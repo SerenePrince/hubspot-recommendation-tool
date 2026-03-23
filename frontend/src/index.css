@@ -1,0 +1,300 @@
+/*
+
+
+
+*/
+
+/* Application Root Styling */
+
+:root {
+  --bg: #E6E7E8;
+  --app: #ffffff; 
+  --fg: #111827;
+  --acc1: #F78F22;
+  --acc2: #E56D66;
+  --acc3: #006F5F;
+  --muted: #6b7280;
+  --hdft: #222222;
+}
+
+html {
+  background-color: var(--hdft);
+}
+
+html, body, #root {
+  
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.5;
+}
+
+.app {
+  position: inherit;
+  z-index: 0;
+  max-width: 1192px;
+  background-color: var(--app);
+  margin: auto;
+  padding: 80px 124px 80px 124px ;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  box-shadow: 0px 4px 50px 50px #00000033;
+}
+
+h1 {
+  margin: 0 0 0.25rem 0;
+}
+
+header#app-header {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  background-color: var(--hdft);
+  min-height: 80px;
+  box-shadow: 0px 4px 15px 5px #00000040;
+}
+
+header img {
+  max-width: 150px;
+}
+
+div#app-heading-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-bottom: solid 1px;
+  border-color: var(--acc2);
+  margin-bottom: 72px;
+}
+
+div#app-heading-main h1 {
+  max-width: 79%;
+  width: 100%;  
+  font-size: 48px;
+}
+
+div#app-heading-main h1 span#highlight {
+  color: var(--acc1);  
+}
+
+div#app-heading-main p {
+  max-width: 79%;
+  font-size: 24px;
+  width: 100%; 
+  margin-bottom: 40px; 
+}
+
+/* Application InputArea Styling */
+
+div#url-input-area {
+  min-width: 69.44%;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  padding-left: 60px;
+  padding-right: 60px;
+  border-radius: 16px;
+  background: var(--bg);
+
+  margin-left: 37px;
+  margin-right: 37px;
+  margin-bottom: 72px;
+
+  box-shadow: 0px 1px 15px 5px #00000030;
+}
+
+.input-row {
+  display: flex;
+}
+input[type='url'] {
+  max-width: 85.6%;
+  flex: 1;
+  height: 72px;
+  border: 0px;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  font-size: 20px;
+  padding-left: 24px;
+}
+button {
+  min-width: 14.4px;
+  padding-left: 28px;
+  padding-right: 28px;
+  font-size: 24px;
+  color: var(--app);
+  background-color: var(--acc1);
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border: 0px;
+}
+.error {
+  color: #b00020;
+}
+.helper {
+  margin-top: 40px;
+  color: #555;
+}
+
+/* Application Report Styling */
+
+div#app-report-area {
+  min-width: 100%;
+  border-top: solid 1px;
+  border-color: var(--acc2);
+}
+
+div#app-report-area div#report-block {
+  min-width: 69.44%;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: 16px;
+  background: var(--bg);
+
+  margin-left: 37px;
+  margin-right: 37px;
+  margin-top: 72px;
+
+  box-shadow: 0px 1px 15px 5px #00000030;
+}
+
+div#app-report-area div#report-block div#report-heading {
+  background-color: var(--app);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  justify-content: center;
+  align-items: center;
+  padding-top: 32px;
+  padding-bottom: 32px;
+}
+
+div#app-report-area div#report-block div#report-heading h3 {
+  color: var(--hdft);
+  margin: 0px;
+}
+
+div#app-report-area div#report-block table thead {
+  display: grid;
+  grid-template-columns: 1fr repeat(2, 2fr);
+  grid-column-gap: 16px;
+  grid-row-gap: 16px;
+}
+
+div#app-report-area div#report-block table thead th {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  color: var(--app);
+  background-color: var(--acc3);
+  min-height: 64px;
+  margin-bottom: 16px;
+}
+
+div#app-report-area div#report-block table thead th:nth-last-child(1) {
+  background-color: var(--acc1);
+}
+
+div#app-report-area div#report-block table tbody tr{
+  display: grid;
+  grid-template-columns: 1fr repeat(2, 2fr);
+  grid-column-gap: 16px;
+  padding-bottom: 16px;
+}
+
+div#app-report-area div#report-block table tbody tr td{
+  background-color: var(--app);
+  border-radius: 8px;
+}
+
+div#app-report-area div#report-block table tbody tr td:nth-child(1) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* Application Footer Styling */
+
+footer a {
+  color: var(--app);
+  font-size: 16px;
+}
+
+footer#app-footer {
+  position: relative;
+  z-index: 1;
+  padding-left: 20.8%;
+  padding-right: 20.8%;
+  padding-top: 21px;
+  padding-bottom: 21px;
+  background-color: var(--hdft);
+  box-shadow: 0px -4px 15px 5px #00000023;
+}
+
+footer div#foot-content  {
+  display: grid;
+  grid-template-columns: 3fr 1fr 3fr;
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+footer div#foot-left {
+  display: flex;
+  align-items: center;
+}
+
+footer div#foot-left img {
+  max-width: 77px;
+  padding-top: 5px;
+  padding-right: 15px;
+  border-right: solid 1px;
+  border-color: var(--app);
+}
+
+footer div#foot-left-links {
+  display: flex;
+  flex-direction: column;
+  padding-left: 16px;
+}
+
+footer div#foot-center {
+  color: var(--app);
+  display: flex;
+  align-items: end;
+  justify-content: center;
+}
+
+footer div#foot-center h5 {
+  margin: 0px;
+}
+
+footer div#foot-right {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+
+footer div#foot-right-links {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  margin-right: 16px;
+}
+
+footer div#foot-right img {
+  max-width: 120px;
+  border-left: solid 1px;
+  border-color: var(--app);
+}

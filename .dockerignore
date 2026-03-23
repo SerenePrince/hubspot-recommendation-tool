@@ -1,0 +1,24 @@
+# Node
+**/node_modules
+**/npm-debug.log
+
+# Builds
+frontend/dist
+backend/coverage
+backend/dist
+backend/build
+
+# VCS / OS / editor
+**/.git
+**/.DS_Store
+**/.idea
+**/.vscode
+
+# Env files (keep examples)
+**/.env
+
+# Misc local artifacts
+**/*.log
+coverage
+tmp
+temp

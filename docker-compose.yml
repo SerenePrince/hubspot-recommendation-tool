@@ -1,0 +1,55 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    ports:
+      - "3001:3001"
+
+    env_file:
+      - ./.env
+
+    environment:
+      NODE_ENV: "production"
+
+      # Root container serves the frontend build through the backend runtime.
+      SERVE_STATIC: "1"
+      STATIC_DIST_DIR: "/app/frontend/dist"
+      STATIC_ASSET_CACHE_SECONDS: "2592000"
+
+      # Same-origin frontend/backend in this containerized deployment.
+      CORS_ALLOW_ORIGIN: "off"
+
+      # Data path inside the container image.
+      DATA_ROOT: "/app/backend/data/vendor/webappanalyzer/src"
+
+      # Health is typically left open for local/platform checks.
+      AUTH_ALLOW_HEALTH: "1"
+
+      # Use Basic Auth in local Docker runs unless explicitly disabled in .env.
+      AUTH_ENABLED: "1"
+
+      # Safe runtime guardrails
+      MAX_CONCURRENT_ANALYSES: "8"
+      MAX_QUEUED_ANALYSES: "32"
+      HTTP_REQUEST_TIMEOUT_MS: "30000"
+      HTTP_HEADERS_TIMEOUT_MS: "35000"
+      HTTP_KEEP_ALIVE_TIMEOUT_MS: "5000"
+      HTTP_MAX_REQUESTS_PER_SOCKET: "100"
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+    init: true
+    restart: unless-stopped

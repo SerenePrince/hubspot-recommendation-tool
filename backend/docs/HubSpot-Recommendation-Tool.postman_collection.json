@@ -1,0 +1,114 @@
+{
+  "info": {
+    "name": "HubSpot Recommendation Tool (Backend)",
+    "_postman_id": "6c1c12c2-3a0a-4e73-9d44-51c93c19b9a1",
+    "description": "Surface-level website technology detection + HubSpot-focused recommendations.\n\n## Purpose\nThis API analyzes a **single public URL** and returns:\n- Technologies detected (surface-level)\n- Categories and groups\n- HubSpot recommendations (config-driven)\n\n## Guardrails\nThis is **not** a recon/scanning tool:\n- No crawling\n- No enumeration\n- No brute forcing\n- No login bypass\n- No private network access (SSRF protections)\n\n## Environment variables used\n- `{{baseUrl}}` (example: http://localhost:3001)\n- `{{exampleUrl}}` (example: https://react.dev/)\n- `{{username}}` + `{{password}}` (Basic Auth)\n\n## Workflow\n1. Run **Health**\n2. Run **Analyze** (default)\n3. Try Analyze options (pretty / includeMeta)\n4. Validate config locally (`npm run validate-config`)\n5. Use the CLI for deeper inspection:\n- `npm run cli -- {{exampleUrl}} --format human --wrap`\n- `npm run cli:pretty -- {{exampleUrl}}`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+
+  "auth": {
+    "type": "basic",
+    "basic": [
+      { "key": "username", "value": "{{username}}", "type": "string" },
+      { "key": "password", "value": "{{password}}", "type": "string" }
+    ]
+  },
+
+  "item": [
+    {
+      "name": "Health",
+      "description": "Use this folder to confirm the backend is running.\n\n### When to use\n- Before demos\n- After deployment\n- After changing `.env`\n- After updating the vendor dataset\n\n### Expected behavior\n- If `AUTH_ALLOW_HEALTH=1`: returns HTTP 200 without requiring auth.\n- Otherwise: will require auth (still should return 200 with auth).",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "const body = pm.response.json();",
+                  "pm.test('ok is true', function () { pm.expect(body.ok).to.eql(true); });",
+                  "pm.test('service field exists', function () { pm.expect(body).to.have.property('service'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Analyze",
+      "description": "Core endpoint for running a **single-page, surface-level** tech analysis.\n\n## GET /analyze\nThis endpoint:\n1. Fetches a single URL (HTML + headers + cookies + referenced JS/CSS, bounded)\n2. Extracts public signals\n3. Detects technologies using fingerprint patterns\n4. Generates HubSpot recommendations based on detected technologies and categories\n\n## Query parameters\n### pretty\n- `pretty=1` → pretty-printed JSON\n\n### includeMeta\n- `includeMeta=1` → includes lightweight metadata (cache + timings + fetch summary)\n\n## Notes\n- Only one URL is fetched (no crawling).\n- SSRF protections block localhost/private IPs.\n- The analysis result may be cached by URL for a short TTL.",
+      "item": [
+        {
+          "name": "GET /analyze (compact)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analyze?url={{exampleUrl}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["analyze"],
+              "query": [{ "key": "url", "value": "{{exampleUrl}}" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Response is valid JSON', function () { pm.expect(() => pm.response.json()).to.not.throw(); });",
+                  "const body = pm.response.json();",
+                  "pm.test('ok is true', function () { pm.expect(body.ok).to.eql(true); });",
+                  "pm.test('apiVersion matches env', function () { pm.expect(body.apiVersion).to.eql(pm.environment.get('apiVersion')); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analyze?pretty=1 (compact)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analyze?url={{exampleUrl}}&pretty=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["analyze"],
+              "query": [
+                { "key": "url", "value": "{{exampleUrl}}" },
+                { "key": "pretty", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /analyze?includeMeta=1 (compact + meta)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analyze?url={{exampleUrl}}&includeMeta=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["analyze"],
+              "query": [
+                { "key": "url", "value": "{{exampleUrl}}" },
+                { "key": "includeMeta", "value": "1" }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

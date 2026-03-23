@@ -1,0 +1,78 @@
+services:
+  - type: web
+    name: hubspot-recommendation-tool
+    runtime: docker
+    plan: free
+    autoDeploy: true
+
+    # Render injects PORT automatically. The backend reads process.env.PORT.
+    healthCheckPath: /health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # Serve the built frontend from the same container as the backend.
+      - key: SERVE_STATIC
+        value: "1"
+      - key: STATIC_DIST_DIR
+        value: /app/frontend/dist
+      - key: STATIC_ASSET_CACHE_SECONDS
+        value: "2592000"
+
+      # Network / fetch guardrails for analyze requests.
+      - key: FETCH_TIMEOUT_MS
+        value: "12000"
+      - key: MAX_FETCH_BYTES
+        value: "2000000"
+
+      # Analysis/runtime guardrails
+      - key: MAX_CONCURRENT_ANALYSES
+        value: "8"
+      - key: MAX_QUEUED_ANALYSES
+        value: "32"
+      - key: HTTP_REQUEST_TIMEOUT_MS
+        value: "30000"
+      - key: HTTP_HEADERS_TIMEOUT_MS
+        value: "35000"
+      - key: HTTP_KEEP_ALIVE_TIMEOUT_MS
+        value: "5000"
+      - key: HTTP_MAX_REQUESTS_PER_SOCKET
+        value: "100"
+
+      # Data path inside the container image.
+      - key: DATA_ROOT
+        value: /app/backend/data/vendor/webappanalyzer/src
+
+      # Frontend and backend share the same origin in this deployment.
+      - key: CORS_ALLOW_ORIGIN
+        value: off
+
+      # Keep request logging on during early deployment/debugging.
+      - key: REQUEST_LOG
+        value: "1"
+
+      # Basic Auth. Render provides HTTPS, which makes this acceptable for a
+      # simple private/internal deployment.
+      - key: AUTH_ENABLED
+        value: "1"
+      - key: AUTH_ALLOW_HEALTH
+        value: "1"
+      - key: AUTH_REALM
+        value: "Internal Tool"
+
+      # Best-effort in-memory failed-auth rate limiting.
+      - key: AUTH_RATE_LIMIT_ENABLED
+        value: "1"
+      - key: AUTH_RATE_LIMIT_WINDOW_MS
+        value: "60000"
+      - key: AUTH_RATE_LIMIT_MAX_FAILURES
+        value: "12"
+      - key: AUTH_RATE_LIMIT_BLOCK_MS
+        value: "300000"
+
+      # Set these in the Render dashboard as secret values.
+      - key: AUTH_USERNAME
+        sync: false
+      - key: AUTH_PASSWORD
+        sync: false

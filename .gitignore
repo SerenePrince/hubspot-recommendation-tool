@@ -1,0 +1,15 @@
+# Secrets
+.env
+backend/.env
+
+# Node
+**/node_modules
+npm-debug.log*
+
+# Builds
+frontend/dist
+backend/coverage
+
+# OS / IDE
+.DS_Store
+.vscode/

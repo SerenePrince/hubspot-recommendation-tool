@@ -1,0 +1,47 @@
+{
+  "name": "hubspot-recommendation-tool-backend",
+  "version": "1.0.0",
+  "description": "Minimal Node.js backend for the HubSpot Recommendation Tool, providing analysis APIs, CLI utilities, and optional static frontend serving for integrated deployments.",
+  "main": "src/api/server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "node src/api/server.js",
+    "dev:api": "node src/api/server.js",
+    "prestart": "npm run validate-config",
+    "start": "node src/api/server.js",
+
+    "cli": "node src/cli/index.js",
+    "cli:help": "node src/cli/index.js --help",
+    "cli:human": "node src/cli/index.js --format human",
+    "cli:pretty": "node src/cli/index.js --format json-pretty",
+    "cli:tax": "node src/cli/taxonomy.js",
+
+    "smoke": "node src/scripts/smokeTest.js",
+    "validate-config": "node src/scripts/validateConfig.js",
+    "update:techdb": "bash src/scripts/update-webappanalyzer-db.sh",
+
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [
+    "node",
+    "backend",
+    "api",
+    "hubspot",
+    "analysis",
+    "vite",
+    "static-serving"
+  ],
+  "author": "Team Debug",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "cheerio": "^1.2.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
