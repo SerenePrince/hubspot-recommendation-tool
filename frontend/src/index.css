@@ -183,6 +183,11 @@ div#app-report-area div#report-block div#report-heading h3 {
   margin: 0px;
 }
 
+div#app-report-area div#report-block div#report-heading h3 a {
+  color: var(--acc3);
+  margin: 0px;
+}
+
 div#app-report-area div#report-block table thead {
   display: grid;
   grid-template-columns: 1fr repeat(2, 2fr);

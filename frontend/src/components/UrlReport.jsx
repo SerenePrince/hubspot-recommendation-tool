@@ -14,9 +14,11 @@ export default function UrlReport({ urlAnalysisData }) {
   };
 
   const generateReport = () => {
-    const urlFinal = urlAnalysisData.urlFinal;
+    const urlFinal = urlAnalysisData.finalUrl;
 
     const techData = urlAnalysisData.technologies;
+
+    console.log(urlAnalysisData.finalUrl);
 
     // Anchor tag currently does not load HREF -- To Fix
     return (
@@ -24,7 +26,7 @@ export default function UrlReport({ urlAnalysisData }) {
         <div id="report-heading">
           <h3>Tech-stack analysis for:</h3>
           <h3>
-            <a href={urlFinal}>{urlAnalysisData.url}</a>
+            <a href={urlAnalysisData.finalUrl}>{urlAnalysisData.url}</a>
           </h3>
         </div>
         <table>
@@ -39,17 +41,11 @@ export default function UrlReport({ urlAnalysisData }) {
                 <td>{foundTech.name}</td>
                 <td>
                   <ul>
-                    <li>
-                      Categories:{" "}
-                      {foundTech.categories.map((c) => c.name).join(", ")}
-                    </li>
+                    <li>Category: {foundTech.categories.name}</li>
                     <li>{foundTech.description}</li>
                   </ul>
                 </td>
-                <td>
-                  {console.log(foundTech)}
-                  {returnProducts(foundTech.hubspot.products)}
-                </td>
+                <td>{returnProducts(foundTech.hubspot.products)}</td>
               </tr>
             ))}
           </tbody>
