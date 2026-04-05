@@ -1,47 +1,47 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from "react";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
-
-console.log('API Base URL:', API_BASE_URL);
+const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 export function useWebsiteAnalysis() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
 
-  const analyzeUrl = useCallback(async (url, includeMeta = false) => {
+  const abortRef = useRef(null);
+
+  const analyzeUrl = useCallback(async (url) => {
+    if (abortRef.current) abortRef.current.abort();
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
 
     try {
       const params = new URLSearchParams({
         url,
-        pretty: 'true',
-        ...(includeMeta && { includeMeta: '1' }),
+        pretty: "true",
       });
 
       const response = await fetch(`${API_BASE_URL}/analyze?${params}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: "GET",
+        credentials: "include",
+        signal: controller.signal,
       });
 
       const data = await response.json();
 
-      if (!response.ok || !data.ok) {
-        setError(data.error || 'Analysis failed');
-        setResult(null);
-        return null;
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.error || "Analysis failed");
       }
-      
-      console.log(JSON.stringify(data));
 
       setResult(data);
       return data;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(message);
+      if (err.name === "AbortError") return null;
+
+      setError(err.message || "Unexpected error");
       setResult(null);
       return null;
     } finally {

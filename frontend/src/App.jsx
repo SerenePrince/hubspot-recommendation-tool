@@ -20,20 +20,14 @@ export default function App() {
         <p>
           Generate a concise report detailing the tech-stack of any given
           website, highlighting technologies and services that HubSpot offers
-          alternatives for{" "}
+          alternatives for
         </p>
       </div>
 
       <div id="url-input-area">
-        <UrlInput
-          returnAnalysis={handleAnalysis}
-          onSubmit={(url) => {
-            // Example handler: currently just logs. Replace with desired behavior.
-            console.log("Submitted URL:", url);
-            alert(`Submitted URL:\n${url}`);
-          }}
-        />
+        <UrlInput returnAnalysis={handleAnalysis} />
       </div>
+
       <div id="app-report-area">
         <UrlReport urlAnalysisData={urlAnalysis} />
       </div>

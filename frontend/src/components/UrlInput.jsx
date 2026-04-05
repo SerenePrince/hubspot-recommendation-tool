@@ -1,66 +1,62 @@
 import React, { useState } from "react";
 import { useWebsiteAnalysis } from "../hooks/useWebsiteAnalysis";
 
-export default function UrlInput({ onSubmit, returnAnalysis }) {
+export default function UrlInput({ returnAnalysis }) {
   const [urlInput, setUrlInput] = useState("");
-  const { analyzeUrl, loading, error, result } = useWebsiteAnalysis();
+  const [lastSubmittedUrl, setLastSubmittedUrl] = useState("");
+  const { analyzeUrl, loading, error } = useWebsiteAnalysis();
 
   function validateUrl(input) {
+    if (!input.trim()) return null; // ← don't validate empty input
     try {
-      // Require a valid absolute URL:
       const parsed = new URL(input);
-      // Enforce http/https:
       if (!["http:", "https:"].includes(parsed.protocol)) {
         return "Only http and https URLs are accepted.";
       }
       return null;
     } catch {
-      return "Please enter a valid absolute URL (example: https://example.com).";
+      return "Enter a valid URL (e.g., https://example.com)";
     }
   }
 
-  const handleAnalyze = async (e) => {
+  const validationError = validateUrl(urlInput);
+  const isDuplicate = urlInput === lastSubmittedUrl;
+  const isDisabled =
+    loading || !urlInput.trim() || !!validationError || isDuplicate;
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!urlInput.trim()) return;
-    const analysisResult = await analyzeUrl(urlInput);
-    returnAnalysis(analysisResult);
+    if (isDisabled) return;
+    const result = await analyzeUrl(urlInput);
+    if (result) {
+      setLastSubmittedUrl(urlInput);
+      returnAnalysis(result);
+    }
   };
 
   return (
-    <form
-      onSubmit={handleAnalyze}
-      className="url-form"
-      aria-describedby="url-help"
-    >
+    <form onSubmit={handleSubmit} className="url-form">
       <div className="input-row">
         <input
-          id="url-input"
-          name="url"
           type="url"
-          inputMode="url"
           placeholder="Enter URL... https://example.com"
           value={urlInput}
           onChange={(e) => setUrlInput(e.target.value)}
-          aria-invalid={!!error}
-          aria-describedby={error ? "url-error" : "url-help"}
+          disabled={loading}
+          aria-invalid={!!validationError || !!error}
         />
-        <button type="submit">SUBMIT</button>
+        <button type="submit" disabled={isDisabled}>
+          {loading ? "Analyzing..." : "Submit"}
+        </button>
       </div>
-
-      <div id="url-error" role="status" aria-live="polite" className="error">
-        {error}
-      </div>
-
-      <div id="url-help" className="helper">
-        <div id="helper-content">
-          <h3>Directions</h3>
-          <p>
-            Enter a valid URL into the field then submit and the application
-            will scrape the systems public HTML and script files for data its
-            tech-stack, then generate a report
-          </p>
+      {(validationError || error) && ( // ← only render when there's something to show
+        <div className="error">{validationError || error}</div>
+      )}
+      {loading && (
+        <div className="helper">
+          Analyzing website… this may take a few seconds.
         </div>
-      </div>
+      )}
     </form>
   );
 }
