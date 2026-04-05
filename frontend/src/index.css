@@ -1,15 +1,19 @@
 /*
-
-
-
+  index.css — Hubspot Recommendation Tool
+  Breakpoints:
+    xs  : <480px     (small phones)
+    sm  : 480–767px  (large phones / small tablets)
+    md  : 768–1023px (tablets / small laptops)
+    lg  : 1024–1191px (laptops)
+    xl  : ≥1192px    (desktops — base/original styles)
 */
 
-/* Application Root Styling */
+/* ─── Design Tokens ────────────────────────────────────────────── */
 
 :root {
-  --bg: #E6E7E8;
-  --app: #ffffff; 
-  --fg: #111827;
+  --bg:   #E6E7E8;
+  --app:  #ffffff;
+  --fg:   #111827;
   --acc1: #F78F22;
   --acc2: #E56D66;
   --acc3: #006F5F;
@@ -17,12 +21,13 @@
   --hdft: #222222;
 }
 
+/* ─── Reset / Base ─────────────────────────────────────────────── */
+
 html {
   background-color: var(--hdft);
 }
 
 html, body, #root {
-  
   margin: 0;
 }
 
@@ -33,23 +38,11 @@ body {
   line-height: 1.5;
 }
 
-.app {
-  position: inherit;
-  z-index: 0;
-  max-width: 1192px;
-  background-color: var(--app);
-  margin: auto;
-  padding: 80px 124px 80px 124px ;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-  box-shadow: 0px 4px 50px 50px #00000033;
-}
-
 h1 {
   margin: 0 0 0.25rem 0;
 }
+
+/* ─── Header ───────────────────────────────────────────────────── */
 
 header#app-header {
   display: flex;
@@ -65,6 +58,64 @@ header img {
   max-width: 150px;
 }
 
+/* xs */
+@media (max-width: 479px) {
+  header#app-header {
+    min-height: 60px;
+  }
+
+  header img {
+    max-width: 110px;
+  }
+}
+
+/* ─── App Container ────────────────────────────────────────────── */
+
+.app {
+  position: inherit;
+  z-index: 0;
+  max-width: 1192px;
+  background-color: var(--app);
+  margin: auto;
+  padding: 80px 124px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  box-shadow: 0px 4px 50px 50px #00000033;
+}
+
+/* lg */
+@media (max-width: 1191px) {
+  .app {
+    padding: 64px 64px;
+  }
+}
+
+/* md */
+@media (max-width: 1023px) {
+  .app {
+    padding: 48px 40px;
+  }
+}
+
+/* sm */
+@media (max-width: 767px) {
+  .app {
+    padding: 32px 20px;
+    box-shadow: none;
+  }
+}
+
+/* xs */
+@media (max-width: 479px) {
+  .app {
+    padding: 24px 16px;
+  }
+}
+
+/* ─── App Heading ──────────────────────────────────────────────── */
+
 div#app-heading-main {
   display: flex;
   flex-direction: column;
@@ -77,52 +128,133 @@ div#app-heading-main {
 
 div#app-heading-main h1 {
   max-width: 79%;
-  width: 100%;  
+  width: 100%;
   font-size: 48px;
 }
 
 div#app-heading-main h1 span#highlight {
-  color: var(--acc1);  
+  color: var(--acc1);
 }
 
 div#app-heading-main p {
   max-width: 79%;
+  width: 100%;
   font-size: 24px;
-  width: 100%; 
-  margin-bottom: 40px; 
+  margin-bottom: 40px;
 }
 
-/* Application InputArea Styling */
+/* md */
+@media (max-width: 1023px) {
+  div#app-heading-main {
+    margin-bottom: 48px;
+  }
+
+  div#app-heading-main h1 {
+    font-size: 36px;
+    max-width: 90%;
+  }
+
+  div#app-heading-main p {
+    font-size: 20px;
+    max-width: 90%;
+    margin-bottom: 32px;
+  }
+}
+
+/* sm */
+@media (max-width: 767px) {
+  div#app-heading-main {
+    margin-bottom: 36px;
+  }
+
+  div#app-heading-main h1 {
+    font-size: 28px;
+    max-width: 100%;
+  }
+
+  div#app-heading-main p {
+    font-size: 16px;
+    max-width: 100%;
+    margin-bottom: 24px;
+  }
+}
+
+/* xs */
+@media (max-width: 479px) {
+  div#app-heading-main h1 {
+    font-size: 22px;
+  }
+
+  div#app-heading-main p {
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+}
+
+/* ─── URL Input Area ───────────────────────────────────────────── */
 
 div#url-input-area {
   min-width: 69.44%;
-  padding-top: 40px;
-  padding-bottom: 40px;
-  padding-left: 60px;
-  padding-right: 60px;
+  width: 100%;
+  padding: 40px 60px;
   border-radius: 16px;
   background: var(--bg);
-
-  margin-left: 37px;
-  margin-right: 37px;
-  margin-bottom: 72px;
-
+  margin: 0 37px 72px;
   box-shadow: 0px 1px 15px 5px #00000030;
+  box-sizing: border-box;
 }
+
+/* md */
+@media (max-width: 1023px) {
+  div#url-input-area {
+    min-width: 100%;
+    padding: 32px 40px;
+    margin: 0 0 48px;
+  }
+}
+
+/* sm */
+@media (max-width: 767px) {
+  div#url-input-area {
+    padding: 24px 20px;
+    margin-bottom: 36px;
+    border-radius: 12px;
+  }
+}
+
+/* xs */
+@media (max-width: 479px) {
+  div#url-input-area {
+    padding: 20px 16px;
+    margin-bottom: 28px;
+    border-radius: 8px;
+  }
+}
+
+/* ─── Input Row ────────────────────────────────────────────────── */
 
 .input-row {
   display: flex;
 }
+
 input[type='url'] {
-  max-width: 85.6%;
   flex: 1;
+  max-width: 85.6%;
   height: 72px;
+  padding-left: 24px;
+  font-size: 20px;
   border: 0px;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
-  font-size: 20px;
-  padding-left: 24px;
+  min-width: 0; /* prevent flex overflow */
+  box-sizing: border-box;
 }
+
+input[type='url']:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--acc3);
+}
+
 button {
   min-width: 14.4px;
   padding-left: 28px;
@@ -130,19 +262,99 @@ button {
   font-size: 24px;
   color: var(--app);
   background-color: var(--acc1);
+  border: 0px;
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
-  border: 0px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
 }
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* md */
+@media (max-width: 1023px) {
+  input[type='url'] {
+    height: 60px;
+    font-size: 18px;
+  }
+
+  button {
+    font-size: 18px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* sm */
+@media (max-width: 767px) {
+  .input-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  input[type='url'] {
+    max-width: 100%;
+    width: 100%;
+    height: 52px;
+    padding: 12px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  button {
+    width: 100%;
+    height: 52px;
+    padding: 0;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+}
+
+/* xs */
+@media (max-width: 479px) {
+  input[type='url'] {
+    height: 46px;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  button {
+    height: 46px;
+    font-size: 15px;
+  }
+}
+
+/* ─── Error & Helper ───────────────────────────────────────────── */
+
 .error {
+  margin-top: 10px;
   color: #b00020;
 }
+
 .helper {
   margin-top: 40px;
   color: #555;
 }
 
-/* Application Report Styling */
+@media (max-width: 767px) {
+  .helper {
+    margin-top: 24px;
+  }
+}
+
+/* ─── Report Area ──────────────────────────────────────────────── */
 
 div#app-report-area {
   min-width: 100%;
@@ -152,40 +364,100 @@ div#app-report-area {
 
 div#app-report-area div#report-block {
   min-width: 69.44%;
-  padding-top: 16px;
-  padding-bottom: 16px;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding: 16px;
   border-radius: 16px;
   background: var(--bg);
-
-  margin-left: 37px;
-  margin-right: 37px;
-  margin-top: 72px;
-
+  margin: 72px 37px 0;
   box-shadow: 0px 1px 15px 5px #00000030;
+  box-sizing: border-box;
+  animation: fadeIn 0.3s ease;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* md */
+@media (max-width: 1023px) {
+  div#app-report-area div#report-block {
+    min-width: 100%;
+    margin: 48px 0 0;
+  }
+}
+
+/* sm */
+@media (max-width: 767px) {
+  div#app-report-area div#report-block {
+    margin-top: 36px;
+    padding: 12px;
+    border-radius: 12px;
+  }
+}
+
+/* xs */
+@media (max-width: 479px) {
+  div#app-report-area div#report-block {
+    margin-top: 28px;
+    padding: 8px;
+    border-radius: 8px;
+  }
+}
+
+/* ─── Report Heading ───────────────────────────────────────────── */
+
 div#app-report-area div#report-block div#report-heading {
-  background-color: var(--app);
-  border-radius: 8px;
   display: flex;
   flex-direction: column;
-  margin-bottom: 16px;
   justify-content: center;
   align-items: center;
-  padding-top: 32px;
-  padding-bottom: 32px;
+  text-align: center;
+  background-color: var(--app);
+  border-radius: 8px;
+  padding: 32px;
+  margin-bottom: 16px;
 }
 
 div#app-report-area div#report-block div#report-heading h3 {
-  color: var(--hdft);
   margin: 0px;
+  color: var(--hdft);
 }
 
 div#app-report-area div#report-block div#report-heading h3 a {
-  color: var(--acc3);
   margin: 0px;
+  color: var(--acc3);
+}
+
+/* sm */
+@media (max-width: 767px) {
+  div#app-report-area div#report-block div#report-heading {
+    padding: 20px 16px;
+  }
+}
+
+/* xs */
+@media (max-width: 479px) {
+  div#app-report-area div#report-block div#report-heading {
+    padding: 16px 12px;
+  }
+
+  div#app-report-area div#report-block div#report-heading h3 {
+    font-size: 14px;
+  }
+}
+
+/* ─── Report Table ─────────────────────────────────────────────── */
+
+div#app-report-area div#report-block table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 div#app-report-area div#report-block table thead {
@@ -199,55 +471,121 @@ div#app-report-area div#report-block table thead th {
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 64px;
+  margin-bottom: 16px;
   border-radius: 8px;
   color: var(--app);
   background-color: var(--acc3);
-  min-height: 64px;
-  margin-bottom: 16px;
 }
 
 div#app-report-area div#report-block table thead th:nth-last-child(1) {
   background-color: var(--acc1);
 }
 
-div#app-report-area div#report-block table tbody tr{
+div#app-report-area div#report-block table tbody tr {
   display: grid;
   grid-template-columns: 1fr repeat(2, 2fr);
   grid-column-gap: 16px;
   padding-bottom: 16px;
 }
 
-div#app-report-area div#report-block table tbody tr td{
+div#app-report-area div#report-block table tbody tr td {
   background-color: var(--app);
   border-radius: 8px;
+  padding: 8px;
+  box-sizing: border-box;
+  word-break: break-word;
+  line-height: 1.4;
 }
 
 div#app-report-area div#report-block table tbody tr td:nth-child(1) {
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
 }
 
+table td ul {
+  margin: 0;
+  padding-left: 16px;
+}
 
-/* Application Footer Styling */
+/* md — tighten column gaps */
+@media (max-width: 1023px) {
+  div#app-report-area div#report-block table thead,
+  div#app-report-area div#report-block table tbody tr {
+    grid-column-gap: 10px;
+  }
+
+  div#app-report-area div#report-block table thead th {
+    min-height: 52px;
+    font-size: 14px;
+  }
+}
+
+/* sm — stack table as cards */
+@media (max-width: 767px) {
+  div#app-report-area div#report-block table thead {
+    display: none; /* hide column headers; labels come from data-label */
+  }
+
+  div#app-report-area div#report-block table tbody tr {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--bg);
+    margin-bottom: 8px;
+  }
+
+  div#app-report-area div#report-block table tbody tr td {
+    padding: 10px 12px;
+    border-radius: 6px;
+  }
+
+  div#app-report-area div#report-block table tbody tr td:nth-child(1) {
+    justify-content: flex-start;
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  /* Injected data-label pseudo-headers for stacked layout */
+  div#app-report-area div#report-block table tbody tr td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+}
+
+/* xs */
+@media (max-width: 479px) {
+  div#app-report-area div#report-block table tbody tr td {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+}
+
+/* ─── Footer ───────────────────────────────────────────────────── */
+
+footer#app-footer {
+  position: relative;
+  z-index: 1;
+  padding: 21px 20.8%;
+  background-color: var(--hdft);
+  box-shadow: 0px -4px 15px 5px #00000023;
+}
 
 footer a {
   color: var(--app);
   font-size: 16px;
 }
 
-footer#app-footer {
-  position: relative;
-  z-index: 1;
-  padding-left: 20.8%;
-  padding-right: 20.8%;
-  padding-top: 21px;
-  padding-bottom: 21px;
-  background-color: var(--hdft);
-  box-shadow: 0px -4px 15px 5px #00000023;
-}
-
-footer div#foot-content  {
+footer div#foot-content {
   display: grid;
   grid-template-columns: 3fr 1fr 3fr;
   grid-template-rows: 1fr;
@@ -275,10 +613,10 @@ footer div#foot-left-links {
 }
 
 footer div#foot-center {
-  color: var(--app);
   display: flex;
   align-items: end;
   justify-content: center;
+  color: var(--app);
 }
 
 footer div#foot-center h5 {
@@ -300,6 +638,85 @@ footer div#foot-right-links {
 
 footer div#foot-right img {
   max-width: 120px;
+  padding-left: 15px;
   border-left: solid 1px;
   border-color: var(--app);
+}
+
+/* md */
+@media (max-width: 1023px) {
+  footer#app-footer {
+    padding-left: 8%;
+    padding-right: 8%;
+  }
+}
+
+/* sm — collapse footer to 2 columns + copyright below */
+@media (max-width: 767px) {
+  footer#app-footer {
+    padding: 20px 5%;
+  }
+
+  footer div#foot-content {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    grid-column-gap: 12px;
+    grid-row-gap: 16px;
+  }
+
+  footer div#foot-center {
+    grid-column: 1 / -1;
+    justify-content: center;
+    align-items: center;
+    order: 3;
+  }
+
+  footer a {
+    font-size: 14px;
+  }
+}
+
+/* xs — fully stacked footer */
+@media (max-width: 479px) {
+  footer div#foot-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+
+  footer div#foot-left,
+  footer div#foot-right {
+    justify-content: center;
+  }
+
+  footer div#foot-right {
+    flex-direction: row-reverse;
+    gap: 12px;
+  }
+
+  footer div#foot-right-links {
+    margin-right: 0;
+    align-items: flex-start;
+  }
+
+  footer div#foot-center {
+    justify-content: center;
+    text-align: center;
+  }
+
+  footer div#foot-left img,
+  footer div#foot-right img {
+    max-width: 60px;
+  }
+
+  footer div#foot-right img {
+    border-left: none;
+    padding-left: 0;
+    padding-right: 15px;
+    border-right: solid 1px;
+    border-color: var(--app);
+  }
+
+  footer a {
+    font-size: 13px;
+  }
 }
