@@ -1,13 +1,13 @@
 import React from "react";
 
-export default function UrlReport({ urlAnalysisData }) {
-  if (!urlAnalysisData || typeof urlAnalysisData !== "object") {
+export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
+  // Before any analysis: show nothing
+  if (!hasAttemptedAnalysis) {
     return null;
   }
 
-  const techData = urlAnalysisData.technologies || [];
-
-  if (!techData.length) {
+  // After analysis but no technologies found
+  if (!urlAnalysisData?.technologies?.length) {
     return (
       <div id="report-block">
         <div id="report-heading">
@@ -18,51 +18,58 @@ export default function UrlReport({ urlAnalysisData }) {
     );
   }
 
+  const technologies = urlAnalysisData.technologies;
+  const urlDisplay = urlAnalysisData.url || urlAnalysisData.finalUrl || "";
+  const urlHref = urlAnalysisData.finalUrl || urlAnalysisData.url || "#";
+
   return (
     <div id="report-block">
       <div id="report-heading">
         <h3>Tech-stack analysis for:</h3>
         <h3>
-          <a
-            href={urlAnalysisData.finalUrl || urlAnalysisData.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {urlAnalysisData.url}
+          <a href={urlHref} target="_blank" rel="noopener noreferrer">
+            {urlDisplay}
           </a>
         </h3>
       </div>
 
-      <table>
+      <table className="report-table">
         <thead>
-          <th>Found Technology</th>
-          <th>Description</th>
-          <th>Recommendation</th>
+          <tr>
+            <th>Found Technology</th>
+            <th>Description</th>
+            <th>Recommendation</th>
+          </tr>
         </thead>
-
         <tbody>
-          {techData.map((tech, i) => (
-            <tr key={i}>
-              <td data-label="Technology">{tech?.name || "Unknown"}</td>
+          {technologies.map((tech, idx) => {
+            const key = tech?.id || tech?.name || idx;
+            const categoryNames =
+              tech?.categories?.map((cat) => cat?.name).filter(Boolean) || [];
 
-              <td data-label="Description">
-                <ul>
-                  <li>Category: {tech?.categories?.name || "Unknown"}</li>
-                  <li>{tech?.description || ""}</li>
-                </ul>
-              </td>
-
-              <td data-label="Recommendation">
-                {tech?.hubspot?.products?.length ? (
+            return (
+              <tr key={key}>
+                <td data-label="Technology">{tech?.name || "Unknown"}</td>
+                <td data-label="Description">
                   <ul>
-                    {tech.hubspot.products.map((p, idx) => (
-                      <li key={idx}>{p?.hubspotProduct}</li>
-                    ))}
+                    <li>Category: {categoryNames.join(", ") || "Unknown"}</li>
+                    {tech?.description && <li>{tech.description}</li>}
                   </ul>
-                ) : null}
-              </td>
-            </tr>
-          ))}
+                </td>
+                <td data-label="Recommendation">
+                  {tech?.hubspot?.products?.length ? (
+                    <ul>
+                      {tech.hubspot.products.map((product, i) => (
+                        <li key={i}>{product?.hubspotProduct}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span>No mapped HubSpot product</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

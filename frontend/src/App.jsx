@@ -3,11 +3,13 @@ import UrlInput from "./components/UrlInput";
 import UrlReport from "./components/UrlReport";
 
 export default function App() {
-  const [urlAnalysis, setUrlAnalysis] = useState("");
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [hasAttemptedAnalysis, setHasAttemptedAnalysis] = useState(false);
 
-  const handleAnalysis = (data) => {
-    if (data != null) {
-      setUrlAnalysis(data);
+  const handleAnalysisCompleted = (report) => {
+    if (report != null) {
+      setAnalysisResult(report);
+      setHasAttemptedAnalysis(true);
     }
   };
 
@@ -20,16 +22,19 @@ export default function App() {
         <p>
           Generate a concise report detailing the tech-stack of any given
           website, highlighting technologies and services that HubSpot offers
-          alternatives for
+          alternatives for.
         </p>
       </div>
 
       <div id="url-input-area">
-        <UrlInput returnAnalysis={handleAnalysis} />
+        <UrlInput onAnalysisComplete={handleAnalysisCompleted} />
       </div>
 
       <div id="app-report-area">
-        <UrlReport urlAnalysisData={urlAnalysis} />
+        <UrlReport
+          urlAnalysisData={analysisResult}
+          hasAttemptedAnalysis={hasAttemptedAnalysis}
+        />
       </div>
     </div>
   );
