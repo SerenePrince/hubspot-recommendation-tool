@@ -54,26 +54,11 @@ In development, you may run the Vite dev server and point it at the backend API.
 
 ## 4. Environment Variables (Common)
 
-Core:
+Environment variables are the primary configuration interface for this project.
 
-- `PORT`
-- `SERVE_STATIC=1` to serve SPA build output
+For the **authoritative** and complete list (including defaults and operator guidance), see:
 
-Authentication:
-
-- `AUTH_ENABLED=1|0`
-- `AUTH_USERNAME`
-- `AUTH_PASSWORD`
-- `AUTH_REALM`
-- `AUTH_ALLOW_HEALTH=1|0`
-
-Rate limit:
-
-- `AUTH_RATE_LIMIT_*` (see `SECURITY.md`)
-
-Dataset:
-
-- `DATA_ROOT` points to where the dataset files live
+- `docs/ENVIRONMENT.md`
 
 ## 5. Authentication & Route Protection
 

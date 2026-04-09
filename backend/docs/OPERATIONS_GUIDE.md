@@ -56,8 +56,6 @@ cp .env.example .env
 npm run dev
 ```
 
-````
-
 For a production-style start:
 
 ```bash id="q9r6gn"
@@ -131,6 +129,10 @@ curl "http://localhost:3001/api/analyze?url=https://react.dev&pretty=1"
 ## Environment configuration
 
 The backend is environment-driven. Operational behavior is controlled primarily through `.env` values.
+
+For the **authoritative** environment variable reference (defaults, required/optional, and suggested baselines), see:
+
+- `docs/ENVIRONMENT.md`
 
 ### Core runtime
 
@@ -443,4 +445,3 @@ This approach keeps the architecture simple while matching the current codebase.
 - `docs/ARCHITECTURE.md`
 - `docs/RUNBOOK.md`
 - `docs/SECURITY.md`
-````

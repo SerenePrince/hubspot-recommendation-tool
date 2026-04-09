@@ -27,8 +27,8 @@ services:
       # Health is typically left open for local/platform checks.
       AUTH_ALLOW_HEALTH: "1"
 
-      # Use Basic Auth in local Docker runs unless explicitly disabled in .env.
-      AUTH_ENABLED: "1"
+      # Auth is configured via the root `.env` file (see `.env.example`).
+      # Do not hardcode secrets or forced auth posture here.
 
       # Safe runtime guardrails
       MAX_CONCURRENT_ANALYSES: "8"

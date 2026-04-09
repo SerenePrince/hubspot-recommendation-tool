@@ -1,15 +1,26 @@
-# URL Input App (Vite + React + TypeScript)
+# Frontend (Vite + React)
 
-A minimal React application skeleton with a text field that receives a URL from a user and performs client-side validation.
+This is the single-page UI for the HubSpot Recommendation Tool.
 
-Quick start:
-1. Clone repo to desired location on system
-2. open cmd and navigate to project directory
-2. npm install
-3. npm run dev
-4. Open http://localhost:5173
+## Local development (UI-only)
 
-Troubleshooting
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-- Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react'
-    - Run 'npm install @vitejs/plugin-react --save-dev'
+By default, the frontend expects the backend API at:
+
+- `/api` (same origin), or
+- set `VITE_API_URL` to point at a different backend base URL
+
+Example:
+
+```bash
+VITE_API_URL=http://localhost:3001/api npm run dev
+```
+
+## Production / Docker
+
+In production, the root `Dockerfile` builds this frontend and the backend serves the built assets statically.

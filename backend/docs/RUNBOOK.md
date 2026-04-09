@@ -60,8 +60,6 @@ From the backend directory:
 npm run dev
 ```
 
-````
-
 ### Production-style start
 
 ```bash id="uv3bta"
@@ -454,4 +452,3 @@ This usually narrows the issue quickly without guesswork.
 - `docs/ARCHITECTURE.md`
 - `docs/OPERATIONS_GUIDE.md`
 - `docs/SECURITY.md`
-````
