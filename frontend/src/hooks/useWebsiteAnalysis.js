@@ -1,22 +1,35 @@
 import { useState, useCallback, useRef } from "react";
 
+// API base URL:
+// - in Docker / production, the frontend is served by the backend, so "/api" works by default
+// - in local dev, VITE_API_URL can be set to point to a separate backend instance
 const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
+/**
+ * Core analysis hook.
+ *
+ * Responsibilities:
+ * - own the request lifecycle (start → success/error → finish)
+ * - expose loading + error state to the UI
+ * - keep the latest successful result cached for consumers
+ * - cancel in‑flight requests when a new one starts
+ */
 export function useWebsiteAnalysis() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
   const [result, setResult] = useState(null);
 
   const abortRef = useRef(null);
 
   const analyzeUrl = useCallback(async (url) => {
+    // Cancel any in‑flight analysis so we don't race multiple responses.
     if (abortRef.current) abortRef.current.abort();
 
     const controller = new AbortController();
     abortRef.current = controller;
 
     setLoading(true);
-    setError(null);
+    setErrorMessage(null);
 
     try {
       const params = new URLSearchParams({
@@ -33,15 +46,16 @@ export function useWebsiteAnalysis() {
       const data = await response.json();
 
       if (!response.ok || !data?.ok) {
+        // Backend already normalizes error messages; prefer those where available.
         throw new Error(data?.error || "Analysis failed");
       }
 
       setResult(data);
       return data;
-    } catch (err) {
-      if (err.name === "AbortError") return null;
+    } catch (error) {
+      if (error.name === "AbortError") return null;
 
-      setError(err.message || "Unexpected error");
+      setErrorMessage(error.message || "Unexpected error");
       setResult(null);
       return null;
     } finally {
@@ -49,5 +63,5 @@ export function useWebsiteAnalysis() {
     }
   }, []);
 
-  return { analyzeUrl, loading, error, result };
+  return { analyzeUrl, loading, errorMessage, result };
 }
