@@ -1,15 +1,6 @@
 import React, { useState } from "react";
 import { useWebsiteAnalysis } from "../hooks/useWebsiteAnalysis";
 
-/**
- * URL input + submit button.
- *
- * Responsibilities:
- * - manage the current URL input field
- * - run lightweight client-side validation
- * - call the analysis hook and surface loading/errors to the user
- * - notify parent when a successful analysis completes
- */
 export default function UrlInput({ onAnalysisComplete }) {
   const [urlInput, setUrlInput] = useState("");
   const [lastSubmittedUrl, setLastSubmittedUrl] = useState("");
@@ -45,7 +36,6 @@ export default function UrlInput({ onAnalysisComplete }) {
     }
   };
 
-  // Determine which message to show (priority: loading > validation error > errorMessage > helper)
   let message = null;
   if (loading) {
     message = {
@@ -65,24 +55,32 @@ export default function UrlInput({ onAnalysisComplete }) {
 
   return (
     <form onSubmit={handleSubmit} className="url-form">
-      <div className="input-row">
+      <div className="url-form__row">
         <input
           type="url"
+          className="url-form__input"
           placeholder="Enter a website URL… e.g. https://example.com"
           value={urlInput}
           onChange={(event) => setUrlInput(event.target.value)}
           disabled={loading}
           aria-invalid={Boolean(validationError || errorMessage)}
         />
-        <button type="submit" disabled={isSubmitDisabled}>
+        <button
+          type="submit"
+          className="url-form__button"
+          disabled={isSubmitDisabled}
+        >
           {loading ? "Analyzing…" : "Submit"}
         </button>
       </div>
 
-      {/* Fixed-height message area – prevents layout shift */}
-      <div className="message-area">
+      <div className="url-form__message-area" aria-live="polite">
         {message && (
-          <div className={`message ${message.type}`}>{message.text}</div>
+          <div
+            className={`url-form__message url-form__message--${message.type}`}
+          >
+            {message.text}
+          </div>
         )}
       </div>
     </form>

@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 import UrlInput from "./components/UrlInput";
 import UrlReport from "./components/UrlReport";
 
@@ -14,28 +16,32 @@ export default function App() {
   };
 
   return (
-    <div className="app">
-      <div id="app-heading-main">
-        <h1>
-          HubSpot <span id="highlight">Marketing</span> Tool
-        </h1>
-        <p>
-          Generate a concise report detailing the tech-stack of any given
-          website, highlighting technologies and services that HubSpot offers
-          alternatives for.
-        </p>
-      </div>
+    <>
+      <Header />
+      <div className="app">
+        <div className="app__heading">
+          <h1>
+            HubSpot <span className="app__highlight">Marketing</span> Tool
+          </h1>
+          <p>
+            Generate a concise report detailing the tech-stack of any given
+            website, highlighting technologies and services that HubSpot offers
+            alternatives for.
+          </p>
+        </div>
 
-      <div id="url-input-area">
-        <UrlInput onAnalysisComplete={handleAnalysisCompleted} />
-      </div>
+        <div className="app__url-input">
+          <UrlInput onAnalysisComplete={handleAnalysisCompleted} />
+        </div>
 
-      <div id="app-report-area">
-        <UrlReport
-          urlAnalysisData={analysisResult}
-          hasAttemptedAnalysis={hasAttemptedAnalysis}
-        />
+        <div className="app__report">
+          <UrlReport
+            urlAnalysisData={analysisResult}
+            hasAttemptedAnalysis={hasAttemptedAnalysis}
+          />
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }

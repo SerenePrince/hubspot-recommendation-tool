@@ -1,16 +1,12 @@
 import React from "react";
 
 export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
-  // Before any analysis: show nothing
-  if (!hasAttemptedAnalysis) {
-    return null;
-  }
+  if (!hasAttemptedAnalysis) return null;
 
-  // After analysis but no technologies found
   if (!urlAnalysisData?.technologies?.length) {
     return (
-      <div id="report-block">
-        <div id="report-heading">
+      <div className="report">
+        <div className="report__heading">
           <h3>No technologies detected</h3>
           <p>This site may block analysis or use uncommon tools.</p>
         </div>
@@ -23,8 +19,8 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
   const urlHref = urlAnalysisData.finalUrl || urlAnalysisData.url || "#";
 
   return (
-    <div id="report-block">
-      <div id="report-heading">
+    <div className="report">
+      <div className="report__heading">
         <h3>Tech-stack analysis for:</h3>
         <h3>
           <a href={urlHref} target="_blank" rel="noopener noreferrer">
@@ -33,7 +29,7 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
         </h3>
       </div>
 
-      <table className="report-table">
+      <table className="report__table">
         <thead>
           <tr>
             <th>Found Technology</th>
