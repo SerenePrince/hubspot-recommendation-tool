@@ -20,6 +20,9 @@ function ensureMappingLoaded(mappingPath) {
 
     const validation = validateMapping(loaded);
     if (!validation.ok) {
+      // Mapping validation errors should not take down analysis:
+      // - detection should still work (this is often the more valuable output)
+      // - recommendations degrade gracefully to empty until the mapping is fixed
       console.error("Recommendation mapping is invalid. Falling back to empty mapping.");
       for (const err of validation.errors.slice(0, 50)) console.error(" -", err);
       cachedMapping = {};
@@ -62,6 +65,8 @@ function buildRecommendations(detections, options = {}) {
   const { mappingPath, minConfidence = 50 } = options;
   const mapping = ensureMappingLoaded(mappingPath);
 
+  // Keep recommendation triggers aligned with report defaults:
+  // - below-threshold detections are considered too noisy for client-facing recommendations
   const filtered = (detections || []).filter((d) => (d?.confidence || 0) >= minConfidence);
 
   const recs = [];
@@ -76,6 +81,10 @@ function buildRecommendations(detections, options = {}) {
     }
   };
 
+  // Mapping supports multiple trigger shapes for flexibility:
+  // - byTechnology: exact match on detection name/slug
+  // - byCategory/byCategoryId: match on taxonomy categories
+  // - byGroup/byGroupId: match on taxonomy groups
   const byTechnology = mapping.byTechnology || {};
   for (const d of filtered) {
     const techKey = (d.name || d.slug || "").trim();

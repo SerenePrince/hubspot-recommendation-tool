@@ -111,6 +111,10 @@ function resolveUrls(urls, baseUrl) {
 /**
  * Fetch a single resource with SSRF checks per hop and a deadline.
  * Returns { finalUrl, status, statusText, headers, contentType, bytes, body }
+ *
+ * Important: we intentionally implement redirects manually:
+ * - Node/undici can follow redirects automatically, but we need to re-check SSRF policy
+ *   for every hop (hostname can change on redirects).
  */
 async function fetchResource(resourceUrl, { deadlineMs, accept, userAgent, maxBytes, maxRedirects }) {
   let currentUrl = resourceUrl;
@@ -148,7 +152,7 @@ async function fetchResource(resourceUrl, { deadlineMs, accept, userAgent, maxBy
       });
     }
 
-    // SSRF: validate host for every hop
+    // SSRF: validate host for every hop (including redirects).
     await assertPublicHost(urlObj.hostname);
 
     const controller = new AbortController();
@@ -250,6 +254,13 @@ async function fetchResource(resourceUrl, { deadlineMs, accept, userAgent, maxBy
  * - max response size cap
  * - redirect limit (enforces SSRF checks per hop)
  * - opportunistically fetches a bounded subset of external JS/CSS resources
+ *
+ * Why fetch external JS/CSS at all?
+ * - Wappalyzer datasets often match technologies using inline code and static asset URLs.
+ * - Pulling a *small* bounded subset improves detection coverage without becoming a crawler.
+ *
+ * Boundaries here are intentionally strict (timeouts, redirect caps, byte caps, and
+ * best-effort failures) so this endpoint remains safe to expose behind auth.
  */
 async function fetchPage(inputUrl, options = {}) {
   const {

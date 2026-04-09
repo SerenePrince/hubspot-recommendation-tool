@@ -23,6 +23,10 @@ const { resolveExcludes } = require("./resolve/excludes");
  * - Confidence is aggregated across matchers
  * - Filter out detections below minConfidence (default 50)
  * - Apply implies/requires relationships
+ *
+ * Why matchers are defensive/no-throw:
+ * - vendor datasets can contain unexpected shapes and occasional invalid regexes
+ * - a single bad rule should reduce coverage for that technology, not fail the entire request
  */
 function detectTechnologies(db, signals, options = {}) {
   const { minConfidence = 50 } = options;
@@ -34,7 +38,9 @@ function detectTechnologies(db, signals, options = {}) {
   // slug -> { slug, name, confidence, version, _versionBestConf, evidence[] }
   const detections = new Map();
 
-  // Run matchers (order doesn't affect correctness; keep stable for determinism)
+  // Run matchers (order doesn't affect correctness; keep stable for determinism/debuggability).
+  // The DB provides a lightweight index per signal type so we don't scan every technology for
+  // every matcher when the vendor dataset includes only a subset of rules.
   runMatcher(detections, matchUrl, db, signals);
   runMatcher(detections, matchHeaders, db, signals);
   runMatcher(detections, matchCookies, db, signals);

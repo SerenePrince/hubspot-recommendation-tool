@@ -8,6 +8,8 @@ const { badRequest } = require("../errors");
  * Supports IPv4 and IPv6.
  *
  * NOTE: This is a conservative allowlist approach: if we can't parse confidently, we block.
+ * In production deployments, treat this as an application-layer guardrail, not a replacement
+ * for network egress policy (VPC rules, firewall, proxy allowlists, etc.).
  */
 function isBlockedIp(ip) {
   const family = net.isIP(ip);
@@ -88,6 +90,10 @@ function isBlockedIpv6(ip) {
  *
  * NOTE: No SSRF protection is perfect without a network egress policy.
  * This is intended as an application-level guardrail.
+ *
+ * Design choice:
+ * - We block if *any* A/AAAA result is non-public. This is conservative but avoids
+ *   "mixed" DNS answers where a client could be routed to an internal IP.
  */
 async function assertPublicHost(hostname) {
   const h = String(hostname || "").trim().toLowerCase();

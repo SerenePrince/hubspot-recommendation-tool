@@ -4,6 +4,10 @@ const { isAppError } = require("../../core/errors");
 const { analysisLimiter } = require("../analysisLimiter");
 const { config } = require("../../core/config");
 
+// This route is intentionally "thin":
+// - it validates inputs and applies back-pressure (analysisLimiter)
+// - it delegates the heavy lifting to core/analyzer (shared by API + CLI)
+// - it shapes output via cleanReport (stable frontend-oriented contract)
 function isTruthy(v) {
   const s = typeof v === "string" ? v.toLowerCase() : "";
   return s === "1" || s === "true";
@@ -74,6 +78,10 @@ async function handleAnalyze(_req, res, requestUrl) {
   }
 
   try {
+    // Back-pressure guardrail:
+    // analysis includes outbound fetches and regex matching; without a limiter, parallel requests
+    // can degrade the service or trigger upstream blocking. This keeps concurrency bounded and
+    // provides a clear retryable failure mode upstream (503 in limiter implementation).
     const release = await analysisLimiter.acquire();
     try {
       const report = await analyzeUrl(normalized.url);

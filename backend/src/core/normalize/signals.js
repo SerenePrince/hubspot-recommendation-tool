@@ -7,6 +7,12 @@ const { URL } = require("node:url");
  *
  * Transform raw fetch artifacts into searchable, standardized signals.
  *
+ * Design notes:
+ * - All large string signals are capped. Later phases perform regex/substring matching against
+ *   these fields; caps keep worst-case CPU/memory bounded.
+ * - We keep cookie *names* only. This is sufficient for most vendor rules and avoids handling
+ *   sensitive cookie values.
+ *
  * Signals produced (aligned with report):
  * - meta tags
  * - cookies (names only)
@@ -37,7 +43,7 @@ function buildSignals(fetchResult, options = {}) {
   const finalUrlRaw = fetchResult?.finalUrl || fetchResult?.requestedUrl || "";
   const url = normalizeUrl(finalUrlRaw);
 
-  // Headers are expected to be normalized to lowercase keys by fetchPage.
+  // Headers are expected to be normalized to lowercase keys by fetchPage (matcher expectations).
   const headers = (fetchResult && fetchResult.headers) || {};
 
   // Cookies: keep names only (safe and sufficient for pattern matching).
