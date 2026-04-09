@@ -36,7 +36,7 @@ export default function Footer() {
         </div>
 
         <div className="footer__center">
-          <h5>© {new Date().getFullYear()} Inbox Communications</h5>
+          <h5>© {new Date().getFullYear()} Inbox</h5>
         </div>
 
         <div className="footer__right">
