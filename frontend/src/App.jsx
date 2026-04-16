@@ -21,7 +21,9 @@ export default function App() {
       <div className="app">
         <div className="app__heading">
           <h1>
-            HubSpot <span className="app__highlight">Marketing</span> Tool
+            <b>
+              HubSpot <span className="app__highlight">Marketing</span> Tool
+            </b>
           </h1>
           <p>
             Generate a concise report detailing the tech-stack of any given
