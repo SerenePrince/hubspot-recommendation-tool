@@ -14,7 +14,7 @@ The HubSpot Recommendation Tool is an internal web application that analyzes **p
 
 ## Accessing the tool
 
-Your administrator will provide a single URL to access the tool (for example a Render URL such as `https://<service>.onrender.com` or a custom domain).
+Your administrator will provide a single URL to access the tool (for example a Render URL such as `https://your-service.onrender.com` or a custom domain).
 
 When you open the URL in a browser, you may be prompted for a shared username/password.
 

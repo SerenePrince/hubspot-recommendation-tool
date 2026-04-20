@@ -80,6 +80,29 @@ cd backend
 npm run validate-config
 ```
 
+If `npm start` fails, it is usually because `prestart` runs `validate-config` and found a configuration error.
+
+Use this sequence:
+
+1. Run validation directly to see exact errors:
+
+```bash
+cd backend
+npm run validate-config
+```
+
+2. Fix the reported `.env` values or missing files:
+   - invalid numeric env values
+   - missing required auth values when `AUTH_ENABLED=1`
+   - missing dataset files under `DATA_ROOT`
+   - invalid timeout relationships (for example, `HTTP_HEADERS_TIMEOUT_MS` lower than `HTTP_REQUEST_TIMEOUT_MS`)
+
+3. Re-run validation, then start again:
+
+```bash
+npm start
+```
+
 ### CLI
 
 ```bash

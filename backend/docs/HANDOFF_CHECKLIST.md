@@ -24,16 +24,16 @@ Use this checklist during handoff to ensure the client has everything needed to 
 ## Verification
 
 - [ ] Health check passes: `GET /health`
-- [ ] Smoke test passes: `SMOKE_BASE_URL=https://<host> npm run smoke`
+- [ ] Smoke test passes: `SMOKE_BASE_URL=https://your-deployed-host npm run smoke`
 - [ ] UI loads and core analysis is usable end-to-end
 
 ## Documentation
 
-- [ ] Client guide provided: `docs/CLIENT_GUIDE.md`
-- [ ] Ops guide provided: `docs/OPERATIONS_GUIDE.md`
-- [ ] Dev guide provided: `docs/DEVELOPER_GUIDE.md`
-- [ ] Security model provided: `docs/SECURITY.md`
-- [ ] Runbook provided: `docs/RUNBOOK.md`
+- [ ] Client guide provided: `CLIENT_GUIDE.md`
+- [ ] Ops guide provided: `backend/docs/OPERATIONS_GUIDE.md`
+- [ ] Dev guide provided: `backend/docs/DEVELOPER_GUIDE.md`
+- [ ] Security model provided: `backend/docs/SECURITY.md`
+- [ ] Runbook provided: `backend/docs/RUNBOOK.md`
 
 ## Password Rotation Drill (Recommended)
 

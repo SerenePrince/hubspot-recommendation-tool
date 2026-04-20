@@ -4,6 +4,15 @@ This project is the capstone handoff for Team Debug (Algonquin College, Computer
 
 Inbox previously did this work manually during client discovery. This tool reduces that process from hours to seconds by automating fetch, detection, and recommendation steps.
 
+## Start Here (30 seconds)
+
+1. Run with Docker:
+   - copy env: `cp .env.example .env`
+   - set `AUTH_USERNAME` and `AUTH_PASSWORD`
+   - start: `docker compose up --build`
+2. Open `http://localhost:3001`
+3. Read `backend/docs/DEVELOPER_GUIDE.md` for full dev setup
+
 ## Who This Is For
 
 - Inbox internal employees using the tool during prospect audits
@@ -16,6 +25,7 @@ Inbox previously did this work manually during client discovery. This tool reduc
 - Backend: vanilla Node.js HTTP server, no Express (`backend/`)
 - Detection data: local WebAppAnalyzer/Wappalyzer-style dataset (`backend/data/vendor/webappanalyzer/src`)
 - Deployment: root `Dockerfile`, `docker-compose.yml`, and `render.yaml`
+- Local runtime requirement (non-Docker): Node.js `>=20`
 
 ## Run Locally With Docker (5 Steps)
 
