@@ -1,51 +1,60 @@
-# Frontend – HubSpot Recommendation Tool
+# Frontend Documentation
 
-## A. Overview
+This frontend is a React + Vite single-page application for Inbox staff. It collects a website URL, calls the backend analysis endpoint, and renders detected technologies with HubSpot replacement options.
 
-This React + Vite single-page app:
+The frontend does not perform detection logic. It only handles user input, API request state, and presentation.
 
-- lets a user enter a website URL,
-- calls the backend `/api/analyze` endpoint, and
-- displays detected technologies and HubSpot recommendations in a responsive table.
+## How It Fits The System
 
-The backend is responsible for all analysis and mapping logic; the frontend is a thin, UI‑focused layer.
+- User enters URL in `UrlInput`
+- `useWebsiteAnalysis` calls backend `GET /api/analyze`
+- `App` stores latest successful report
+- `UrlReport` renders technologies and mapped HubSpot products
+- In production, backend serves this built frontend and API from the same origin
 
----
+See `backend/docs/ARCHITECTURE.md` and `backend/docs/API.md` for backend details.
 
-## B. Structure
+## File Structure
 
-- **`src/App.jsx`**
-  - Top-level layout and page copy.
-  - Wires together the URL input and report components.
+```text
+frontend/
+├── src/
+│   ├── App.jsx
+│   ├── main.jsx
+│   ├── index.css
+│   ├── hooks/
+│   │   └── useWebsiteAnalysis.js
+│   └── components/
+│       ├── Header.jsx
+│       ├── Footer.jsx
+│       ├── UrlInput.jsx
+│       └── UrlReport.jsx
+└── package.json
+```
 
-- **`src/components/UrlInput.jsx`**
-  - Controlled URL input + submit button.
-  - Uses the analysis hook and surfaces loading/errors.
+- `src/main.jsx`: React bootstrap and root mount guard
+- `src/App.jsx`: page layout and top-level state for analysis result
+- `src/hooks/useWebsiteAnalysis.js`: API lifecycle (`loading`, `errorMessage`, cancellation, latest `result`)
+- `src/components/UrlInput.jsx`: form input, client URL validation, submit handling
+- `src/components/UrlReport.jsx`: table output and no-result state
+- `src/components/Header.jsx`, `src/components/Footer.jsx`: static brand/footer UI
+- `src/index.css`: all styling and responsive behavior
 
-- **`src/components/UrlReport.jsx`**
-  - Renders the analysis result as a responsive table (grid on desktop, stacked “cards” on small screens).
+## Data Flow
 
-- **`src/hooks/useWebsiteAnalysis.js`**
-  - Custom hook that owns the API request lifecycle (loading, error, cancellation, latest result).
+1. User types URL in `UrlInput`.
+2. `UrlInput` validates format (`http`/`https` only) before submit.
+3. On submit, `useWebsiteAnalysis.analyzeUrl(url)` runs:
+   - aborts any in-flight request
+   - sends `GET ${API_BASE_URL}/analyze?url=...&pretty=true`
+   - sets `loading` and `errorMessage`
+4. On success, `App` stores response in `analysisResult`.
+5. `UrlReport` reads `analysisResult.technologies` and renders:
+   - technology name
+   - category + description
+   - `tech.hubspot.products[*].hubspotProduct`
 
-- **Styling**
-  - `src/index.css` – main layout, responsive breakpoints, and component styles (including report table, header, and footer).
-
----
-
-## C. Data flow
-
-1. User enters a URL and submits the form in `UrlInput`.
-2. `UrlInput` calls `useWebsiteAnalysis.analyzeUrl(url)`.
-3. The hook performs `GET {API_BASE_URL}/analyze?url=...&pretty=true` and:
-   - exposes `loading` and `errorMessage` to the UI,
-   - returns the parsed JSON response on success.
-4. `App` stores the latest successful report in state.
-5. `UrlReport` renders the technologies + HubSpot products from that report.
-
----
-
-## D. Running locally (frontend dev)
+## Local Development
 
 ```bash
 cd frontend
@@ -53,53 +62,37 @@ npm install
 npm run dev
 ```
 
-By default, the frontend will call:
+Frontend dev server is Vite. Run backend separately (see `backend/README.md` and `backend/docs/DEVELOPER_GUIDE.md`).
 
-- `VITE_API_URL` if set, otherwise
-- `/api` on the same origin.
+## Environment Variables
 
-If your backend runs on `http://localhost:3001`, you can point the frontend at it with:
+- `VITE_API_URL` (optional)
+  - Type: string URL prefix
+  - Default: `/api`
+  - Used in: `src/hooks/useWebsiteAnalysis.js`
+  - Example:
 
 ```bash
 VITE_API_URL=http://localhost:3001/api npm run dev
 ```
 
----
+If not set, requests go to `/api` on the same origin.
 
-## E. Environment variables
+## Build And Production Integration
 
-- **`VITE_API_URL`** (optional)
-  - When set, overrides the API base URL used in `useWebsiteAnalysis`.
-  - Example: `VITE_API_URL=http://localhost:3001/api`
-  - In Docker / production, this is typically **not needed**, because the backend serves the frontend and `/api` from the same origin.
+- Build command:
 
----
+```bash
+npm run build
+```
 
-## F. Build & production integration
+- Output directory: `frontend/dist`
+- Root `Dockerfile` builds the frontend in a dedicated stage and copies `dist` to `/app/frontend/dist`
+- Backend serves static files when:
+  - `SERVE_STATIC=1`
+  - `STATIC_DIST_DIR=/app/frontend/dist` (Docker default)
 
-- `npm run build` runs the Vite production build and outputs files under `dist/`.
-- The root‑level `Dockerfile`:
-  - builds this frontend in a separate stage, and
-  - copies `dist/` into the final image at `/app/frontend/dist`.
-- The backend then serves the built assets when `SERVE_STATIC=1`:
-  - static files from `STATIC_DIST_DIR` (default `/app/frontend/dist` in Docker),
-  - API routes under `/api/*`.
+In integrated mode, frontend and API share origin and route prefixes:
 
-In most deployments you do **not** run the Vite dev server in production; you use the combined Docker image built from the project root.
-
----
-
-## G. Styling & UX conventions
-
-- Layout uses a centered card (`.app`) with responsive padding and shadows.
-- Forms:
-  - URL input and submit button are visually paired on desktop, stacked on small screens.
-  - Disabled state and hover/active states are consistent across buttons.
-- Messages:
-  - `.error` is used for validation and API error text.
-  - `.helper` is used for neutral guidance and loading messages.
-- Report table:
-  - Desktop: three-column table header row, with alternating row backgrounds for easier scanning.
-  - Small screens: header row hidden, rows rendered as stacked cards with `data-label` pseudo-headers.
-- Footer:
-  - Uses CSS grid to adapt from three columns on desktop to stacked sections on the smallest screens.***
+- Frontend pages: `/...`
+- API endpoints: `/api/...` (and `/...` aliases for health/analyze)

@@ -1,170 +1,112 @@
-# Client Guide (Non-Technical)
+# Inbox Client Guide
 
-This guide is for **non-technical users** and client stakeholders.
+This guide is for Inbox team members using the HubSpot Recommendation Tool. It explains what the tool does, how to run an analysis, and what to do if something fails.
 
-- If you just want to **use** the application, start with **“Using the app”**.
-- If your team needs to **run** the application (IT/admin), use **“Running the app (Docker)”**.
+## What The Tool Does
 
----
+You enter a public website URL. The tool scans that site and returns:
 
-## What this application does (plain English)
+- technologies it detected (CMS, analytics, scripts, etc.)
+- HubSpot products that may replace or consolidate those tools
 
-You paste a website address into the app. The app:
+The result helps Inbox speed up early discovery work for prospective clients.
 
-1. Visits that website using only publicly available information
-2. Detects which technologies the site appears to use (for example: analytics tools, CMS platforms, marketing tools)
-3. Produces a report and recommends HubSpot alternatives where available
+## What The Tool Does Not Do
 
-Important notes:
+- It does not log in to the target website.
+- It does not crawl private pages.
+- It does not store user-entered site data between requests.
+- Some websites may block automated fetches, which can reduce detections.
 
-- It does **not** log in to the target site.
-- It does **not** require credentials for the target site.
-- Results are “best effort” because websites can block automated requests or hide signals.
+## Step-By-Step: Run An Analysis
 
----
+1. Open the tool URL provided by your team (for example `https://your-service.example`).
+2. If prompted, enter your shared login username and password.
+3. Paste a full URL (example: `https://example.com`).
+4. Click `Submit`.
+5. Wait a few seconds for the report.
+6. Review:
+   - Found Technology
+   - Description (including category)
+   - Recommendation (HubSpot products)
 
-## Using the app
+## Understanding Results
 
-### 1) Open the app link
+- If technologies are listed:
+  - each row shows one detected technology
+  - recommendations list mapped HubSpot products for that technology
+- If no technologies are detected:
+  - the site may hide signals or block analysis requests
+  - try another public page on the same domain
 
-Your team will provide a URL that looks like:
-
-- `https://<your-domain>` (preferred), or
-- a hosted service URL (for example, Render)
-
-Open it in Chrome, Edge, Firefox, or Safari.
-
-### 2) Log in (if prompted)
-
-You may see a browser login prompt. If so, enter the **shared username and password** provided by your administrator.
-
-If you are not prompted but expected to be, contact your administrator.
-
-### 3) Run an analysis
-
-1. Paste a full website URL (example: `https://example.com`)
-2. Click **Analyze**
-3. Wait for results
-
-If an error appears, copy the error text and send it to your support contact.
-
----
-
-## Running the app (Docker) — IT/Admin steps
-
-These steps are for someone who can run Docker on a server or workstation.
+## Docker Run Guide (IT/Admin)
 
 ### Prerequisites
 
-- Install Docker Desktop (Windows/macOS) or Docker Engine (Linux)
-- Ensure the machine can reach the public internet (the app fetches public websites)
+- Docker installed
+- Internet access from host machine
 
-### 1) Create the configuration file
+### Steps
 
-In the project root, create a `.env` file.
+1. In repo root, copy env template:
 
-Minimum recommended settings:
+```bash
+cp .env.example .env
+```
+
+2. Set auth credentials in `.env`:
 
 ```dotenv
 AUTH_ENABLED=1
-AUTH_USERNAME=change-me
-AUTH_PASSWORD=change-me
-AUTH_ALLOW_HEALTH=1
-
-PORT=3001
-NODE_ENV=production
-REQUEST_LOG=1
-SERVE_STATIC=1
+AUTH_USERNAME=your-user
+AUTH_PASSWORD=your-pass
 ```
 
-Notes:
-
-- Treat `AUTH_USERNAME` and `AUTH_PASSWORD` as secrets.
-- In real deployments, set these through your hosting platform’s “secrets” UI rather than committing them.
-
-### 2) Start the app
-
-From the project root:
+3. Start service:
 
 ```bash
 docker compose up --build
 ```
 
-### 3) Verify it is running
-
-- App: `http://localhost:3001`
-- Health check: `http://localhost:3001/health`
-
-To verify from a terminal:
+4. Verify health:
 
 ```bash
 curl http://localhost:3001/health
 ```
 
----
+5. Open app:
 
-## Configuration changes (safe guidance)
+```text
+http://localhost:3001
+```
 
-### Changing the login credentials
+## Common Problems
 
-- Update `AUTH_USERNAME` / `AUTH_PASSWORD`
-- Restart the service (Docker restart / redeploy)
+### Browser keeps asking for login
 
-### Changing timeouts and safety limits
-
-If your environment is slow or you see timeouts, your operator can adjust fetch limits.
-
-The authoritative configuration reference is:
-
-- `backend/docs/ENVIRONMENT.md`
-
----
-
-## Deployment overview (high level)
-
-This application can run on:
-
-- A single VM/server with Docker
-- A managed container hosting platform (for example, Render)
-
-Recommended deployment posture:
-
-- Use **HTTPS**
-- Keep **Basic Auth enabled** (unless protected upstream)
-- Keep `/health` available if the hosting platform requires it
-
----
-
-## Troubleshooting (common issues)
-
-### “Authentication required” or repeated login prompts
-
-- Confirm you are using the correct credentials
-- If credentials were recently changed, close and reopen the browser and try again
+- Confirm username/password with admin
+- Clear cached browser credentials and retry
 
 ### “Invalid URL format”
 
-- Ensure the URL starts with `https://` (or `http://`)
-- Try opening the URL in a browser tab first
+- Include `https://` or `http://`
+- Use a full public URL
 
-### “Request failed” / “Internal server error”
+### No technologies detected
 
-Common causes:
+- Target site may block automated traffic
+- Try another page/domain
 
-- The target website blocked automated requests
-- Temporary network issues
-- The service is overloaded or misconfigured
+### Error while analyzing
 
-What to send support:
+- Try again in a minute
+- If error continues, send support:
+  - URL tested
+  - timestamp
+  - screenshot/error text
 
-- The exact URL you tried to analyze
-- The time it happened
-- A screenshot of the error
+## Support Contact
 
----
-
-## Support contact (fill this in before handoff)
-
-- Name:
-- Email:
-- Hours:
+- Primary owner: `TODO: verify in source`
+- Backup owner: `TODO: verify in source`
+- Escalation channel: `TODO: verify in source`

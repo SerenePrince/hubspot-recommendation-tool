@@ -1,332 +1,213 @@
-# Architecture
+# Backend Architecture
 
-## Overview
+This document explains the backend architecture for developers joining the project. It covers runtime components, the five-phase analysis pipeline, request flow, and deployment topology.
 
-This backend is part of a larger full-stack project that contains:
+## System Components
 
-- a frontend application built with Vite
-- this backend service
-- root-level deployment/build configuration
-
-The backend is intentionally small and focused. It is responsible for:
-
-- exposing a minimal HTTP API
-- performing website analysis and recommendation generation
-- optionally serving the built frontend statically in integrated deployments
-
-The backend does **not** own the full build pipeline for the application. In this project, Docker and frontend build orchestration live at the **root project level**, not inside the backend folder.
-
----
-
-## High-level project layout
-
-Typical structure:
-
-```text id="u8bh6n"
-root/
-├── frontend/   # Vite frontend
-├── backend/    # Node.js backend
-├── Dockerfile  # root-level app build/runtime
-└── ...
+```text
+User Browser (React SPA)
+    -> Backend HTTP Server (Node.js, no framework)
+        -> Analysis Pipeline
+            -> Local Wappalyzer-style dataset (JSON files on disk, loaded in memory)
+        -> Optional static file server (frontend build output)
+    -> Target public websites (outbound fetch)
 ```
 
-This means the backend should be understood as one part of the overall application, not as a completely standalone deployment unit.
+Main directories:
 
----
+- `frontend/`: React + Vite UI
+- `backend/src/api/`: HTTP server/auth/routing/static serving
+- `backend/src/core/`: analysis engine
+- `backend/data/vendor/webappanalyzer/src/`: technology dataset
 
-## Backend architecture goals
+## Backend Layering
 
-The backend is designed around a few simple goals:
+- Transport layer: `src/api/server.js`
+- Route adapter: `src/api/routes/analyze.js`
+- Core orchestration: `src/core/analyzer.js`
+- Specialized core modules:
+  - `src/core/fetch/*`
+  - `src/core/normalize/*`
+  - `src/core/detect/*`
+  - `src/core/report/*`
 
-- keep the HTTP surface small
-- avoid unnecessary framework complexity
-- keep analysis logic separate from transport/server logic
-- support both local development and integrated production deployment
-- remain easy to reason about and safe to change late in the project
+The route layer stays thin and delegates logic to core modules.
 
----
+## Five-Phase Analysis Pipeline
 
-## Main runtime responsibilities
+Pipeline entry point: `analyzeUrl()` in `src/core/analyzer.js`.
 
-### 1. HTTP server layer
+### Phase 1 - Database Loading (`loadTechDb`)
 
-The server is a minimal Node.js HTTP server.
+File: `src/core/techdb/loadTechDb.js`
 
-Responsibilities:
+- Loads:
+  - `categories.json`
+  - `groups.json`
+  - `technologies/_.json`
+  - `technologies/a.json` through `technologies/z.json`
+- Verifies required files exist before loading
+- Parses JSON and merges technologies into one map by technology name
+- Builds a lightweight matcher index (`headers`, `scriptSrc`, `meta`, `url`, `cookies`, `scripts`, `dom`, `text`, `html`, `css`, plus relation keys)
+- Loaded once per process and cached in `analyzer.js`
 
-- parse incoming requests
-- apply security-related headers
-- apply optional CORS behavior
-- enforce optional authentication
-- route requests to API handlers
-- serve static frontend assets when enabled
-- provide a SPA fallback for browser navigation when configured
+### Phase 2 - Page Fetching (`fetchPage`)
 
-Main files:
+Files: `src/core/fetch/fetchPage.js`, `src/core/fetch/ssrf.js`
 
-- `src/api/server.js`
-- `src/api/static.js`
-- `src/api/auth.js`
-- `src/api/rateLimit.js`
-- `src/api/analysisLimiter.js`
+- Accepts only `http` and `https` URLs
+- Applies SSRF host/IP checks (`assertPublicHost`) on each fetch and every redirect hop
+- Blocks private/loopback/link-local/local-reserved destinations
+- Uses manual redirect handling with max redirects
+- Enforces timeout deadline and max bytes for response bodies
+- Fetches primary HTML
+- Best-effort fetches bounded external scripts/styles for better detection coverage
+- Returns:
+  - `requestedUrl`, `finalUrl`
+  - `status`, `statusText`
+  - `headers`, `contentType`, `bytes`, `timingMs`
+  - `html`
+  - `external` (`scripts`, `stylesheets`, `skipped`)
 
----
+### Phase 3 - Signal Normalization (`buildSignals`)
 
-### 2. API route layer
+File: `src/core/normalize/signals.js`
 
-The API surface is intentionally small.
+- Converts fetch output into stable signals:
+  - `url`
+  - `urlParams`
+  - `headers`
+  - `cookies` (names only)
+  - `meta`
+  - `scriptSrc`
+  - `scripts` (inline + fetched scripts text)
+  - `css` (`hrefs` + inline/fetched stylesheet text)
+  - `text`
+  - `html`
+  - `dom` (Cheerio root function)
+- Applies caps to large text fields to bound CPU/memory use
+- Normalizes URLs and deduplicates resolved resource URLs
 
-Current public routes:
+### Phase 4 - Technology Detection (`detectTechnologies`)
 
-- `GET /health`
-- `GET /api/health`
-- `GET /analyze`
-- `GET /api/analyze`
+File: `src/core/detect/detectTechnologies.js`
 
-Main route file:
+Runs ten matchers in a stable order:
 
-- `src/api/routes/analyze.js`
+- `url`
+- `headers`
+- `cookies`
+- `meta`
+- `html`
+- `text`
+- `scriptSrc`
+- `scripts`
+- `css`
+- `dom`
 
-This route layer is intentionally thin. It should mostly:
+Behavior:
 
-- validate request input
-- call the analysis pipeline
-- shape HTTP responses
-- avoid owning core business logic
+- Matchers return candidate matches with confidence and optional version/evidence
+- Confidence is aggregated using probabilistic OR and clamped to `0..100`
+- Relationship resolution runs after matcher pass:
+  - `requires`
+  - `implies`
+  - `excludes`
+- Final detection threshold is applied after relationship resolution (`minConfidence`, default `50`)
 
----
+### Phase 5 - Report Generation
 
-### 3. Core analysis layer
+Files:
 
-The analysis logic lives under `src/core/`.
-
-Responsibilities include:
-
-- loading configuration and taxonomy data
-- fetching and inspecting target pages
-- applying SSRF protections and fetch limits
-- detecting technologies
-- mapping detections to recommendation logic
-- generating response output
-
-Important modules include:
-
-- `src/core/analyzer.js`
-- `src/core/config.js`
-- `src/core/fetch/fetchPage.js`
-- `src/core/fetch/ssrf.js`
-- `src/core/detect/detectTechnologies.js`
-- `src/core/techdb/loadTechDb.js`
-- `src/core/report/mappingValidator.js`
+- `src/core/report/enrichDetections.js`
 - `src/core/report/recommendations.js`
+- `src/core/report/summarize.js`
+- `src/core/report/groupDetections.js`
+- `src/core/report/cleanReport.js`
 
-This separation is important: the HTTP server should stay small, while the analysis pipeline remains testable and reusable.
+Flow inside `analyzer.js`:
 
----
+1. `enrichDetections`: add description, website, icon, category/group taxonomy
+2. `buildSummary`: compute totals and counts by group/category
+3. `groupDetections`: bucket detections by group name
+4. `buildRecommendations`: map detections/categories/groups to HubSpot recommendations
 
-### 4. CLI and developer tooling
+Important implementation detail:
 
-The project also includes CLI and utility scripts for development and maintenance.
+- Mapping file path defaults to `backend/data/alternatives/hubspot-mapping.json`
+- If mapping file is missing or invalid, recommendations fall back to empty instead of failing the request
 
-Responsibilities include:
+API response shaping then happens in `buildSimpleReport()` in `cleanReport.js`.
 
-- local analysis/testing outside the HTTP API
-- config validation
-- smoke testing
-- taxonomy and technology database operations
+## Frontend-Backend Integration
 
-Relevant files:
+### Development mode
 
-- `src/cli/index.js`
-- `src/cli/taxonomy.js`
-- `src/scripts/validateConfig.js`
-- `src/scripts/smokeTest.js`
+- Frontend Vite server runs separately
+- Frontend hook calls `${VITE_API_URL || "/api"}/analyze`
+- Backend usually runs with `SERVE_STATIC=0`
+- CORS can be enabled with `CORS_ALLOW_ORIGIN`
 
-This helps keep debugging and maintenance workflows separate from the live server path.
+### Production/integrated mode
 
----
+- Root Docker build compiles frontend to `frontend/dist`
+- Backend runs with `SERVE_STATIC=1` and serves built assets
+- API and UI share origin
+- CORS commonly set to `off` in integrated mode
 
-## Deployment model
+## Request Flow Diagrams
 
-### Local development
+### Health Request
 
-In local development, the frontend and backend are usually run separately.
-
-Typical setup:
-
-- frontend runs on the Vite dev server
-- backend runs independently
-- static serving from the backend is usually disabled
-- CORS may be enabled to allow frontend-to-backend requests
-
-This mode is useful because it keeps frontend iteration fast while backend behavior remains easy to test independently.
-
----
-
-### Integrated production deployment
-
-In production, the system is typically run in an integrated way.
-
-Typical flow:
-
-1. the root project builds the frontend
-2. the built frontend files are made available to the backend
-3. the backend serves:
-   - API routes
-   - static frontend assets
-   - SPA fallback for browser navigation
-
-In this model, the backend acts as the application server for both API traffic and the built frontend.
-
-This is why static serving exists in the backend even though the frontend build process itself happens elsewhere.
-
----
-
-## Static serving behavior
-
-When enabled, the backend static layer does the following:
-
-- serves direct file requests from the configured dist directory
-- only serves `GET` and `HEAD` requests
-- prevents path traversal outside the configured root
-- applies cache headers based on file type/path
-- serves `index.html` as the SPA fallback for non-API browser navigation
-
-Important behavior:
-
-- API routes are handled before SPA fallback
-- HTML is served with `no-store`
-- hashed frontend assets may be cached aggressively
-- static serving is optional and configuration-driven
-
----
-
-## Authentication model
-
-Authentication is intentionally simple.
-
-The backend supports optional HTTP Basic Authentication.
-
-When enabled:
-
-- API routes require authentication
-- static frontend routes also require authentication
-- health routes may remain public if configured
-
-A lightweight in-memory failed-auth rate limiter can also be enabled to reduce repeated brute-force attempts.
-
-This model is sufficient for a student-led deployment or internal tool scenario, especially when the service is placed behind HTTPS and platform-level protections.
-
-It is not intended to be a full identity/access management system.
-
----
-
-## Request flow
-
-### Health request
-
-```text id="nmp58m"
-client
-  -> backend server
-  -> auth check (optional, health may be exempt)
-  -> health response
+```text
+GET /health or /api/health
+  -> server.js
+  -> optional auth gate (can be bypassed when AUTH_ALLOW_HEALTH=1)
+  -> JSON { ok: true, service, shuttingDown: false }
 ```
 
-### Analyze request
+### Analyze Request
 
-```text id="d5bb3i"
-client
-  -> backend server
-  -> auth check (optional)
-  -> route validation
-  -> analysis pipeline
+```text
+GET /analyze?url=... or /api/analyze?url=...
+  -> server.js route match
+  -> optional auth gate + optional auth-failure rate limiter
+  -> analyze route input validation
+  -> analysisLimiter.acquire() (concurrency/queue guardrail)
+  -> analyzeUrl() five-phase pipeline
+  -> buildSimpleReport()
   -> JSON response
 ```
 
-### Frontend navigation request in integrated mode
+### Static Frontend Request (Integrated Mode)
 
-```text id="a6tv6w"
-browser
-  -> backend server
-  -> auth check (optional)
-  -> static file lookup
-  -> existing asset response OR SPA fallback (index.html)
+```text
+GET / or /assets/... or SPA route
+  -> server.js
+  -> optional auth gate
+  -> tryServeStatic() for file hit
+  -> if no file and request accepts HTML and non-/api path:
+       tryServeSpaFallback() -> index.html
+  -> else 404 JSON
 ```
 
----
+## Deployment Model
 
-## Configuration model
+### Local development
 
-Configuration is centralized and environment-driven.
+- Run backend from `backend/`
+- Optionally run frontend separately from `frontend/`
+- Fast iteration, separate processes
 
-The backend uses environment variables to control:
+### Docker/integrated production
 
-- runtime mode
-- fetch and analysis limits
-- static serving behavior
-- CORS behavior
-- authentication
-- failed-auth rate limiting
-- logging
+- Root `Dockerfile` builds frontend and backend runtime image
+- Backend process serves both API and static frontend
+- Health endpoint available at `/health`
 
-Main configuration file:
+See:
 
-- `src/core/config.js`
-
-This keeps deployment behavior configurable without requiring application code changes.
-
----
-
-## Error-handling approach
-
-The backend favors a simple and predictable error model:
-
-- route-level validation errors return clear client responses
-- unexpected failures return `500`
-- production error messages are intentionally generic
-- request logging remains structured and lightweight
-
-The system aims for late-project stability over excessive abstraction.
-
----
-
-## Security considerations
-
-Key security measures currently built into the backend include:
-
-- SSRF protections in fetch logic
-- fetch size/time limits
-- optional HTTP Basic Auth
-- optional failed-auth rate limiting
-- path traversal protection in static serving
-- conservative default security headers
-- optional CORS controls
-
-These protections are intentionally lightweight but practical for the current scope of the project.
-
----
-
-## Design philosophy
-
-This backend is intentionally not over-engineered.
-
-The current architecture favors:
-
-- clarity over cleverness
-- direct modules over heavy abstractions
-- stable behavior over large refactors
-- deployment practicality over framework complexity
-
-That makes it a good fit for the current project stage, where the priority is to make the existing backend as reliable, readable, and maintainable as possible without introducing last-minute risk.
-
----
-
-## Related documents
-
-- `README.md`
-- `docs/API.md`
-- `docs/CLI.md`
-- `docs/DEVELOPER_GUIDE.md`
-- `docs/OPERATIONS_GUIDE.md`
-- `docs/RUNBOOK.md`
-- `docs/SECURITY.md`
+- `../README.md`
+- `API.md`
+- `ENVIRONMENT.md`
+- `OPERATIONS_GUIDE.md`

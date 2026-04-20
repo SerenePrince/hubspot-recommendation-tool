@@ -1,135 +1,252 @@
-# Environment Variables (Authoritative Reference)
+# Environment Variables
 
-This document is the **single source of truth** for backend environment variables.
+This document lists every backend environment variable defined in `src/core/config.js`, including type, default, usage, and misconfiguration impact.
 
-- Developers: read this before editing `.env` or adding new configuration.
-- Operators: use this to configure Docker/Render/CI secrets consistently.
+## Required vs Optional
 
-If a setting is described differently elsewhere, **this file wins**.
+- Required only when auth is enabled:
+  - `AUTH_USERNAME`
+  - `AUTH_PASSWORD`
+- All other variables have code defaults
 
----
+## Variables
 
-## Quick start (safe defaults)
+### `PORT`
 
-### API-only (local dev)
+- Type: number
+- Default: `3001`
+- Purpose: HTTP listen port
+- Misconfigured impact: invalid port can prevent startup or bind behavior
 
-- `SERVE_STATIC=0`
-- `AUTH_ENABLED=0` (or enable it if you want parity with production)
-- `CORS_ALLOW_ORIGIN=*` (or set to your Vite dev server origin)
+### `DATA_ROOT`
 
-### Integrated app mode (production-style)
+- Type: path string
+- Default: `./data/vendor/webappanalyzer/src` (resolved from process cwd)
+- Purpose: location of Wappalyzer-style dataset
+- Misconfigured impact:
+  - DB load fails
+  - analysis fails when DB cannot initialize
+  - `validate-config` will fail if path/files missing
 
-- `SERVE_STATIC=1`
-- `AUTH_ENABLED=1` (recommended unless protected upstream)
-- **HTTPS required** if using Basic Auth
-- Prefer same-origin frontend+backend; avoid permissive CORS
+### `FETCH_TIMEOUT_MS`
 
----
+- Type: number
+- Default: `12000`
+- Purpose: wall-clock deadline for fetch operations
+- Misconfigured impact:
+  - too low: false timeout failures (`504`)
+  - too high: longer resource hold under slow targets
 
-## Core runtime
+### `MAX_FETCH_BYTES`
 
-- **`PORT`** (number, default `3001`)
-  - Port the backend HTTP server listens on.
+- Type: number
+- Default: `2000000`
+- Purpose: max primary response body bytes
+- Misconfigured impact:
+  - too low: frequent `413`
+  - too high: higher memory pressure
 
-- **`NODE_ENV`** (string, default `development`)
-  - Affects error message exposure and other “production vs dev” behaviors.
+### `NODE_ENV`
 
-- **`REQUEST_LOG`** (`1|0`, default `0`)
-  - Enables lightweight JSON request logs.
+- Type: string
+- Default: `development`
+- Purpose: production vs development behavior (mainly error detail exposure)
+- Misconfigured impact: can expose too much error detail or hide useful debug info
 
----
+### `REQUEST_LOG`
 
-## Data / technology database
+- Type: boolean-like (`1/0`, `true/false`, `yes/no`, `on/off`)
+- Default: `false`
+- Purpose: enable JSON request logs
+- Misconfigured impact: logging noise or missing request traces
 
-- **`DATA_ROOT`** (path, default `./data/vendor/webappanalyzer/src` resolved from process cwd)
-  - Points to the WebAppAnalyzer/Wappalyzer-style dataset source directory.
-  - Must contain:
-    - `categories.json`
-    - `groups.json`
-    - `technologies/_.json` and `technologies/a.json` … `technologies/z.json`
+### `CORS_ALLOW_ORIGIN`
 
----
+- Type: string
+- Default: `*`
+- Purpose: CORS allow origin policy
+- Special value: `off` disables CORS headers
+- Misconfigured impact:
+  - too strict: browser calls fail in split-origin dev
+  - too open: unnecessary cross-origin exposure
 
-## Fetch + analysis safety
+### `SERVE_STATIC`
 
-- **`FETCH_TIMEOUT_MS`** (number, default `12000`)
-  - Hard wall-clock deadline shared across the primary fetch + best-effort external JS/CSS fetches.
+- Type: boolean-like
+- Default: `false`
+- Purpose: enable static frontend serving from backend
+- Misconfigured impact: integrated UI not served when expected
 
-- **`MAX_FETCH_BYTES`** (number, default `2000000`)
-  - Maximum bytes read for the primary HTML document response body.
+### `STATIC_DIST_DIR`
 
-- **`MAX_CONCURRENT_ANALYSES`** (number, default `8`)
-  - Concurrency cap for `/analyze` to prevent resource exhaustion.
+- Type: path string
+- Default: `./public` (resolved from process cwd)
+- Purpose: path to built frontend assets
+- Misconfigured impact: static files and SPA fallback fail
 
-- **`MAX_QUEUED_ANALYSES`** (number, default `32`)
-  - Queue size cap for pending analyses; rejects requests when exceeded.
+### `STATIC_ASSET_CACHE_SECONDS`
 
----
+- Type: number
+- Default: `2592000` (30 days)
+- Purpose: immutable cache duration for hashed assets
+- Misconfigured impact: stale assets or reduced cache efficiency
 
-## Static frontend serving (integrated mode)
+### `MAX_CONCURRENT_ANALYSES`
 
-- **`SERVE_STATIC`** (`1|0`, default `0`)
-  - Enables serving the built frontend and SPA fallback behavior.
+- Type: number
+- Default: `8`
+- Purpose: max simultaneous analyses
+- Misconfigured impact:
+  - too low: unnecessary throttling
+  - too high: CPU/socket pressure
 
-- **`STATIC_DIST_DIR`** (path, default `./public` resolved from process cwd)
-  - Path to the built frontend output directory (e.g. Vite `dist/`).
+### `MAX_QUEUED_ANALYSES`
 
-- **`STATIC_ASSET_CACHE_SECONDS`** (number, default \(30 days\))
-  - Cache duration for hashed/static assets.
-  - HTML (`index.html`) is still served with `no-store`.
+- Type: number
+- Default: `32`
+- Purpose: max queued analysis requests
+- Misconfigured impact:
+  - too low: more `503 ANALYZE_OVERLOADED`
+  - too high: memory pressure under bursts
 
----
+### `AUTH_ENABLED`
 
-## CORS
+- Type: boolean-like
+- Default: `false`
+- Purpose: enable HTTP Basic Auth gate
+- Misconfigured impact: either unexpected access denial or unintended open access
 
-- **`CORS_ALLOW_ORIGIN`** (string, default `*`)
-  - `*` for local development simplicity.
-  - Set to a specific origin for tighter production hardening if needed.
-  - Set to `off` to disable CORS headers entirely.
+### `AUTH_USERNAME`
 
----
+- Type: string
+- Default: empty string
+- Purpose: Basic Auth username
+- Required when: `AUTH_ENABLED=1`
+- Misconfigured impact: startup exits if auth enabled and missing
 
-## Authentication (HTTP Basic Auth)
+### `AUTH_PASSWORD`
 
-- **`AUTH_ENABLED`** (`1|0`, default `0`)
-  - When enabled, both API routes and static frontend routes require Basic Auth.
+- Type: string
+- Default: empty string
+- Purpose: Basic Auth password
+- Required when: `AUTH_ENABLED=1`
+- Misconfigured impact: startup exits if auth enabled and missing
 
-- **`AUTH_USERNAME`** (string, **required when** `AUTH_ENABLED=1`)
-- **`AUTH_PASSWORD`** (string, **required when** `AUTH_ENABLED=1`)
-  - Treat both as secrets; do not commit them.
+### `AUTH_REALM`
 
-- **`AUTH_REALM`** (string, default `Internal Tool`)
-  - Shown in browser credential prompts.
+- Type: string
+- Default: `Internal Tool`
+- Purpose: browser challenge realm text
+- Misconfigured impact: cosmetic login prompt confusion
 
-- **`AUTH_ALLOW_HEALTH`** (`1|0`, default `1`)
-  - Allows `/health` and `/api/health` to remain public for platform probes.
+### `AUTH_ALLOW_HEALTH`
 
----
+- Type: boolean-like
+- Default: `true`
+- Purpose: bypass auth on `/health` and `/api/health`
+- Misconfigured impact: health probes may fail with `401`
 
-## Failed-auth rate limiting (best-effort, in-memory)
+### `AUTH_RATE_LIMIT_ENABLED`
 
-- **`AUTH_RATE_LIMIT_ENABLED`** (`1|0`, default `1`)
-- **`AUTH_RATE_LIMIT_WINDOW_MS`** (number, default `60000`)
-- **`AUTH_RATE_LIMIT_MAX_FAILURES`** (number, default `12`)
-- **`AUTH_RATE_LIMIT_BLOCK_MS`** (number, default `300000`)
+- Type: boolean-like
+- Default: `true`
+- Purpose: enable failed-auth in-memory limiter
+- Misconfigured impact: brute-force throttling disabled if off
 
-Notes:
+### `AUTH_RATE_LIMIT_WINDOW_MS`
 
-- These limits are per-process and reset on restart.
-- For stronger guarantees, enforce rate limiting at the reverse proxy / hosting layer.
+- Type: number
+- Default: `60000`
+- Purpose: failure counting window
+- Misconfigured impact: too short/long block sensitivity
 
----
+### `AUTH_RATE_LIMIT_MAX_FAILURES`
 
-## HTTP server timeouts (defensive)
+- Type: number
+- Default: `12`
+- Purpose: max failures before block
+- Misconfigured impact: too low locks users quickly; too high weakens protection
 
-- **`HTTP_REQUEST_TIMEOUT_MS`** (number, default `30000`)
-- **`HTTP_HEADERS_TIMEOUT_MS`** (number, default `35000`)
-- **`HTTP_KEEP_ALIVE_TIMEOUT_MS`** (number, default `5000`)
-- **`HTTP_MAX_REQUESTS_PER_SOCKET`** (number, default `100`)
+### `AUTH_RATE_LIMIT_BLOCK_MS`
 
----
+- Type: number
+- Default: `300000`
+- Purpose: block duration after threshold
+- Misconfigured impact: overly long or ineffective block periods
 
-## Internal debugging
+### `HTTP_REQUEST_TIMEOUT_MS`
 
-- **`DEBUG_SIGNALS`** (`1|0`, default `0`)
-  - Adds `_debugSignals` into the internal report output (not required by the UI).
+- Type: number
+- Default: `30000`
+- Purpose: server request timeout
+- Misconfigured impact: stalled connections or premature termination
+
+### `HTTP_HEADERS_TIMEOUT_MS`
+
+- Type: number
+- Default: `35000`
+- Purpose: server headers timeout
+- Misconfigured impact: if less than request timeout, config validation fails
+
+### `HTTP_KEEP_ALIVE_TIMEOUT_MS`
+
+- Type: number
+- Default: `5000`
+- Purpose: socket keep-alive timeout
+- Misconfigured impact: connection churn or excess open sockets
+
+### `HTTP_MAX_REQUESTS_PER_SOCKET`
+
+- Type: number
+- Default: `100`
+- Purpose: max requests per keep-alive socket
+- Misconfigured impact: poor socket reuse or long-lived socket risk
+
+### `DEBUG_SIGNALS`
+
+- Type: boolean-like
+- Default: `false`
+- Purpose: include `_debugSignals` in internal report from `analyzeUrl()`
+- Misconfigured impact: larger payloads and extra internal detail exposure
+
+## Recommended Baselines
+
+### Development (API-only)
+
+```dotenv
+NODE_ENV=development
+PORT=3001
+SERVE_STATIC=0
+CORS_ALLOW_ORIGIN=*
+AUTH_ENABLED=0
+```
+
+### Integrated production
+
+```dotenv
+NODE_ENV=production
+PORT=3001
+SERVE_STATIC=1
+STATIC_DIST_DIR=/app/frontend/dist
+CORS_ALLOW_ORIGIN=off
+AUTH_ENABLED=1
+AUTH_ALLOW_HEALTH=1
+REQUEST_LOG=1
+```
+
+Use HTTPS when auth is enabled.
+
+## Validation
+
+Run config validation:
+
+```bash
+cd backend
+npm run validate-config
+```
+
+Also see:
+
+- `API.md`
+- `SECURITY.md`
+- `OPERATIONS_GUIDE.md`

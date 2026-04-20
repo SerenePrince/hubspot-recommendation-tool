@@ -1,399 +1,157 @@
-# Security
+# Security Guide
 
-## Purpose
+This document describes implemented backend security controls, their limits, and pre-deployment checks. It covers only controls verified in source.
 
-This document describes the current security posture of the backend and the practical security expectations for deployment.
+## Implemented Controls
 
-This project is a student-led application, so the goal is not to present it as an enterprise security platform. The goal is to make the current backend as safe, clear, and deployment-ready as possible without introducing high-risk late-stage changes.
+### SSRF protection
 
----
+Files: `src/core/fetch/ssrf.js`, `src/core/fetch/fetchPage.js`
 
-## Security model overview
+- Blocks localhost and common internal hostnames (`.local`, `.internal`, `.lan`)
+- Resolves hostnames and blocks if any resolved IP is private/loopback/link-local/reserved
+- Blocks private IPv4 ranges (`10/8`, `172.16/12`, `192.168/16`, etc.)
+- Blocks private/loopback IPv6 ranges (`::1`, `fc00::/7`, `fe80::/10`, mapped loopback)
+- Re-checks host policy on every redirect hop
 
-The backend uses a lightweight, practical security model built around:
+Limitations:
 
-- small API surface area
-- constrained server behavior
-- input validation
-- upstream fetch protections
-- optional HTTP Basic Authentication
-- lightweight failed-auth rate limiting
-- static file serving protections
-- conservative response headers
-- deployment-time configuration controls
+- Application-level SSRF checks are not a replacement for network egress controls
 
-This security model is appropriate for the current scope of the project, especially when paired with HTTPS and standard hosting-platform protections.
+### Fetch limits
 
----
+Files: `src/core/fetch/fetchPage.js`, `src/core/config.js`
 
-## Current exposed surface
+- Timeout deadline (`FETCH_TIMEOUT_MS`)
+- Max primary response bytes (`MAX_FETCH_BYTES`)
+- Redirect limit
+- External JS/CSS fetches are bounded by:
+  - count limits
+  - per-resource byte cap
+  - total external byte budget
+  - concurrency limit
 
-The backend intentionally keeps its HTTP surface small.
+Limitations:
 
-Primary routes:
+- Aggressive target-side anti-bot/firewall controls can still cause fetch failure or incomplete signals
 
-- `GET /health`
-- `GET /api/health`
-- `GET /analyze`
-- `GET /api/analyze`
+### HTTP Basic Auth
 
-When static serving is enabled, the backend may also serve:
+Files: `src/api/server.js`, `src/api/auth.js`
 
-- built frontend assets
-- the frontend application's `index.html`
-- SPA fallback responses for browser navigation
+- Optional global gate (`AUTH_ENABLED`)
+- Covers API + static routes
+- Optional health exemption (`AUTH_ALLOW_HEALTH`)
+- Uses constant-time compare (`timingSafeEqual`) for same-length values
+- Returns standards-based challenge (`WWW-Authenticate`)
+- Startup fails if auth enabled without username/password
 
-A smaller exposed surface is one of the simplest and most effective security advantages in this project.
+Limitations:
 
----
+- Basic Auth is lightweight, not full IAM
+- Must run behind HTTPS
 
-## Authentication
+### Failed-auth rate limiting
 
-### Supported authentication model
+Files: `src/api/rateLimit.js`, `src/api/server.js`
 
-The backend supports optional **HTTP Basic Authentication**.
+- In-memory per-IP failure tracking
+- Sliding window + temporary block
+- Sends `429` with `Retry-After`
+- Success clears IP state
 
-When enabled:
+Limitations:
 
-- API routes require valid credentials
-- static frontend routes also require valid credentials
-- health routes may remain public if `AUTH_ALLOW_HEALTH=1`
+- Per-process only
+- Resets on restart
+- Not distributed across replicas
 
-### Important limitations
+### Analysis back-pressure controls
 
-Basic Auth is intentionally simple and should be understood clearly:
+File: `src/api/analysisLimiter.js`
 
-- it is **not** a full identity system
-- it does not provide roles, sessions, or user management
-- it should only be used behind **HTTPS**
-- credentials must be treated as secrets and stored securely in deployment settings
+- In-memory max concurrent analysis slots
+- Bounded queue
+- Returns `503` overload error when queue full
 
-### Production guidance
+### Static file path traversal protection
 
-If the app is private or limited-access, recommended practice is:
+File: `src/api/static.js`
 
-- terminate HTTPS at the hosting platform or reverse proxy
-- store auth credentials in environment secrets
-- avoid exposing the app publicly without protection
-- allow unauthenticated health checks only when necessary for platform operations
+- Decodes path safely
+- Removes NUL bytes
+- Resolves path and verifies it stays within configured static root
+- Supports only `GET` and `HEAD` for static serving
 
-### Startup safety
+### Security headers
 
-If authentication is enabled but required credentials are missing, the server refuses to start.
-
-This is a useful safety check because it helps prevent accidental unauthenticated deployments.
-
----
-
-## Failed-auth rate limiting
-
-The backend supports a lightweight in-memory failed-auth rate limiter.
-
-Characteristics:
-
-- IP-based
-- best effort
-- temporary blocking after repeated failures
-- cleared on successful authentication
-- reset on restart because it is in-memory only
-
-### What it helps with
-
-This can reduce:
-
-- repeated bad-password attempts
-- simple brute-force behavior
-- noisy automated retries with invalid credentials
-
-### What it does not provide
-
-It is not a substitute for:
-
-- platform firewalling
-- WAF protections
-- reverse-proxy rate limiting
-- enterprise-grade abuse detection
-
-It is intentionally small and practical for the current deployment scope.
-
----
-
-## Static file serving protections
-
-When static serving is enabled, the backend serves files from a configured frontend build directory.
-
-Security-sensitive behaviors include:
-
-- only `GET` and `HEAD` requests are served as static files
-- request paths are decoded safely
-- malformed path encoding is handled safely
-- path traversal outside the configured static root is blocked
-- direct file serving and SPA fallback are separated from API routes
-
-### Path traversal protection
-
-The static layer verifies that the resolved request path remains inside the configured static root.
-
-This is important because file-serving code is a common place for accidental traversal bugs.
-
-The current implementation is designed to prevent:
-
-- `../` traversal attempts
-- encoded traversal attempts
-- sibling-directory escape cases caused by weak string-prefix checks
-
----
-
-## Input validation
-
-The backend keeps validation close to the request and analysis flow.
-
-Important validation areas include:
-
-- query parameter presence
-- URL parsing and normalization
-- config validation at startup
-- fetch-related limits and analysis controls
-
-This helps reduce:
-
-- malformed request handling issues
-- undefined runtime behavior
-- accidental production misconfiguration
-
----
-
-## SSRF protections
-
-The backend performs remote fetches as part of website analysis, which makes SSRF protection especially important.
-
-Relevant protections are implemented in the fetch layer.
-
-Security goals include preventing fetches to:
-
-- internal/private network targets
-- loopback/local-only destinations
-- unsafe or unexpected hosts depending on fetch policy
-
-This is one of the most important backend security areas because analyze-style endpoints can otherwise become SSRF vectors.
-
-For implementation details, review:
-
-- `src/core/fetch/ssrf.js`
-- `src/core/fetch/fetchPage.js`
-
----
-
-## Fetch limits and resource controls
-
-The backend includes safeguards around outbound analysis/fetch behavior.
-
-Examples include controls for:
-
-- request timeout
-- maximum fetched bytes
-- concurrency limits
-- queued analysis limits
-
-These controls help reduce:
-
-- resource exhaustion
-- hanging requests
-- oversized responses
-- accidental denial-of-service against the application itself
-
-They are not a complete anti-abuse system, but they are important defensive limits.
-
----
-
-## Security headers
-
-The backend sets a small set of conservative security-related headers, including:
+File: `src/api/server.js`
 
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: no-referrer`
 - `X-Frame-Options: DENY`
 
-These help reduce some common browser-side risks.
+Limitations:
 
-### CSP note
+- CSP is intentionally not set in backend; comment in code recommends setting CSP at proxy/frontend policy layer
 
-A Content Security Policy is **not** hard-coded in the backend server.
+### CORS control
 
-This is intentional.
+File: `src/api/server.js`
 
-Because the backend may serve a built frontend, a useful CSP depends on:
+- Controlled by `CORS_ALLOW_ORIGIN`
+- Can be disabled with `off`
+- In production integrated mode with wildcard origin, CORS headers are skipped
 
-- the actual frontend build output
-- inline script/style behavior
-- third-party assets or APIs used by the frontend
-- deployment environment and reverse-proxy policy
+## Intentionally Not Implemented
 
-For this project, CSP is better handled:
+Verified absent in backend code:
 
-- at the reverse proxy / hosting layer, or
-- together with the finalized frontend deployment policy
+- Session management
+- User accounts/roles
+- OAuth/OIDC
+- CSRF token framework
+- Persistent/distributed abuse tracking
+- Built-in WAF behavior
 
-A hard-coded backend CSP added blindly would carry unnecessary risk of breaking the app late in the project.
+## Pre-Deployment Security Checklist
 
----
+- Use HTTPS termination at hosting/proxy layer
+- If private/internal deployment, set:
+  - `AUTH_ENABLED=1`
+  - `AUTH_USERNAME` and `AUTH_PASSWORD` from secret store
+- Decide health auth posture (`AUTH_ALLOW_HEALTH`)
+- Set conservative CORS:
+  - same-origin integrated mode: `CORS_ALLOW_ORIGIN=off` recommended
+- Validate config:
 
-## CORS
+```bash
+cd backend
+npm run validate-config
+```
 
-CORS behavior is configurable.
+- Run smoke test:
 
-Operationally:
+```bash
+cd backend
+npm run smoke
+```
 
-- permissive CORS may be acceptable in local development
-- production deployments serving frontend and backend from the same origin usually do not need permissive CORS
-- CORS should be restricted or disabled when cross-origin access is not required
+- Verify auth and rate limiting behavior:
 
-CORS should be treated as an exposure-control setting, not as an authentication mechanism.
+```bash
+curl -i "http://localhost:3001/api/analyze?url=https://react.dev"
+```
 
----
+## Honest Limitations
 
-## Error handling and information exposure
+- Some sites block automation; this can reduce signal quality
+- App-level SSRF defenses should be backed by infrastructure egress policy
+- In-memory rate limiting and analysis limiting do not coordinate across multiple instances
 
-The backend uses a simple error model.
+## Related Docs
 
-In production:
-
-- unexpected failures return generic `500` responses
-- internal details are not intentionally exposed in error messages
-
-In non-production environments:
-
-- more detailed error messages may be returned to support debugging
-
-This is a practical balance between operational usefulness and unnecessary error-detail exposure.
-
----
-
-## Logging considerations
-
-The backend supports lightweight structured request logging.
-
-Operationally useful fields may include:
-
-- request id
-- method
-- path
-- status code
-- duration
-
-### Logging guidance
-
-Avoid adding logs that expose:
-
-- Basic Auth credentials
-- sensitive deployment secrets
-- excessive raw request data
-- unnecessary internal state dumps in production
-
-The current lightweight request logging model is appropriate for this project stage.
-
----
-
-## Deployment security recommendations
-
-For the current project, the safest practical deployment posture is:
-
-- use HTTPS
-- keep the app behind platform TLS termination or a reverse proxy
-- enable Basic Auth if the app is private
-- store secrets in deployment configuration, not in the repository
-- keep `/health` public only if required by the hosting environment
-- restrict CORS unless cross-origin access is truly needed
-- verify static file path configuration carefully
-- keep environment configuration minimal and explicit
-
----
-
-## What is intentionally not included
-
-The backend does **not** currently implement:
-
-- user accounts
-- session management
-- RBAC/permissions
-- CSRF token flows
-- OAuth/OpenID Connect
-- persistent abuse tracking
-- advanced WAF-like protections
-- enterprise audit logging
-
-That is acceptable for the current project scope, as long as the deployment model remains simple and the app is handled as a controlled-access tool rather than a broad public internet platform.
-
----
-
-## Practical security checklist
-
-Before deployment, confirm:
-
-- HTTPS is enabled
-- auth is enabled if the app should be private
-- auth credentials are stored as secrets
-- health route behavior matches platform requirements
-- CORS is not more permissive than necessary
-- static serving points to the correct build directory
-- startup config validation passes
-- analyze/fetch limits are set to sane values
-- tests pass
-- no debug-only logging or unsafe temporary code remains
-
----
-
-## Security testing suggestions
-
-Practical checks before release:
-
-### Auth checks
-
-- request a protected route without credentials and confirm `401`
-- request with valid credentials and confirm success
-- intentionally fail auth repeatedly and confirm rate limiting if enabled
-
-### Static file checks
-
-- request a known frontend asset and confirm it serves correctly
-- request a frontend route and confirm SPA fallback works
-- attempt traversal-style paths and confirm they are not served
-
-### API checks
-
-- send invalid analyze requests and confirm clean error responses
-- test a known-good analyze request
-- confirm non-existent API routes return JSON `404`
-
-### Deployment checks
-
-- verify health endpoint behavior
-- verify HTTPS is active
-- verify secrets are coming from deployment configuration
-- verify logs do not expose credentials or sensitive values
-
----
-
-## Final notes
-
-This backend uses a modest but sensible security posture for its scope.
-
-Its strongest security qualities are:
-
-- small and understandable server surface
-- practical fetch and static-serving protections
-- optional auth with startup safeguards
-- conservative defaults
-- limited complexity
-
-That is the right direction for this project stage: improve real safety, reduce obvious risks, and avoid introducing large late-stage changes that could create new bugs.
-
----
-
-## Related documents
-
-- `README.md`
-- `docs/API.md`
-- `docs/ARCHITECTURE.md`
-- `docs/OPERATIONS_GUIDE.md`
-- `docs/RUNBOOK.md`
+- `API.md`
+- `ENVIRONMENT.md`
+- `OPERATIONS_GUIDE.md`
+- `RUNBOOK.md`

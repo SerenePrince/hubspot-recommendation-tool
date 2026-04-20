@@ -1,52 +1,77 @@
-# HubSpot Recommendation Tool (Full-Stack)
+# HubSpot Recommendation Tool
 
-This application analyzes a website URL, detects the technologies in use (Wappalyzer-style patterns), and generates HubSpot-focused recommendations.
+This project is the capstone handoff for Team Debug (Algonquin College, Computer Engineering Technology), built for Inbox, a HubSpot Platinum Solutions Partner in Ottawa. It is an internal tool that analyzes a public website URL, detects technologies in use, and returns HubSpot replacement recommendations.
 
-## Quick start (Docker, 3–5 steps)
+Inbox previously did this work manually during client discovery. This tool reduces that process from hours to seconds by automating fetch, detection, and recommendation steps.
 
-1) Clone the repo
+## Who This Is For
 
-2) Create your environment file:
+- Inbox internal employees using the tool during prospect audits
+- Developers maintaining or extending the codebase after handoff
+- IT/admin staff deploying the integrated app with Docker
+
+## Tech Stack
+
+- Frontend: React + Vite SPA (`frontend/`)
+- Backend: vanilla Node.js HTTP server, no Express (`backend/`)
+- Detection data: local WebAppAnalyzer/Wappalyzer-style dataset (`backend/data/vendor/webappanalyzer/src`)
+- Deployment: root `Dockerfile`, `docker-compose.yml`, and `render.yaml`
+
+## Run Locally With Docker (5 Steps)
+
+1. Copy the root environment template.
 
 ```bash
 cp .env.example .env
 ```
 
-3) Edit `.env` and set:
+2. Set at least these auth variables in `.env`:
 
-- `AUTH_USERNAME`
-- `AUTH_PASSWORD`
+```dotenv
+AUTH_ENABLED=1
+AUTH_USERNAME=your-user
+AUTH_PASSWORD=your-pass
+```
 
-4) Build + run:
+3. Build and start the integrated app.
 
 ```bash
 docker compose up --build
 ```
 
-5) Open:
+4. Open the app UI.
 
-- App UI: `http://localhost:3001`
-- Health: `http://localhost:3001/health`
+```text
+http://localhost:3001
+```
 
-## Example usage (API)
+5. Verify health.
+
+```bash
+curl http://localhost:3001/health
+```
+
+## Quick API Example
 
 ```bash
 curl -u "$AUTH_USERNAME:$AUTH_PASSWORD" \
-  "http://localhost:3001/api/analyze?url=https://react.dev&pretty=1"
+  "http://localhost:3001/api/analyze?url=https://react.dev&pretty=1&includeMeta=1"
 ```
 
-## Configuration
+## Project Documentation
 
-- Authoritative env var reference: `backend/docs/ENVIRONMENT.md`
-- Ops + troubleshooting: `backend/docs/OPERATIONS_GUIDE.md`, `backend/docs/RUNBOOK.md`
-- Security posture: `backend/docs/SECURITY.md`
-
-## Client handoff
-
-- Client-friendly guide: `CLIENT_GUIDE.md`
-
-## Developer onboarding
-
-- Start here: `backend/docs/DEVELOPER_GUIDE.md`
-- Architecture overview: `backend/docs/ARCHITECTURE.md`
-- API reference: `backend/docs/API.md`
+- Root/client handoff:
+  - `CLIENT_GUIDE.md`
+- Frontend:
+  - `frontend/README.md`
+- Backend overview:
+  - `backend/README.md`
+- Backend deep docs:
+  - `backend/docs/ARCHITECTURE.md`
+  - `backend/docs/API.md`
+  - `backend/docs/DEVELOPER_GUIDE.md`
+  - `backend/docs/ENVIRONMENT.md`
+  - `backend/docs/SECURITY.md`
+  - `backend/docs/OPERATIONS_GUIDE.md`
+  - `backend/docs/RUNBOOK.md`
+  - `backend/docs/CLI.md`

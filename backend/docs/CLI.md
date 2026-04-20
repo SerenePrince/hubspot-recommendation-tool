@@ -1,49 +1,52 @@
-# CLI Guide – HubSpot Recommendation Tool
+# CLI Guide
 
-## Overview
+This guide documents the backend CLI commands in `src/cli/`.
 
-The backend includes a CLI for running analysis and producing human-readable or machine-readable output. This is useful for:
+## Analyzer CLI
 
-- Quick verification in development
-- Ad-hoc analysis without opening the UI
-- Smoke testing or debugging input/output
-
-## Running the CLI
-
-From the backend directory:
+Command:
 
 ```bash
 cd backend
 npm run cli -- <url> [flags]
 ```
 
-You can also use convenience scripts:
+Equivalent direct command:
 
-- `npm run cli:pretty -- <url>` (same as `--format json-pretty`)
-- `npm run cli:human -- <url> [human flags]` (same as `--format human`)
-- `npm run cli:help`
+```bash
+node src/cli/index.js <url> [flags]
+```
 
-## Flags
+## Flags (`src/cli/index.js`)
 
-### Output selection
+- `--format <json|json-pretty|human>`
+  - Output format
+  - Default: `json`
+- `--human`
+  - Alias for `--format human`
+- `--pretty`
+  - Alias for `--format json-pretty`
+- `--meta`
+  - Backward-compatible flag; current output already uses clean report with metadata
+- `--raw`
+  - Print full internal report (`analyzeUrl()` output), bypassing clean report shaping
+- `--help`, `-h`
+  - Print usage text
 
-- `--format <json|json-pretty|human>` (default: `json`)
-- `--human` (alias for `--format human`)
-- `--pretty` (alias for `--format json-pretty`)
-- `--raw` (prints the full internal analysis report; useful for debugging)
-- `--meta` (kept for backwards compatibility; the default output already includes metadata)
-- `--help` / `-h`
+Human format-only flags:
 
-### Human format rendering (only when `--format human` / `--human`)
+- `--wide`
+  - No truncation; output may exceed terminal width
+- `--wrap`
+  - Wrap long cells to fit table width
+- `--max-width <n>`
+  - Override table width (`40..400` clamp)
+- `--inspect <tech>`
+  - Detailed output for one detected technology
 
-- `--wide` (disable truncation; may exceed terminal width)
-- `--wrap` (wrap long cells to fit within table width)
-- `--max-width <n>` (override table width; defaults to terminal width, capped at 120)
-- `--inspect <tech>` (show a detailed view for one detected technology)
+## Working Examples
 
-## Examples
-
-Basic JSON:
+Default JSON:
 
 ```bash
 npm run cli -- https://react.dev
@@ -52,29 +55,71 @@ npm run cli -- https://react.dev
 Pretty JSON:
 
 ```bash
-npm run cli:pretty -- https://react.dev
-# or: npm run cli -- https://react.dev --format json-pretty
+npm run cli -- https://react.dev --format json-pretty
 ```
 
-Human-readable report:
+Human format:
 
 ```bash
-npm run cli:human -- https://react.dev --wide
-# or: npm run cli -- https://react.dev --format human --wide
+npm run cli -- https://react.dev --format human
 ```
 
-Inspect a specific technology (human mode):
+Human format wide:
 
 ```bash
-npm run cli -- https://react.dev --format human --inspect WordPress --wrap
+npm run cli -- https://react.dev --human --wide
 ```
 
-## Taxonomy Helper
+Human format wrapped at width 100:
 
-A taxonomy helper script is available:
+```bash
+npm run cli -- https://react.dev --human --wrap --max-width 100
+```
+
+Inspect one technology:
+
+```bash
+npm run cli -- https://react.dev --human --inspect WordPress --wide
+```
+
+Raw internal report:
+
+```bash
+npm run cli -- https://react.dev --raw --format json-pretty
+```
+
+Help:
+
+```bash
+npm run cli:help
+```
+
+## Taxonomy CLI
+
+Command:
 
 ```bash
 npm run cli:tax
-# add --pretty for formatted JSON:
+```
+
+Equivalent direct:
+
+```bash
+node src/cli/taxonomy.js
+```
+
+Flag:
+
+- `--pretty`: pretty-print JSON
+
+Example:
+
+```bash
 npm run cli:tax -- --pretty
 ```
+
+## Notes
+
+- URL must be absolute `http` or `https`
+- Invalid URLs exit with code `1`
+- Analyzer CLI uses same core pipeline as API (`analyzeUrl()`)
