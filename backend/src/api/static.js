@@ -59,8 +59,8 @@ function safeJoin(root, requestPathname) {
   // Remove NUL bytes before joining.
   const clean = decoded.replace(/\0/g, "");
 
-  // Join against the configured root and verify the final resolved path
-  // remains inside that root.
+  // Resolve and then enforce root containment to block `../` traversal attempts,
+  // including encoded path tricks that only become visible after decoding.
   const joined = path.join(root, clean);
   if (!isPathInsideRoot(root, joined)) return null;
 
@@ -102,6 +102,12 @@ function sendFile(res, absPath, { cacheControl }) {
 /**
  * Attempts to serve a static file.
  * Returns true if a response was sent.
+ *
+ * @param {import("node:http").IncomingMessage} req - Incoming request
+ * @param {import("node:http").ServerResponse} res - Response writer
+ * @param {URL} requestUrl - Parsed request URL
+ * @param {{distDir: string, assetCacheSeconds: number}} options - Static serving configuration
+ * @returns {Promise<boolean>} True when file was served and response completed
  */
 async function tryServeStatic(req, res, requestUrl, options) {
   const { distDir, assetCacheSeconds } = options;
@@ -150,6 +156,11 @@ async function tryServeStatic(req, res, requestUrl, options) {
 /**
  * Serves the SPA fallback by returning dist/index.html for non-API GET routes.
  * Returns true if served.
+ *
+ * @param {import("node:http").IncomingMessage} req - Incoming request
+ * @param {import("node:http").ServerResponse} res - Response writer
+ * @param {{distDir: string}} options - Static serving configuration
+ * @returns {Promise<boolean>} True when index fallback was served
  */
 async function tryServeSpaFallback(req, res, options) {
   const { distDir } = options;

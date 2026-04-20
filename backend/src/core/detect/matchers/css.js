@@ -1,6 +1,13 @@
 // backend/src/core/detect/matchers/css.js
 const { compilePattern } = require("../compilePattern");
 
+/**
+ * Matches CSS-related rules against inline stylesheet text and stylesheet URLs.
+ *
+ * @param {object} db - Technology database and matcher index
+ * @param {object} signals - Normalized analysis signals
+ * @returns {Array<object>} Candidate detections from CSS evidence
+ */
 function matchCss(db, signals) {
   const cssObj = signals?.css && typeof signals.css === "object" ? signals.css : {};
   const cssText = typeof cssObj.inline === "string" ? cssObj.inline : "";

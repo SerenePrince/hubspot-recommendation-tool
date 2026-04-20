@@ -1,6 +1,13 @@
 // backend/src/core/detect/matchers/text.js
 const { compilePattern } = require("../compilePattern");
 
+/**
+ * Matches technology rules against visible text extracted from the page.
+ *
+ * @param {object} db - Technology database and matcher index
+ * @param {object} signals - Normalized analysis signals
+ * @returns {Array<object>} Candidate detections from visible text evidence
+ */
 function matchText(db, signals) {
   const text = typeof signals?.text === "string" ? signals.text : "";
   if (!text) return [];

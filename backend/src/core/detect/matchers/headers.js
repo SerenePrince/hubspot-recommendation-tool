@@ -1,6 +1,13 @@
 // backend/src/core/detect/matchers/headers.js
 const { compilePattern } = require("../compilePattern");
 
+/**
+ * Matches header rules against normalized response headers.
+ *
+ * @param {object} db - Technology database and matcher index
+ * @param {object} signals - Normalized analysis signals
+ * @returns {Array<object>} Candidate detections from HTTP header evidence
+ */
 function matchHeaders(db, signals) {
   const headers = signals?.headers && typeof signals.headers === "object" ? signals.headers : {};
   const out = [];

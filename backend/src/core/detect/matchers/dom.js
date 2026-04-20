@@ -9,6 +9,10 @@ const { compilePattern } = require("../compilePattern");
  * - { "selector": { "attributes": { "attr": "regex" } } }
  *
  * We support a conservative subset commonly used by Wappalyzer data.
+ *
+ * @param {object} db - Technology database and matcher index
+ * @param {object} signals - Normalized analysis signals; expects `signals.dom` as cheerio root function
+ * @returns {Array<object>} Candidate detections from DOM selector/text/attribute evidence
  */
 function matchDom(db, signals) {
   const $ = signals?.dom;

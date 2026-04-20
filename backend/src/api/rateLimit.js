@@ -18,6 +18,12 @@ function parseForwardedFor(v) {
   return first;
 }
 
+/**
+ * Resolves best-effort client IP from common proxy headers or socket address.
+ *
+ * @param {import("node:http").IncomingMessage} req - Incoming request
+ * @returns {string} Client IP string used as rate-limit key
+ */
 function getClientIp(req) {
   // If you're behind a reverse proxy, ensure it sets X-Forwarded-For / X-Real-IP correctly.
   const xf = parseForwardedFor(req.headers["x-forwarded-for"]);
@@ -26,6 +32,13 @@ function getClientIp(req) {
   return xf || xr || remote || "unknown";
 }
 
+/**
+ * Creates an in-memory failed-auth limiter keyed by client IP.
+ * State is process-local and resets on restart, so treat it as best-effort protection.
+ *
+ * @param {{windowMs?: number, maxFailures?: number, blockMs?: number}} [opts] - Limiter thresholds
+ * @returns {{getClientIp: Function, isBlocked: Function, recordFailure: Function, recordSuccess: Function, _state: Map<any, any>, _opts: object}} Limiter API and debug state
+ */
 function createRateLimiter(opts) {
   const windowMs = Number(opts && opts.windowMs) || 60_000;
   const maxFailures = Number(opts && opts.maxFailures) || 12;

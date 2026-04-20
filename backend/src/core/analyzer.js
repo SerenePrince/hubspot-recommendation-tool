@@ -25,6 +25,13 @@ const MIN_CONFIDENCE = 50; // report-aligned threshold
 let cachedDb = null;
 let dbInitPromise = null;
 
+// --- Phase 1 bootstrap: process-wide dataset cache ---
+/**
+ * Loads and caches the technology database for the current process.
+ * Reuses the same in-memory object for all requests to avoid disk IO on every analysis.
+ *
+ * @returns {Promise<object>} Loaded technology database object from `loadTechDb()`
+ */
 async function initTechDb() {
   if (cachedDb) return cachedDb;
   if (!dbInitPromise) {
@@ -42,6 +49,14 @@ async function initTechDb() {
   return dbInitPromise;
 }
 
+// --- Phases 2-5 orchestration entrypoint ---
+/**
+ * Runs the full analysis pipeline for a single URL and returns the API report payload.
+ *
+ * @param {string} url - Absolute http/https URL to analyze
+ * @returns {Promise<object>} Full analysis report with fetch metadata, detections, and recommendations
+ * @throws {Error} Propagates operational errors from fetch, normalization, detection, or report stages
+ */
 async function analyzeUrl(url) {
   const totalStart = Date.now();
 
@@ -73,6 +88,7 @@ async function analyzeUrl(url) {
   // Phase 5: attach taxonomy + human-friendly metadata (used by report + recommendation logic)
   const enriched = enrichDetections(db, detections);
 
+  // Keep output ordering deterministic so repeated runs are stable and diff-friendly.
   // Stable ordering: confidence desc, then name asc
   enriched.sort((a, b) => {
     if ((b.confidence || 0) !== (a.confidence || 0)) return (b.confidence || 0) - (a.confidence || 0);
@@ -125,6 +141,7 @@ async function analyzeUrl(url) {
   return report;
 }
 
+// --- Response shaping helpers ---
 function pickHeaders(headers, keys) {
   const out = {};
   if (!headers || typeof headers !== "object") return out;

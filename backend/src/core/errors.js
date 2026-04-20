@@ -26,21 +26,45 @@ class AppError extends Error {
   }
 }
 
+/**
+ * Type guard for operational errors that carry HTTP semantics.
+ *
+ * @param {unknown} err - Unknown thrown value
+ * @returns {boolean} True when the value is an AppError instance shape
+ */
 function isAppError(err) {
   return Boolean(err && typeof err === "object" && err.name === "AppError" && "statusCode" in err);
 }
 
 /**
  * Helper for common 4xx operational errors.
+ *
+ * @param {string} code - Stable machine-readable error code
+ * @param {string} message - Client-safe error message
+ * @returns {AppError} 400 AppError marked safe to expose
  */
 function badRequest(code, message) {
   return new AppError({ code, message, statusCode: 400, expose: true });
 }
 
+/**
+ * Builds a 429 operational error.
+ *
+ * @param {string} code - Stable machine-readable error code
+ * @param {string} message - Client-safe error message
+ * @returns {AppError} 429 AppError marked safe to expose
+ */
 function tooManyRequests(code, message) {
   return new AppError({ code, message, statusCode: 429, expose: true });
 }
 
+/**
+ * Builds a 503 operational error.
+ *
+ * @param {string} code - Stable machine-readable error code
+ * @param {string} message - Client-safe error message
+ * @returns {AppError} 503 AppError marked safe to expose
+ */
 function serviceUnavailable(code, message) {
   return new AppError({ code, message, statusCode: 503, expose: true });
 }

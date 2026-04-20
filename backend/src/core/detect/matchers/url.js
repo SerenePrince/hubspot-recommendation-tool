@@ -1,6 +1,13 @@
 // backend/src/core/detect/matchers/url.js
 const { compilePattern } = require("../compilePattern");
 
+/**
+ * Matches technology rules against the normalized final URL.
+ *
+ * @param {object} db - Technology database and matcher index
+ * @param {object} signals - Normalized analysis signals
+ * @returns {Array<object>} Candidate detections from URL evidence
+ */
 function matchUrl(db, signals) {
   const url = typeof signals?.url === "string" ? signals.url : "";
   if (!url) return [];

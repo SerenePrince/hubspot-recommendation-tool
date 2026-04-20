@@ -1,5 +1,11 @@
 // backend/src/core/report/summarize.js
 
+/**
+ * Builds high-level summary counts used by API and CLI outputs.
+ *
+ * @param {Array<object>} detections - Enriched detections
+ * @returns {{totals: object, countsByGroup: object, countsByCategory: object}} Aggregate summary object
+ */
 function buildSummary(detections) {
   const byGroup = new Map();
   const byCategory = new Map();

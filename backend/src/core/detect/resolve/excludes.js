@@ -4,6 +4,10 @@
  * Apply "excludes" relationships:
  * - If A excludes B, and both are present, drop the lower-confidence one.
  * - If confidence ties, keep deterministic: keep lexicographically smaller slug.
+ *
+ * @param {Array<object>} detections - Current detection candidates
+ * @param {object} db - Technology database containing excludes relationships
+ * @returns {Array<object>} Detections after conflict resolution
  */
 
 function resolveExcludes(detections, db) {

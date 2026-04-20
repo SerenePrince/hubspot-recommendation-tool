@@ -18,6 +18,10 @@ const { config } = require("../config");
  *
  * NOTE: Many datasets include "_.json" for technologies beginning with
  * numbers or special characters. We load that too.
+ *
+ * @param {{ rootSrc?: string }} [options] - Optional override for dataset root directory
+ * @returns {Promise<object>} Parsed database containing technologies, taxonomy, and matcher index
+ * @throws {Error} If required files are missing or any JSON file cannot be parsed
  */
 async function loadTechDb(options = {}) {
   const { rootSrc = config.dataRoot } = options;
@@ -84,6 +88,7 @@ function technologyFiles() {
   return out;
 }
 
+// --- File and parsing helpers ---
 async function findMissingFiles(dir, files) {
   const missing = [];
   for (const f of files) {
@@ -127,6 +132,7 @@ async function mapLimit(items, limit, fn) {
   return out;
 }
 
+// --- Lightweight matcher pre-index ---
 function buildIndex(technologies) {
   const idx = {
     headers: [],

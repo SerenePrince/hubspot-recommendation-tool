@@ -32,19 +32,35 @@ function parseBasicAuth(headerValue) {
 }
 
 function safeEq(a, b) {
-  // timingSafeEqual requires same-length buffers
+  // Constant-time comparison reduces timing side-channel leakage during credential checks.
+  // timingSafeEqual requires same-length buffers.
   const ba = Buffer.from(String(a), "utf8");
   const bb = Buffer.from(String(b), "utf8");
   if (ba.length !== bb.length) return false;
   return timingSafeEqual(ba, bb);
 }
 
+/**
+ * Validates HTTP Basic credentials from request headers.
+ *
+ * @param {import("node:http").IncomingMessage} req - Incoming request
+ * @param {string} expectedUser - Expected username from config
+ * @param {string} expectedPass - Expected password from config
+ * @returns {boolean} True when parsed credentials match expected values
+ */
 function isAuthorized(req, expectedUser, expectedPass) {
   const creds = parseBasicAuth(req.headers.authorization);
   if (!creds) return false;
   return safeEq(creds.username, expectedUser) && safeEq(creds.password, expectedPass);
 }
 
+/**
+ * Sends HTTP Basic auth challenge response.
+ *
+ * @param {import("node:http").ServerResponse} res - Response writer
+ * @param {string} [realm="Restricted"] - Realm label shown to clients
+ * @returns {void}
+ */
 function sendAuthChallenge(res, realm = "Restricted") {
   res.statusCode = 401;
   res.setHeader("WWW-Authenticate", `Basic realm="${String(realm).replace(/"/g, "")}", charset="UTF-8"`);

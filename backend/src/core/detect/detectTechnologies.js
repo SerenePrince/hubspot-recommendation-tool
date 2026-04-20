@@ -27,6 +27,12 @@ const { resolveExcludes } = require("./resolve/excludes");
  * Why matchers are defensive/no-throw:
  * - vendor datasets can contain unexpected shapes and occasional invalid regexes
  * - a single bad rule should reduce coverage for that technology, not fail the entire request
+ *
+ * @param {object} db - Loaded technology database and matcher index
+ * @param {object} signals - Normalized signal bundle from Phase 3
+ * @param {{ minConfidence?: number }} [options] - Detection threshold overrides
+ * @returns {Array<object>} Stable, filtered list of detected technologies
+ * @throws {Error} If database was not initialized before detection
  */
 function detectTechnologies(db, signals, options = {}) {
   const { minConfidence = 50 } = options;
@@ -38,7 +44,8 @@ function detectTechnologies(db, signals, options = {}) {
   // slug -> { slug, name, confidence, version, _versionBestConf, evidence[] }
   const detections = new Map();
 
-  // Run matchers (order doesn't affect correctness; keep stable for determinism/debuggability).
+  // Run order is fixed for deterministic debugging output and reproducible tests.
+  // It does not change semantic correctness because aggregation is commutative.
   // The DB provides a lightweight index per signal type so we don't scan every technology for
   // every matcher when the vendor dataset includes only a subset of rules.
   runMatcher(detections, matchUrl, db, signals);
@@ -54,12 +61,17 @@ function detectTechnologies(db, signals, options = {}) {
 
   let found = Array.from(detections.values()).map(finalizeDetection);
 
-  // Relationship resolution (defensive / no-throw)
+  // Relationship resolution order is intentional:
+  // 1) requires removes detections missing prerequisites,
+  // 2) implies adds inferred technologies,
+  // 3) excludes resolves mutually incompatible detections.
+  // Running requires first reduces false-positive propagation into implied results.
   found = resolveRequires(found, db);
   found = resolveImplies(found, db);
   found = resolveExcludes(found, db); // vendor-compat extension
 
-  // Apply threshold after relationship resolution
+  // Threshold is applied after relationship logic so implied detections can still
+  // contribute when they clear confidence policy.
   found = found.filter((d) => (d.confidence || 0) >= minConfidence);
 
   // Stable order (confidence desc, slug asc)
@@ -71,6 +83,7 @@ function detectTechnologies(db, signals, options = {}) {
   return found;
 }
 
+// --- Matcher execution and aggregation helpers ---
 function runMatcher(detections, matcherFn, db, signals) {
   try {
     const matches = matcherFn(db, signals);
@@ -93,7 +106,7 @@ function runMatcher(detections, matcherFn, db, signals) {
         evidence: [],
       };
 
-      // Aggregate confidence across matchers (bounded [0,100])
+      // Probabilistic OR keeps confidence bounded while rewarding multiple independent signals.
       existing.confidence = aggregateConfidence(existing.confidence, incomingConf);
 
       // Prefer version from the single strongest evidence match

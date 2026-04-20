@@ -12,9 +12,15 @@
  * - string "tech"
  * - array ["tech1", "tech2"]
  * - or strings containing directives e.g. "tech\\;confidence:80"
+ *
+ * @param {Array<object>} detections - Current detection candidates
+ * @param {object} db - Technology database containing implies relationships
+ * @returns {Array<object>} Detection list with implied technologies merged in
  */
 
 const { compilePattern } = require("../compilePattern");
+// NOTE: compilePattern is intentionally unused in this module.
+// Implies values are parsed as `slug;directive` strings, not regex patterns.
 
 function resolveImplies(detections, db) {
   if (!Array.isArray(detections) || !db?.technologies) return detections || [];

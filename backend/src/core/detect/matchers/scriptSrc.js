@@ -1,6 +1,13 @@
 // backend/src/core/detect/matchers/scriptSrc.js
 const { compilePattern } = require("../compilePattern");
 
+/**
+ * Matches technology rules against script source URL signals.
+ *
+ * @param {object} db - Technology database and matcher index
+ * @param {object} signals - Normalized analysis signals
+ * @returns {Array<object>} Candidate detections from script source URL evidence
+ */
 function matchScriptSrc(db, signals) {
   const scriptSrc = Array.isArray(signals?.scriptSrc) ? signals.scriptSrc : [];
   if (scriptSrc.length === 0) return [];

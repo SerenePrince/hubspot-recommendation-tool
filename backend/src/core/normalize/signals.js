@@ -26,6 +26,10 @@ const { URL } = require("node:url");
  *
  * Additional internal signal used by matchers:
  * - scripts (inline + fetched, bounded)
+ *
+ * @param {object} fetchResult - Output of Phase 2 fetch including html/headers/external assets
+ * @param {object} [options] - Optional caps to constrain normalized signal sizes
+ * @returns {object} Normalized signal object consumed by detection matchers
  */
 function buildSignals(fetchResult, options = {}) {
   const {
@@ -113,11 +117,13 @@ function buildSignals(fetchResult, options = {}) {
   };
 }
 
+// --- Normalization primitives ---
 function capText(s, maxChars) {
   const t = typeof s === "string" ? s : "";
   return t.length > maxChars ? t.slice(0, maxChars) : t;
 }
 
+// --- URL and header-derived signals ---
 function normalizeUrl(raw) {
   if (!raw || typeof raw !== "string") return "";
   try {
@@ -170,6 +176,7 @@ function extractUrlParams(url, maxPairs) {
   }
 }
 
+// --- Cookie parsing (name-only policy) ---
 function parseSetCookie(setCookieHeader) {
   if (!setCookieHeader) return [];
   if (Array.isArray(setCookieHeader)) {
@@ -187,6 +194,7 @@ function getCookieName(cookieLine) {
   return firstPart.slice(0, idx).trim();
 }
 
+// --- DOM extraction helpers ---
 function extractMeta($) {
   const meta = {};
 

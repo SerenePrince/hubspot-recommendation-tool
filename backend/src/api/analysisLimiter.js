@@ -13,6 +13,9 @@ const { serviceUnavailable } = require("../core/errors");
  * Design:
  * - Limit concurrent executions
  * - Optional bounded queue to smooth small bursts
+ *
+ * @param {{maxConcurrent: number, maxQueued: number}} param0 - Concurrency and queue caps
+ * @returns {{acquire: () => Promise<Function>, stats: () => {inFlight: number, queued: number}}} Limiter instance
  */
 
 function createLimiter({ maxConcurrent, maxQueued }) {
@@ -25,6 +28,8 @@ function createLimiter({ maxConcurrent, maxQueued }) {
       return release;
     }
 
+    // Reject immediately once queue is full so requests fail fast instead of
+    // accumulating unbounded memory and latency under sustained load.
     if (queue.length >= maxQueued) {
       throw serviceUnavailable(
         "ANALYZE_OVERLOADED",

@@ -3,6 +3,13 @@
 // Enhances detections with taxonomy and human-friendly metadata from the tech DB.
 // Kept intentionally lightweight: description + website + icon are enough for UI.
 
+/**
+ * Enriches raw detections with taxonomy and presentation metadata from the tech DB.
+ *
+ * @param {object} db - Loaded technology database with categories and groups
+ * @param {Array<object>} detections - Raw detection records from Phase 4
+ * @returns {Array<object>} Detections augmented with description/icon/category/group info
+ */
 function enrichDetections(db, detections) {
   const techBySlug = db?.technologies || {};
   const techByName = db?.technologiesByName || techBySlug;

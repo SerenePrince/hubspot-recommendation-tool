@@ -11,11 +11,21 @@
  * Production hardening:
  * - Memoized to avoid recompiling thousands of regexes per request
  * - Bounded cache size to prevent unbounded memory growth
+ *
+ * Wappalyzer rules frequently append directives to regex text (confidence/version)
+ * using escaped semicolon syntax. We must split directives before compiling regex
+ * or they become invalid pattern text and silently reduce detection quality.
  */
 
 const CACHE_MAX = 50_000;
 const cache = new Map(); // rawPattern -> compiled|null
 
+/**
+ * Compiles a Wappalyzer-style pattern string into regex + directives.
+ *
+ * @param {string|number|null|undefined} pattern - Raw vendor pattern (regex plus optional directives)
+ * @returns {{re: RegExp, confidence: number, version?: string}|null} Compiled matcher metadata, or null for invalid rules
+ */
 function compilePattern(pattern) {
   if (pattern == null) return null;
 
@@ -34,6 +44,7 @@ function compilePattern(pattern) {
   return compiled;
 }
 
+// --- Internal parsing helpers ---
 function compilePatternUncached(raw) {
   const parts = splitDirectives(raw);
   const patternPart = parts.shift() ?? "";

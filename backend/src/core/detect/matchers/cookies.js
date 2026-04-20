@@ -1,6 +1,14 @@
 // backend/src/core/detect/matchers/cookies.js
 const { compilePattern } = require("../compilePattern");
 
+/**
+ * Matches technology cookie rules against normalized cookie-name signals.
+ * Cookie values are intentionally not inspected in this pipeline.
+ *
+ * @param {object} db - Technology database and matcher index
+ * @param {object} signals - Normalized analysis signals
+ * @returns {Array<object>} Candidate detections from cookie evidence
+ */
 function matchCookies(db, signals) {
   const cookies = Array.isArray(signals?.cookies) ? signals.cookies : [];
   if (cookies.length === 0) return [];

@@ -57,6 +57,11 @@ function normalizeAndValidateUrl(raw) {
  * - url (required)
  * - pretty=1
  * - includeMeta=1
+ *
+ * @param {import("node:http").IncomingMessage} _req - Raw incoming request object (unused)
+ * @param {import("node:http").ServerResponse} res - Response writer
+ * @param {URL} requestUrl - Parsed request URL with query params
+ * @returns {Promise<void>} Resolves after response is written
  */
 async function handleAnalyze(_req, res, requestUrl) {
   const pretty = isTruthy(requestUrl.searchParams.get("pretty"));

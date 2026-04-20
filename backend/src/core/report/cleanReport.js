@@ -239,6 +239,13 @@ function buildTopRecommendations(recommendations, max = 5) {
     }));
 }
 
+/**
+ * Converts internal analyzer output into a stable, frontend-facing response shape.
+ *
+ * @param {object} report - Internal report from `analyzeUrl()`
+ * @param {{ includeMeta?: boolean }} [options] - Whether to include fetch/timing metadata
+ * @returns {object} API-friendly payload with technologies, recommendations, and summary
+ */
 function buildSimpleReport(report, options = {}) {
   const { includeMeta = false } = options;
 
@@ -305,6 +312,12 @@ function buildSimpleReport(report, options = {}) {
   return payload;
 }
 
+/**
+ * Builds the clean report with metadata included by default.
+ *
+ * @param {object} report - Internal report from `analyzeUrl()`
+ * @returns {object} Clean report payload including `meta.fetch` and `meta.timings`
+ */
 function buildCleanReport(report) {
   return buildSimpleReport(report, { includeMeta: true });
 }

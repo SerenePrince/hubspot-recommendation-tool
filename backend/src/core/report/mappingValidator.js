@@ -2,6 +2,13 @@
 
 const ALLOWED_PRIORITIES = new Set(["high", "medium", "low"]);
 
+/**
+ * Validates recommendation mapping structure before it is used by recommendation building.
+ * This runs when the mapping file is loaded (not per request loop over detections).
+ *
+ * @param {object} mapping - Parsed mapping JSON object
+ * @returns {{ok: boolean, errors: string[]}} Validation result with accumulated errors
+ */
 function validateMapping(mapping) {
   const errors = [];
 

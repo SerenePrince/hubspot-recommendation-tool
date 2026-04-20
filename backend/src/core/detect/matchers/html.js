@@ -1,6 +1,13 @@
 // backend/src/core/detect/matchers/html.js
 const { compilePattern } = require("../compilePattern");
 
+/**
+ * Matches technology rules against full normalized HTML content.
+ *
+ * @param {object} db - Technology database and matcher index
+ * @param {object} signals - Normalized analysis signals
+ * @returns {Array<object>} Candidate detections from HTML evidence
+ */
 function matchHtml(db, signals) {
   const html = typeof signals?.html === "string" ? signals.html : "";
   if (!html) return [];

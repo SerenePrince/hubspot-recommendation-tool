@@ -108,6 +108,7 @@ function resolveUrls(urls, baseUrl) {
   return uniq(out);
 }
 
+// --- Low-level fetch primitive with redirect-aware safety checks ---
 /**
  * Fetch a single resource with SSRF checks per hop and a deadline.
  * Returns { finalUrl, status, statusText, headers, contentType, bytes, body }
@@ -152,7 +153,8 @@ async function fetchResource(resourceUrl, { deadlineMs, accept, userAgent, maxBy
       });
     }
 
-    // SSRF: validate host for every hop (including redirects).
+    // SSRF checks must run on every hop because redirects can change hostname
+    // after an initially safe URL is accepted.
     await assertPublicHost(urlObj.hostname);
 
     const controller = new AbortController();
@@ -191,7 +193,8 @@ async function fetchResource(resourceUrl, { deadlineMs, accept, userAgent, maxBy
       clearTimeout(timeoutId);
     }
 
-    // Manual redirect handling so we can SSRF-check each hop.
+    // Manual redirect handling is intentional: automatic follow would skip our
+    // per-hop host validation guarantees.
     if ([301, 302, 303, 307, 308].includes(res.status) && res.headers.get("location")) {
       if (redirects === maxRedirects) {
         throw new AppError({
@@ -261,6 +264,11 @@ async function fetchResource(resourceUrl, { deadlineMs, accept, userAgent, maxBy
  *
  * Boundaries here are intentionally strict (timeouts, redirect caps, byte caps, and
  * best-effort failures) so this endpoint remains safe to expose behind auth.
+ *
+ * @param {string} inputUrl - Target URL submitted by the user
+ * @param {object} [options] - Optional runtime overrides for timeout and resource bounds
+ * @returns {Promise<object>} Normalized fetch artifacts used by Phase 3 signal building
+ * @throws {Error} AppError variants for invalid URL, blocked host, timeout, oversize response, or fetch failure
  */
 async function fetchPage(inputUrl, options = {}) {
   const {
@@ -305,7 +313,8 @@ async function fetchPage(inputUrl, options = {}) {
   const html = page.body || "";
   const baseUrl = page.finalUrl;
 
-  // Best-effort: fetch external scripts + stylesheets referenced by the page
+  // Pulling some external assets improves detection coverage, but we keep strict
+  // byte/count/concurrency limits so this never behaves like a crawler.
   // (keeps matchers effective while bounding latency and bytes).
   const ext = extractExternalResources(html);
 

@@ -1,5 +1,11 @@
 import React from "react";
 
+/**
+ * Renders analysis output as a table for Inbox users.
+ *
+ * @param {{urlAnalysisData: object|null, hasAttemptedAnalysis: boolean}} props - Report payload and interaction state
+ * @returns {JSX.Element|null} Report UI or null when no analysis was attempted yet
+ */
 export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
   if (!hasAttemptedAnalysis) return null;
 

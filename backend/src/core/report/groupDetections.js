@@ -1,9 +1,21 @@
 // backend/src/core/report/groupDetections.js
 
+/**
+ * Groups detections into top-level report buckets.
+ *
+ * @param {Array<object>} detections - Enriched detection list
+ * @returns {Record<string, Array<object>>} Detections grouped by group name
+ */
 function groupDetections(detections) {
   return groupDetectionsByGroup(detections);
 }
 
+/**
+ * Groups detections by taxonomy group name with deterministic item ordering.
+ *
+ * @param {Array<object>} detections - Enriched detection list
+ * @returns {Record<string, Array<object>>} Group-name to detection array map
+ */
 function groupDetectionsByGroup(detections) {
   const out = {};
 

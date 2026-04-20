@@ -5,10 +5,22 @@ const { validateMapping } = require("./mappingValidator");
 
 let cachedMapping = null;
 
+/**
+ * Returns the default absolute path for the HubSpot recommendation mapping file.
+ *
+ * @returns {string} Absolute mapping JSON path
+ */
 function getDefaultMappingPath() {
   return path.resolve(__dirname, "../../../data/alternatives/hubspot-mapping.json");
 }
 
+/**
+ * Loads and validates recommendation mapping JSON once per process.
+ * Invalid or missing mapping intentionally degrades to an empty mapping so analysis can still succeed.
+ *
+ * @param {string} [mappingPath] - Optional override path to mapping file
+ * @returns {object} Parsed mapping object (or `{}` fallback)
+ */
 function ensureMappingLoaded(mappingPath) {
   if (cachedMapping) return cachedMapping;
 
@@ -61,6 +73,16 @@ function recKey(rec) {
   return `${(rec.title || "").trim().toLowerCase()}||${(rec.hubspotProduct || "").trim().toLowerCase()}`;
 }
 
+/**
+ * Builds HubSpot recommendations from enriched detections using configurable mapping triggers.
+ *
+ * Mapping supports technology, category, and group triggers so teams can maintain
+ * recommendations at taxonomy level (broader coverage) instead of per-tech-only rules.
+ *
+ * @param {Array<object>} detections - Enriched detections from report phase
+ * @param {{ mappingPath?: string, minConfidence?: number }} [options] - Mapping path and threshold overrides
+ * @returns {Array<object>} Ranked, deduplicated recommendation list with trigger traceability
+ */
 function buildRecommendations(detections, options = {}) {
   const { mappingPath, minConfidence = 50 } = options;
   const mapping = ensureMappingLoaded(mappingPath);
@@ -81,6 +103,8 @@ function buildRecommendations(detections, options = {}) {
     }
   };
 
+  // Category/group triggers are intentionally supported because mapping every single
+  // technology is brittle; taxonomy-level rules cover more cases with less maintenance.
   // Mapping supports multiple trigger shapes for flexibility:
   // - byTechnology: exact match on detection name/slug
   // - byCategory/byCategoryId: match on taxonomy categories

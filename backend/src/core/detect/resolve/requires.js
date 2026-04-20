@@ -9,6 +9,10 @@
  * - string: "jquery"
  * - array: ["jquery", "wordpress"]
  * - or combined rules in a string; we support splitting by comma.
+ *
+ * @param {Array<object>} detections - Current detection candidates
+ * @param {object} db - Technology database containing requires relationships
+ * @returns {Array<object>} Detections that satisfy all declared prerequisites
  */
 
 function resolveRequires(detections, db) {

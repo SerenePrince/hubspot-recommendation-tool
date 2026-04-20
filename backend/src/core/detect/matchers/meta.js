@@ -1,6 +1,13 @@
 // backend/src/core/detect/matchers/meta.js
 const { compilePattern } = require("../compilePattern");
 
+/**
+ * Matches technology meta-tag rules against normalized meta key/value signals.
+ *
+ * @param {object} db - Technology database and matcher index
+ * @param {object} signals - Normalized analysis signals
+ * @returns {Array<object>} Candidate detections from meta tag evidence
+ */
 function matchMeta(db, signals) {
   const meta = signals?.meta && typeof signals.meta === "object" ? signals.meta : {};
   const out = [];

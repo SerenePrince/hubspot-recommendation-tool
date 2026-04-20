@@ -76,6 +76,7 @@ function sendRateLimited(res, retryAfterSeconds, pretty) {
   res.end(pretty ? JSON.stringify(payload, null, 2) : JSON.stringify(payload));
 }
 
+// --- Route matching helpers ---
 function getPretty(requestUrl) {
   const v = requestUrl.searchParams.get("pretty");
   return v === "1" || v === "true";
@@ -89,6 +90,7 @@ function isAnalyzePath(pathname) {
   return pathname === "/analyze" || pathname === "/api/analyze";
 }
 
+// --- Request logging ---
 function logRequest(req, res, requestUrl, requestId, startMs) {
   if (!config.logging.requestLog) return;
 
@@ -108,6 +110,7 @@ function logRequest(req, res, requestUrl, requestId, startMs) {
 }
 
 // Best-effort in-memory limiter for failed auth attempts.
+// This protects a single process; distributed deployments should add edge-level limits too.
 const authRateLimiter = createRateLimiter(
   config.auth && config.auth.rateLimit ? config.auth.rateLimit : undefined
 );
@@ -146,7 +149,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // Parse URL safely using the incoming Host header as the base.
+    // Parse URL using Host header so relative request paths can be handled uniformly.
     requestUrl = new URL(req.url || "/", `http://${host}`);
     pretty = getPretty(requestUrl);
 
@@ -280,6 +283,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+// --- Server hardening and lifecycle ---
 // Production-safe HTTP timeouts / limits.
 server.requestTimeout = config.http.requestTimeoutMs;
 server.headersTimeout = config.http.headersTimeoutMs;

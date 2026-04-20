@@ -13,6 +13,8 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
  * - expose loading + error state to the UI
  * - keep the latest successful result cached for consumers
  * - cancel in‑flight requests when a new one starts
+ *
+ * @returns {{analyzeUrl: (url: string) => Promise<object|null>, loading: boolean, errorMessage: string|null, result: object|null}} Hook API for analysis requests
  */
 export function useWebsiteAnalysis() {
   const [loading, setLoading] = useState(false);

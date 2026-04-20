@@ -1,5 +1,6 @@
 const path = require("path");
 
+// --- Environment coercion helpers ---
 function num(v, fallback) {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
@@ -17,6 +18,8 @@ function bool(v, fallback = false) {
   return fallback;
 }
 
+// --- Centralized runtime configuration ---
+// Parse once at process startup so all modules share consistent defaults and coercion behavior.
 const config = {
   port: num(process.env.PORT, 3001),
 

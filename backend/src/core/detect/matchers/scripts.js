@@ -1,6 +1,13 @@
 // backend/src/core/detect/matchers/scripts.js
 const { compilePattern } = require("../compilePattern");
 
+/**
+ * Matches technology rules against concatenated inline and fetched script bodies.
+ *
+ * @param {object} db - Technology database and matcher index
+ * @param {object} signals - Normalized analysis signals
+ * @returns {Array<object>} Candidate detections from JavaScript body evidence
+ */
 function matchScripts(db, signals) {
   const scripts = typeof signals?.scripts === "string" ? signals.scripts : "";
   if (!scripts) return [];

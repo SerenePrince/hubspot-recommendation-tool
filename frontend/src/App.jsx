@@ -4,6 +4,11 @@ import Footer from "./components/Footer";
 import UrlInput from "./components/UrlInput";
 import UrlReport from "./components/UrlReport";
 
+/**
+ * Top-level application shell that coordinates URL submission and report display.
+ *
+ * @returns {JSX.Element} Full app layout
+ */
 export default function App() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [hasAttemptedAnalysis, setHasAttemptedAnalysis] = useState(false);

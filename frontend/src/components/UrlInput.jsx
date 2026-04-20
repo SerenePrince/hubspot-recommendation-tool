@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { useWebsiteAnalysis } from "../hooks/useWebsiteAnalysis";
 
+/**
+ * Collects a URL, validates basic format, and triggers backend analysis.
+ *
+ * @param {{onAnalysisComplete?: (report: object) => void}} props - Callback invoked after successful analysis
+ * @returns {JSX.Element} URL input form
+ */
 export default function UrlInput({ onAnalysisComplete }) {
   const [urlInput, setUrlInput] = useState("");
   const [lastSubmittedUrl, setLastSubmittedUrl] = useState("");
@@ -21,6 +27,8 @@ export default function UrlInput({ onAnalysisComplete }) {
   }
 
   const validationError = validateUrl(urlInput);
+  // Prevent accidental duplicate submissions that would produce the same result
+  // while still allowing edits to re-enable submit.
   const isDuplicate = urlInput === lastSubmittedUrl;
   const isSubmitDisabled =
     loading || !urlInput.trim() || Boolean(validationError) || isDuplicate;
