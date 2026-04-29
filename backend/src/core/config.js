@@ -23,6 +23,8 @@ function bool(v, fallback = false) {
 const config = {
   port: num(process.env.PORT, 3001),
 
+  // Resolved from process working directory at startup.
+  // Default is relative to backend/ when run via npm scripts; override with an absolute path in Docker.
   dataRoot: path.resolve(
     process.cwd(),
     str(process.env.DATA_ROOT, "./data/vendor/webappanalyzer/src"),
@@ -51,7 +53,7 @@ const config = {
     // Typically you enable this in production (SERVE_STATIC=1) and point STATIC_DIST_DIR
     // at the Vite build output directory.
     enabled: bool(process.env.SERVE_STATIC, false),
-    // Path (relative to repo root / cwd) to Vite build output.
+    // Path to built frontend assets; resolved from process working directory at startup.
     distDir: path.resolve(process.cwd(), str(process.env.STATIC_DIST_DIR, "./public")),
     // Basic caching: in production, immutable hashed assets can be cached longer.
     // (index.html is always served with no-store.)
