@@ -18,10 +18,6 @@
  * @returns {Array<object>} Detection list with implied technologies merged in
  */
 
-const { compilePattern } = require("../compilePattern");
-// NOTE: compilePattern is intentionally unused in this module.
-// Implies values are parsed as `slug;directive` strings, not regex patterns.
-
 function resolveImplies(detections, db) {
   if (!Array.isArray(detections) || !db?.technologies) return detections || [];
 
@@ -64,9 +60,6 @@ function normalizeImplies(v) {
     const s = String(item || "").trim();
     if (!s) continue;
 
-    // Reuse compilePattern directive parser:
-    // We feed it a "pattern" that we don't intend to use as regex; we only want directives.
-    // But compilePattern expects a regex. So we parse ourselves:
     const parsed = parseImpliesString(s);
     if (parsed) out.push(parsed);
   }

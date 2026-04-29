@@ -1,4 +1,5 @@
 # Exported from Render on 2026-04-08T13:30:05Z
+# NOTE: Update the repo URL below to point to your fork before connecting this service in Render.
 version: "1"
 services:
   - type: web
@@ -10,9 +11,11 @@ services:
     envVars:
       - key: PORT
         sync: false
-      - key: AUTH_PASSWORD
+      - key: AUTH_ENABLED
         sync: false
       - key: AUTH_USERNAME
+        sync: false
+      - key: AUTH_PASSWORD
         sync: false
     region: oregon
     dockerContext: .

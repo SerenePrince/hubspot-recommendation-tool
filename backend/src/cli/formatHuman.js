@@ -67,7 +67,7 @@ function formatHuman(report, options = {}) {
   if (summary && typeof summary === "object") {
     lines.push(section("Summary"));
     const totals = summary.totals && typeof summary.totals === "object" ? summary.totals : {};
-    lines.push(kvLine("Technologies detected", String(totals.detections ?? technologies.length)));
+    lines.push(kvLine("Technologies detected", String(totals.detections ?? totals.technologiesDetected ?? technologies.length)));
     lines.push(kvLine("Groups", String(totals.groups ?? "n/a")));
     lines.push(kvLine("Categories", String(totals.categories ?? "n/a")));
     lines.push("");

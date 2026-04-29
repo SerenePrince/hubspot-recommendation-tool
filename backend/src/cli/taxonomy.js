@@ -26,7 +26,7 @@ async function main() {
       name: c.name ?? null,
       groups: Array.isArray(c.groups) ? c.groups.map(String) : [],
     }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
 
   const groups = Object.entries(db.groupsById || {})
     .map(([id, g]) => ({
@@ -34,7 +34,7 @@ async function main() {
       name: g.name ?? null,
       // If vendor adds extra fields we ignore them here
     }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
 
   const payload = { categories, groups, meta: db.meta || null };
 
