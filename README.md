@@ -25,7 +25,7 @@ Inbox previously did this work manually during client discovery. This tool reduc
 - Backend: vanilla Node.js HTTP server, no Express (`backend/`)
 - Detection data: local WebAppAnalyzer/Wappalyzer-style dataset (`backend/data/vendor/webappanalyzer/src`)
 - Deployment: root `Dockerfile`, `docker-compose.yml`, and `render.yaml`
-- Local runtime requirement (non-Docker): Node.js `>=20`
+- Local runtime requirement (non-Docker): Node.js `>=20.12` (for `--env-file-if-exists` in dev scripts)
 
 ## Run Locally With Docker (5 Steps)
 

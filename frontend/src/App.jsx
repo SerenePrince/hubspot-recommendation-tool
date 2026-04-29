@@ -31,7 +31,7 @@ export default function App() {
             </b>
           </h1>
           <p>
-            Generate a concise report detailing the tech-stack of any given
+            Generate a concise report detailing the tech stack of any given
             website, highlighting technologies and services that HubSpot offers
             alternatives for.
           </p>

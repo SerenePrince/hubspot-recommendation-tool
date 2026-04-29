@@ -4,7 +4,7 @@ This guide is for developers who need to run, debug, and extend the HubSpot Reco
 
 ## Prerequisites
 
-- Node.js `>=20` (enforced in `backend/package.json`)
+- Node.js `>=20.12` (required for `--env-file-if-exists` used by local dev scripts; `>=20` is the package minimum but `20.12+` is strongly recommended)
 - npm
 - Docker (for integrated local/prod-parity runs)
 
@@ -14,7 +14,7 @@ This guide is for developers who need to run, debug, and extend the HubSpot Reco
 
 ```bash
 cd backend
-cp .env.example .env
+cp .env.example .env   # creates local env config — loaded automatically by npm scripts via --env-file-if-exists
 npm install
 npm run dev
 ```

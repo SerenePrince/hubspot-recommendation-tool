@@ -51,5 +51,5 @@ services:
       retries: 3
       start_period: 20s
 
-    init: true
+    # dumb-init in the Dockerfile ENTRYPOINT handles signal forwarding and zombie reaping.
     restart: unless-stopped

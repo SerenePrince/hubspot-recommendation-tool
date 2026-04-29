@@ -18,7 +18,7 @@ RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit
 
 
 # ---------- Stage 3: runtime image ----------
-FROM node:24-alpine
+FROM node:24-alpine AS runtime
 WORKDIR /app
 
 RUN apk add --no-cache dumb-init
@@ -31,6 +31,8 @@ COPY --chown=node:node backend/data ./backend/data
 # Frontend build output
 COPY --from=frontend-build --chown=node:node /frontend/dist ./frontend/dist
 
+# AUTH_ENABLED defaults to 0 so the image works out-of-the-box in development.
+# Override to 1 (with AUTH_USERNAME + AUTH_PASSWORD) for any networked deployment.
 ENV NODE_ENV=production \
     PORT=3001 \
     REQUEST_LOG=1 \

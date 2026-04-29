@@ -7,19 +7,19 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "node src/api/server.js",
-    "dev:api": "node src/api/server.js",
+    "dev": "node --env-file-if-exists=.env src/api/server.js",
+    "dev:api": "node --env-file-if-exists=.env src/api/server.js",
     "prestart": "npm run validate-config",
     "start": "node src/api/server.js",
 
-    "cli": "node src/cli/index.js",
-    "cli:help": "node src/cli/index.js --help",
-    "cli:human": "node src/cli/index.js --format human",
-    "cli:pretty": "node src/cli/index.js --format json-pretty",
-    "cli:tax": "node src/cli/taxonomy.js",
+    "cli": "node --env-file-if-exists=.env src/cli/index.js",
+    "cli:help": "node --env-file-if-exists=.env src/cli/index.js --help",
+    "cli:human": "node --env-file-if-exists=.env src/cli/index.js --format human",
+    "cli:pretty": "node --env-file-if-exists=.env src/cli/index.js --format json-pretty",
+    "cli:tax": "node --env-file-if-exists=.env src/cli/taxonomy.js",
 
-    "smoke": "node src/scripts/smokeTest.js",
-    "validate-config": "node src/scripts/validateConfig.js",
+    "smoke": "node --env-file-if-exists=.env src/scripts/smokeTest.js",
+    "validate-config": "node --env-file-if-exists=.env src/scripts/validateConfig.js",
     "update:techdb": "bash src/scripts/update-webappanalyzer-db.sh",
 
     "test": "jest",
