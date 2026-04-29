@@ -57,7 +57,6 @@ async function loadTechDb(options = {}) {
     }
   }
 
-  // Backward-compatible alias used by other modules
   const technologiesByName = technologies;
 
   // A lightweight index can be useful for future optimization; keep it deterministic.

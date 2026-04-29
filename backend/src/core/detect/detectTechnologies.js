@@ -16,7 +16,7 @@ const { resolveImplies } = require("./resolve/implies");
 const { resolveExcludes } = require("./resolve/excludes");
 
 /**
- * Phase 4 (Technical Report): detect technologies by matching patterns across 10 matcher types.
+ * Phase 4 (Technology Detection): detect technologies by matching patterns across 10 matcher types.
  *
  * Report invariants:
  * - Each matcher yields confidence 0..100

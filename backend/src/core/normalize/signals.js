@@ -3,7 +3,7 @@ const cheerio = require("cheerio");
 const { URL } = require("node:url");
 
 /**
- * Phase 3 (report): Signal Normalization
+ * Phase 3 (Signal Normalization)
  *
  * Transform raw fetch artifacts into searchable, standardized signals.
  *

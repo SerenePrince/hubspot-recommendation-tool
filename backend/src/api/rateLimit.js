@@ -80,7 +80,7 @@ function createRateLimiter(opts) {
 
     s.lastSeen = n;
 
-    // If previous window expired, reset window
+    // Failure window elapsed; start a new one
     if (!s.firstAt || (n - s.firstAt) > windowMs) {
       s.firstAt = n;
       s.count = 1;
