@@ -129,10 +129,7 @@ function formatHuman(report, options = {}) {
     if (cats) lines.push(kvLine("Categories", cats));
     if (groups) lines.push(kvLine("Groups", groups));
 
-    const replacement = formatProductsForTech(techToHubSpotProducts, tech.name, tech.slug, {
-      maxProducts: 5,
-      style: "arrow",
-    });
+    const replacement = resolveReplacement(tech, techToHubSpotProducts, String(tech.name || tech.slug || ""), { maxProducts: 5 });
     if (replacement) lines.push(kvLine("HubSpot Replacement", replacement));
 
     lines.push("");
@@ -192,10 +189,10 @@ function formatHuman(report, options = {}) {
         .slice(0, 3)
         .join(", ");
 
-      const replacement = formatProductsForTech(techToHubSpotProducts, name, t?.slug, {
-        maxProducts: 2,
-        style: "arrow",
-      });
+      // Prefer the pre-computed hubspot.products from the clean report (covers all trigger
+      // types including category-triggered). Fall back to the recommendations-derived map
+      // for raw report format which doesn't carry hubspot.products.
+      const replacement = resolveReplacement(t, techToHubSpotProducts, name);
 
       if (replacement) mappedCount += 1;
       else if (unmappedNames.length < 8 && name !== "Unknown") unmappedNames.push(name);
@@ -291,13 +288,25 @@ function inspectTechnology(technologies, recommendations, inspect) {
 
   const keyCandidates = new Set([String(tech.name || "").trim(), String(tech.slug || "").trim()]);
 
+  // Match technology-triggered recs by exact name/slug, and category-triggered recs
+  // by checking whether this technology belongs to the matched category.
+  const techCategoryNames = new Set(
+    (Array.isArray(tech.categories) ? tech.categories : [])
+      .map((c) => String(c?.name || "").trim())
+      .filter(Boolean)
+  );
+
   const recs = (recommendations || []).filter((rec) => {
     const triggers = Array.isArray(rec?.triggeredBy) ? rec.triggeredBy : [];
-    return triggers.some(
-      (t) =>
-        t?.triggerType === "technology" &&
-        keyCandidates.has(String(t?.key || t?.matched || "").trim())
-    );
+    return triggers.some((t) => {
+      if (t?.triggerType === "technology") {
+        return keyCandidates.has(String(t?.key || t?.matched || "").trim());
+      }
+      if (t?.triggerType === "category") {
+        return techCategoryNames.has(String(t?.key || "").trim());
+      }
+      return false;
+    });
   });
 
   return { tech, recs };
@@ -337,6 +346,26 @@ function prioRank(p) {
   if (v === "medium") return 1;
   if (v === "low") return 2;
   return 3;
+}
+
+/**
+ * Resolve the HubSpot replacement string for a technology row.
+ *
+ * Prefers the pre-computed `tech.hubspot.products` from the clean report, which covers
+ * all trigger types (technology and category). Falls back to the recommendations-derived
+ * map for raw report format where `hubspot.products` is absent.
+ */
+function resolveReplacement(tech, map, nameForFallback, opts = {}) {
+  const maxProducts = Number.isFinite(opts.maxProducts) ? Math.max(1, Math.floor(opts.maxProducts)) : 2;
+  const products = Array.isArray(tech?.hubspot?.products) ? tech.hubspot.products : [];
+
+  if (products.length) {
+    const shown = products.slice(0, maxProducts).map((p) => String(p?.hubspotProduct || "")).filter(Boolean);
+    const extra = products.length > maxProducts ? ` +${products.length - maxProducts}` : "";
+    return shown.join(" → ") + extra;
+  }
+
+  return formatProductsForTech(map, nameForFallback, tech?.slug, { maxProducts, style: "arrow" });
 }
 
 /**

@@ -18,6 +18,7 @@
     "cli:pretty": "node --env-file-if-exists=.env src/cli/index.js --format json-pretty",
     "cli:tax": "node --env-file-if-exists=.env src/cli/taxonomy.js",
 
+    "cli:check": "node src/scripts/cliCheck.js",
     "smoke": "node --env-file-if-exists=.env src/scripts/smokeTest.js",
     "validate-config": "node --env-file-if-exists=.env src/scripts/validateConfig.js",
     "update:techdb": "bash src/scripts/update-webappanalyzer-db.sh",

@@ -86,7 +86,9 @@ async function main() {
 
   if (!urlArg || urlArg === "help" || flags.has("--help") || flags.has("-h")) {
     printHelp();
-    process.exit(urlArg ? 0 : 1);
+    // Exit 0 when help was explicitly requested; exit 1 when no URL was provided at all.
+    const helpRequested = flags.has("--help") || flags.has("-h") || urlArg === "help";
+    process.exit(helpRequested ? 0 : 1);
   }
 
   const url = normalizeUrl(urlArg);
