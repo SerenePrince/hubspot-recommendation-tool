@@ -23,7 +23,8 @@ export default function App() {
         <div className="app__heading">
           <h1>
             <b>
-              HubSpot <span className="app__highlight">Marketing</span> Tool
+              HubSpot <span className="app__highlight">Recommendation</span>{" "}
+              Tool
             </b>
           </h1>
           <p>
