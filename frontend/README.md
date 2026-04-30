@@ -1,98 +1,95 @@
-# Frontend Documentation
+# Frontend
 
-This frontend is a React + Vite single-page application for Inbox staff. It collects a website URL, calls the backend analysis endpoint, and renders detected technologies with HubSpot replacement options.
+React + Vite SPA for Inbox staff. Enter a public website URL to detect its tech stack and see HubSpot replacement options.
 
-The frontend does not perform detection logic. It only handles user input, API request state, and presentation.
+The frontend performs no detection logic — it only handles user input, API request state, and table display.
 
-## How It Fits The System
-
-- User enters URL in `UrlInput`
-- `useWebsiteAnalysis` calls backend `GET /api/analyze`
-- `App` stores latest successful report
-- `UrlReport` renders technologies and mapped HubSpot products
-- In production, backend serves this built frontend and API from the same origin
-
-See `backend/docs/ARCHITECTURE.md` and `backend/docs/API.md` for backend details.
-
-## File Structure
-
-```text
-frontend/
-├── src/
-│   ├── App.jsx
-│   ├── main.jsx
-│   ├── index.css
-│   ├── hooks/
-│   │   └── useWebsiteAnalysis.js
-│   └── components/
-│       ├── Header.jsx
-│       ├── Footer.jsx
-│       ├── UrlInput.jsx
-│       └── UrlReport.jsx
-└── package.json
-```
-
-- `src/main.jsx`: React bootstrap and root mount guard
-- `src/App.jsx`: page layout and top-level state for analysis result
-- `src/hooks/useWebsiteAnalysis.js`: API lifecycle (`loading`, `errorMessage`, cancellation, latest `result`)
-- `src/components/UrlInput.jsx`: form input, client URL validation, submit handling
-- `src/components/UrlReport.jsx`: table output and no-result state
-- `src/components/Header.jsx`, `src/components/Footer.jsx`: static brand/footer UI
-- `src/index.css`: all styling and responsive behavior
-
-## Data Flow
-
-1. User types URL in `UrlInput`.
-2. `UrlInput` validates format (`http`/`https` only) before submit.
-3. On submit, `useWebsiteAnalysis.analyzeUrl(url)` runs:
-   - aborts any in-flight request
-   - sends `GET ${API_BASE_URL}/analyze?url=...&pretty=true`
-   - sets `loading` and `errorMessage`
-4. On success, `App` stores response in `analysisResult`.
-5. `UrlReport` reads `analysisResult.technologies` and renders:
-   - technology name
-   - category + description
-   - `tech.hubspot.products[*].hubspotProduct`
-
-## Local Development
+## How to Run (Local Dev)
 
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev        # starts Vite dev server on port 5173
 ```
 
-Frontend dev server is Vite. Run backend separately (see `backend/README.md` and `backend/docs/DEVELOPER_GUIDE.md`).
+Run the backend separately (see `backend/README.md`). The Vite dev server proxies `/api` to `http://localhost:3001` by default.
 
-## Environment Variables
+### Environment Variable
 
-- `VITE_API_URL` (optional)
-  - Type: string URL prefix
-  - Default: `/api`
-  - Used in: `src/hooks/useWebsiteAnalysis.js`
-  - Example:
+| Variable        | Default | Purpose                            |
+| --------------- | ------- | ---------------------------------- |
+| `VITE_API_URL`  | `/api`  | API base URL used by the fetch hook |
 
 ```bash
 VITE_API_URL=http://localhost:3001/api npm run dev
 ```
 
-If not set, requests go to `/api` on the same origin.
+## File Structure
 
-## Build And Production Integration
-
-- Build command:
-
-```bash
-npm run build
+```
+frontend/src/
+├── App.jsx                        — layout and top-level analysis state
+├── main.jsx                       — React root mount
+├── index.css                      — all styles (BEM, responsive)
+├── hooks/
+│   └── useWebsiteAnalysis.js      — fetch lifecycle, abort, loading/error state
+├── components/
+│   ├── UrlInput.jsx               — URL form, validation, submit handling
+│   ├── UrlReport.jsx              — 3-column results table
+│   ├── Header.jsx                 — static brand header
+│   └── Footer.jsx                 — static brand footer
+└── utils/
+    └── mapApiToTableData.js       — transforms API response into table rows
 ```
 
-- Output directory: `frontend/dist`
-- Root `Dockerfile` builds the frontend in a dedicated stage and copies `dist` to `/app/frontend/dist`
-- Backend serves static files when:
-  - `SERVE_STATIC=1`
-  - `STATIC_DIST_DIR=/app/frontend/dist` (Docker default)
+## API Response Shape (Relevant Fields)
 
-In integrated mode, frontend and API share origin and route prefixes:
+The table uses three columns. `mapApiToTableData` extracts only what is needed:
 
-- Frontend pages: `/...`
-- API endpoints: `/api/...` (and `/...` aliases for health/analyze)
+```jsonc
+// GET /api/analyze?url=https://example.com
+{
+  "ok": true,
+  "url": "https://example.com",
+  "finalUrl": "https://example.com/",
+  "technologies": [
+    {
+      "name": "React",
+      "description": "A JavaScript library for building user interfaces.",
+      "categories": [{ "id": 12, "name": "JavaScript frameworks" }],
+      "hubspot": {
+        "primaryProduct": "HubSpot CMS Hub",
+        "products": [
+          {
+            "hubspotProduct": "HubSpot CMS Hub",
+            "priority": "high",
+            "title": "Migrate to HubSpot CMS"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+Mapped to table rows:
+| Column             | Source field                              | Fallback                  |
+| ------------------ | ----------------------------------------- | ------------------------- |
+| Technology         | `tech.name` + `tech.categories[0].name`   | `"Unknown"`               |
+| Description        | `tech.description`                        | `"No description available"` |
+| HubSpot Replacement| `tech.hubspot.primaryProduct` + `products[0].title` | `"No direct replacement"` |
+
+## Constraints
+
+- Table always has exactly **3 columns**: Technology, Description, HubSpot Replacement.
+- Only the **primary HubSpot product** and its recommendation title are shown per row.
+- Input only accepts **https://** URLs.
+- Raw API data is never passed directly into components — always goes through `mapApiToTableData`.
+
+## Build
+
+```bash
+npm run build   # output: frontend/dist
+```
+
+In production, the backend serves `frontend/dist` as static files when `SERVE_STATIC=1`.
