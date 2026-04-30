@@ -38,20 +38,17 @@ export default function Footer() {
         </div>
 
         <div className="footer__right">
-          <div className="footer__links-right">
-            <a
-              href="https://www.inboxcommunications.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              inboxcommunications.com
-            </a>
-          </div>
-          <img
-            className="footer__logo-right"
-            src="/images/logo.svg"
-            alt="Inbox logo"
-          />
+          <a
+            href="https://www.inboxcommunications.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              className="footer__logo-right"
+              src="/images/logo.svg"
+              alt="Inbox Communications"
+            />
+          </a>
         </div>
       </div>
     </footer>

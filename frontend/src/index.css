@@ -116,6 +116,7 @@ body {
   font-size: 48px;
   max-width: 79%;
   margin: 0 auto 0.25rem;
+  white-space: nowrap;
 }
 .app__highlight {
   color: var(--acc1);
@@ -132,6 +133,7 @@ body {
   .app__heading h1 {
     font-size: 36px;
     max-width: 90%;
+    white-space: nowrap;
   }
   .app__heading p {
     font-size: 20px;
@@ -146,6 +148,7 @@ body {
   .app__heading h1 {
     font-size: 28px;
     max-width: 100%;
+    white-space: nowrap;
   }
   .app__heading p {
     font-size: 16px;
@@ -156,6 +159,7 @@ body {
 @media (max-width: 479px) {
   .app__heading h1 {
     font-size: 22px;
+    white-space: nowrap;
   }
   .app__heading p {
     font-size: 14px;
@@ -505,28 +509,50 @@ body {
 .header {
   display: flex;
   justify-content: center;
+  align-items: center;
   background-color: var(--hdft);
-  min-height: 80px;
+  min-height: 72px;
+  padding: 0 24px;
   box-shadow: 0px 4px 15px 5px #00000040;
 }
 
 .header__logo {
-  max-width: 150px;
+  max-width: 140px;
+}
+
+@media (max-width: 1023px) {
+  .header {
+    min-height: 64px;
+    padding: 0 20px;
+  }
+  .header__logo {
+    max-width: 125px;
+  }
+}
+
+@media (max-width: 767px) {
+  .header {
+    min-height: 58px;
+  }
+  .header__logo {
+    max-width: 115px;
+  }
 }
 
 @media (max-width: 479px) {
   .header {
-    min-height: 60px;
+    min-height: 50px;
+    padding: 0 16px;
   }
   .header__logo {
-    max-width: 110px;
+    max-width: 100px;
   }
 }
 
 /* ─── Footer (BEM) ─────────────────────────────────────────────── */
 .footer {
   background-color: var(--hdft);
-  padding: 21px 20.8%;
+  padding: 14px 20.8%;
   box-shadow: 0px -4px 15px 5px #00000023;
 }
 
@@ -563,25 +589,20 @@ body {
 
 .footer__center h5 {
   margin: 0;
+  white-space: nowrap;
 }
 
 .footer__right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-}
-
-.footer__links-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  margin-right: 16px;
+  gap: 0;
 }
 
 .footer__logo-right {
   max-width: 120px;
-  padding-left: 15px;
-  border-left: 1px solid var(--app-bg);
+  padding-left: 0;
+  border-left: none;
 }
 
 .footer a {
@@ -594,63 +615,57 @@ body {
   text-decoration: underline;
 }
 
+/* Single-column stack at 1023px — same breakpoint as padding change,
+   prevents the side columns from crowding the narrow center cell. */
 @media (max-width: 1023px) {
   .footer {
-    padding-left: 8%;
-    padding-right: 8%;
-  }
-}
-
-@media (max-width: 767px) {
-  .footer {
-    padding: 20px 5%;
+    padding: 14px 8%;
   }
   .footer__content {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    align-items: start;
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .footer__left {
+    order: 1;
+    justify-content: center;
+  }
+  .footer__right {
+    order: 2;
+    justify-content: center;
+    flex-direction: row-reverse;
+    gap: 12px;
   }
   .footer__center {
-    grid-column: 1 / -1;
     order: 3;
-    margin-top: 12px;
+    justify-content: center;
+    text-align: center;
+  }
+  .footer__links-right {
+    margin-right: 0;
+    align-items: flex-start;
+  }
+  .footer__logo-right {
+    border-left: none;
+    padding-left: 0;
+    padding-right: 15px;
   }
   .footer a {
     font-size: 14px;
   }
 }
 
+@media (max-width: 767px) {
+  .footer {
+    padding: 14px 5%;
+  }
+}
+
 @media (max-width: 479px) {
-  .footer__content {
-    grid-template-columns: 1fr;
-    align-items: center;
-  }
-  .footer__left,
-  .footer__right {
-    justify-content: center;
-  }
-  .footer__right {
-    flex-direction: row-reverse;
-    gap: 12px;
-  }
-  .footer__links-right {
-    margin-right: 0;
-    align-items: flex-start;
-  }
-  .footer__center {
-    justify-content: center;
-    text-align: center;
-  }
   .footer__logo-left,
   .footer__logo-right {
     max-width: 60px;
-  }
-  .footer__logo-right {
-    border-left: none;
-    padding-left: 0;
-    padding-right: 15px;
-    border-right: 1px solid var(--app-bg);
   }
   .footer a {
     font-size: 13px;
