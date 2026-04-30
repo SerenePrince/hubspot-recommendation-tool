@@ -11,6 +11,9 @@
 const { ensureMappingLoaded, getDefaultMappingPath } = require("./recommendations");
 
 const asArray = (v) => (Array.isArray(v) ? v : []);
+
+// Strip markdown link syntax from vendor dataset names: [text](url) → text
+const sanitizeName = (name) => String(name || "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").trim();
 const slimTaxonomy = (items) => asArray(items).map((x) => ({ id: x.id, name: x.name }));
 const slimGroupItem = (d) => ({
   name: d.name,
@@ -128,13 +131,35 @@ function cleanRecommendations(recs) {
   return out;
 }
 
+function addToProductsIndex(index, techName, product, rank, rec, recIndex) {
+  if (!index.has(techName)) index.set(techName, new Map());
+
+  const productMap = index.get(techName);
+
+  if (!productMap.has(product)) {
+    productMap.set(product, {
+      hubspotProduct: product,
+      bestPriorityRank: rank,
+      priority: rec.priority,
+      firstSeen: recIndex,
+      description: rec.description ?? null,
+      title: rec.title ?? null,
+    });
+  } else {
+    const meta = productMap.get(product);
+    meta.bestPriorityRank = Math.min(meta.bestPriorityRank, rank);
+    meta.firstSeen = Math.min(meta.firstSeen, recIndex);
+    if (rank < prioRank(meta.priority)) meta.priority = rec.priority;
+    if (!meta.description && rec.description) meta.description = rec.description;
+  }
+}
+
 /**
  * Build: techName -> ordered products array (primary-first).
- * We preserve "primary first" using:
- * - best priority rank across recommendations producing that product
- * - then earliest first-seen recommendation order
+ * Handles both technology-triggered and category-triggered recommendations so that
+ * technologies matched only via a category mapping still receive HubSpot products.
  */
-function buildTechnologyProductsIndex(recommendations) {
+function buildTechnologyProductsIndex(recommendations, detections) {
   const index = new Map();
 
   (recommendations || []).forEach((rec, recIndex) => {
@@ -142,35 +167,19 @@ function buildTechnologyProductsIndex(recommendations) {
     if (!product) return;
 
     const rank = prioRank(rec?.priority);
-    const triggers = asArray(rec?.triggeredBy);
 
-    for (const trigger of triggers) {
-      if (trigger?.triggerType !== "technology") continue;
+    for (const trigger of asArray(rec?.triggeredBy)) {
+      if (trigger?.triggerType === "technology") {
+        const techName = sanitizeName(trigger.key);
+        if (techName) addToProductsIndex(index, techName, product, rank, rec, recIndex);
 
-      const techName = trigger.key;
-      if (!techName) continue;
-
-      if (!index.has(techName)) index.set(techName, new Map());
-
-      const productMap = index.get(techName);
-
-      if (!productMap.has(product)) {
-        productMap.set(product, {
-          hubspotProduct: product,
-          bestPriorityRank: rank,
-          priority: rec.priority,
-          firstSeen: recIndex,
-          // Useful for UI tooltips; keep it short.
-          description: rec.description ?? null,
-          title: rec.title ?? null,
-        });
-      } else {
-        const meta = productMap.get(product);
-        meta.bestPriorityRank = Math.min(meta.bestPriorityRank, rank);
-        meta.firstSeen = Math.min(meta.firstSeen, recIndex);
-        // Prefer to keep the highest priority label if we improve rank
-        if (rank < prioRank(meta.priority)) meta.priority = rec.priority;
-        if (!meta.description && rec.description) meta.description = rec.description;
+      } else if (trigger?.triggerType === "category") {
+        // Reverse-map: attribute this recommendation to every detection in the matched category
+        for (const d of asArray(detections)) {
+          const inCategory = asArray(d.categories).some((c) => c?.name === trigger.key);
+          const cleanName = sanitizeName(d.name);
+          if (inCategory && cleanName) addToProductsIndex(index, cleanName, product, rank, rec, recIndex);
+        }
       }
     }
   });
@@ -254,12 +263,13 @@ function buildSimpleReport(report, options = {}) {
 
   const cleanedRecs = cleanRecommendations(report?.recommendations);
 
-  const productsIndex = buildTechnologyProductsIndex(cleanedRecs);
+  const productsIndex = buildTechnologyProductsIndex(cleanedRecs, report?.detections);
 
   const technologies = asArray(report?.detections).map((d) => {
-    const products = productsIndex.get(d.name) || [];
+    const cleanName = sanitizeName(d.name);
+    const products = productsIndex.get(cleanName) || [];
     return {
-      name: d.name,
+      name: cleanName,
       confidence: d.confidence,
       version: d.version ?? null,
       description: d.description ?? null,
