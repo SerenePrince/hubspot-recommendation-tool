@@ -47,6 +47,10 @@ export function useWebsiteAnalysis() {
 
       const data = await response.json();
 
+      if (response.status === 503) {
+        throw new Error("The server is busy — please try again in a moment.");
+      }
+
       if (!response.ok || !data?.ok) {
         // Backend already normalizes error messages; prefer those where available.
         throw new Error(data?.error || "Analysis failed");

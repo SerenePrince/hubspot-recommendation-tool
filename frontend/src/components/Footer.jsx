@@ -5,8 +5,8 @@ export default function Footer() {
         <div className="footer__left">
           <img
             className="footer__logo-left"
-            src="/images/HubSpot_Platinum_Solutions_Partner.png"
-            alt="Inbox Communications Icon"
+            src="/images/HubSpot_Platinum_Solutions_Partner_Large.png"
+            alt="HubSpot Platinum Solutions Partner"
           />
           <div className="footer__links-left">
             <a
@@ -49,8 +49,8 @@ export default function Footer() {
           </div>
           <img
             className="footer__logo-right"
-            src="/images/logo.png"
-            alt="Inbox Communications Icon"
+            src="/images/logo.svg"
+            alt="Inbox logo"
           />
         </div>
       </div>

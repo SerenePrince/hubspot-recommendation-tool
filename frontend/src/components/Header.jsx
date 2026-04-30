@@ -3,8 +3,8 @@ export default function Header() {
     <header className="header">
       <img
         className="header__logo"
-        src="/images/logo.png"
-        alt="Inbox Communications Icon"
+        src="/images/logo.svg"
+        alt="Inbox logo"
       />
     </header>
   );

@@ -1,13 +1,14 @@
-/* design tokens */
+/* design tokens — colours from Inbox Brand Guidelines */
 :root {
-  --bg: #e6e7e8;
+  --bg: #e6e7e8;     /* Color 6 — light grey */
   --app-bg: #ffffff;
-  --fg: #111827;
-  --acc1: #f78f22;
-  --acc2: #e56d66;
-  --acc3: #006f5f;
+  --fg: #302e2f;     /* Color 2 — brand dark (body text) */
+  --acc1: #f78f22;   /* Color 1 — orange */
+  --acc2: #e56d66;   /* Color 3 — coral */
+  --acc3: #006f5f;   /* Color 5 — teal */
+  --acc4: #900049;   /* Color 4 — magenta */
   --muted: #6b7280;
-  --hdft: #222222;
+  --hdft: #302e2f;   /* Color 2 — brand dark (header/footer) */
 }
 
 @font-face {
@@ -427,7 +428,7 @@ body {
 }
 .tech-category {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -443,8 +444,8 @@ body {
 }
 .replacement-title {
   display: block;
-  font-size: 0.8rem;
-  color: var(--muted);
+  font-size: 0.875rem;
+  color: #4b5563;
   margin-top: 3px;
 }
 .replacement-none {
@@ -541,7 +542,7 @@ body {
 }
 
 .footer__logo-left {
-  max-width: 77px;
+  max-width: 96px;
   padding-top: 5px;
   padding-right: 15px;
   border-right: 1px solid var(--app-bg);
