@@ -2,6 +2,9 @@
  * Unit tests for mappingValidator (recommendation mapping schema).
  *
  * Goal: prevent configuration drift or malformed JSON from causing runtime failures.
+ *
+ * Validates all five sections (byTechnology, byCategory, byGroup, byCategoryId, byGroupId)
+ * and every field type constraint on RecommendationItem entries.
  */
 const { validateMapping } = require("../src/core/report/mappingValidator");
 
@@ -87,6 +90,57 @@ describe("core/report/mappingValidator - validateMapping", () => {
         expect.stringContaining(".description must be a string"),
         expect.stringContaining(".reason must be a string"),
         expect.stringContaining(".tags must contain only strings"),
+      ]),
+    );
+  });
+
+  test("validates byGroup section the same as byTechnology", () => {
+    const mapping = {
+      byGroup: {
+        Analytics: [{ title: "t", hubspotProduct: "p", priority: "high" }],
+        BadGroup: "not an array",
+      },
+    };
+
+    const r = validateMapping(mapping);
+    expect(r.ok).toBe(false);
+    expect(r.errors.some((e) => e.includes("byGroup"))).toBe(true);
+    expect(r.errors.some((e) => e.includes("BadGroup"))).toBe(true);
+  });
+
+  test("rejects null or non-object items inside a recommendation array", () => {
+    const mapping = {
+      byTechnology: {
+        React: [null, "a string", 42],
+      },
+    };
+
+    const r = validateMapping(mapping);
+    expect(r.ok).toBe(false);
+    expect(r.errors.some((e) => e.includes("must be an object"))).toBe(true);
+  });
+
+  test("rejects url and inboxOffer fields with wrong types", () => {
+    const mapping = {
+      byCategory: {
+        Ecommerce: [
+          {
+            title: "t",
+            hubspotProduct: "p",
+            priority: "medium",
+            url: 123,
+            inboxOffer: true,
+          },
+        ],
+      },
+    };
+
+    const r = validateMapping(mapping);
+    expect(r.ok).toBe(false);
+    expect(r.errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(".url must be a string"),
+        expect.stringContaining(".inboxOffer must be a string"),
       ]),
     );
   });

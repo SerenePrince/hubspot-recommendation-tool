@@ -2,10 +2,11 @@
  * Unit tests for GET /analyze handler.
  *
  * Scope:
- * - query validation (missing/invalid URL, unsupported protocols, overly long URLs)
+ * - query validation: missing URL, invalid format, unsupported protocol, URL > 2048 chars
  * - successful path returns a "clean" report for the frontend
- * - operational AppError maps to its status code and safe message behavior
- * - limiter is acquired and released on success/failure
+ * - AppError with expose=true passes message through; expose=false shows "Request failed"
+ * - non-AppError (generic Error) returns 500
+ * - limiter release is always called on both success and error paths
  */
 describe("api/routes/analyze - handleAnalyze", () => {
   function mkRes() {
@@ -123,6 +124,93 @@ describe("api/routes/analyze - handleAnalyze", () => {
     expect(json.ok).toBe(false);
     expect(json.error).toBe("Fetch timed out");
 
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  test("returns 400 when URL exceeds 2048 characters", async () => {
+    jest.doMock("../src/api/analysisLimiter", () => ({
+      analysisLimiter: { acquire: jest.fn() },
+    }));
+
+    const { handleAnalyze } = require("../src/api/routes/analyze");
+    const res = mkRes();
+    const longUrl = "https://example.com/" + "a".repeat(2100);
+    await handleAnalyze({}, res, mkUrl(`/analyze?url=${encodeURIComponent(longUrl)}`));
+
+    expect(res.statusCode).toBe(400);
+    const json = JSON.parse(res.body);
+    expect(json.ok).toBe(false);
+    expect(json.error).toMatch(/too long/i);
+  });
+
+  test("returns 400 when URL format is not parseable", async () => {
+    jest.doMock("../src/api/analysisLimiter", () => ({
+      analysisLimiter: { acquire: jest.fn() },
+    }));
+
+    const { handleAnalyze } = require("../src/api/routes/analyze");
+    const res = mkRes();
+    await handleAnalyze({}, res, mkUrl("/analyze?url=not-a-valid-url-at-all"));
+
+    expect(res.statusCode).toBe(400);
+    const json = JSON.parse(res.body);
+    expect(json.ok).toBe(false);
+    expect(json.error).toMatch(/invalid url/i);
+  });
+
+  test("AppError with expose=false returns 'Request failed' not the internal message", async () => {
+    const release = jest.fn();
+
+    jest.doMock("../src/api/analysisLimiter", () => ({
+      analysisLimiter: { acquire: jest.fn(async () => release) },
+    }));
+
+    const { AppError } = require("../src/core/errors");
+    jest.doMock("../src/core/analyzer", () => ({
+      analyzeUrl: jest.fn(async () => {
+        throw new AppError({
+          code: "INTERNAL",
+          message: "Secret internal detail",
+          statusCode: 500,
+          expose: false,
+        });
+      }),
+    }));
+    jest.doMock("../src/core/report/cleanReport", () => ({ buildSimpleReport: jest.fn() }));
+
+    const { handleAnalyze } = require("../src/api/routes/analyze");
+    const res = mkRes();
+    await handleAnalyze({}, res, mkUrl("/analyze?url=https://example.com"));
+
+    expect(res.statusCode).toBe(500);
+    const json = JSON.parse(res.body);
+    expect(json.ok).toBe(false);
+    expect(json.error).toBe("Request failed");
+    expect(JSON.stringify(json)).not.toContain("Secret internal detail");
+    expect(release).toHaveBeenCalledTimes(1);
+  });
+
+  test("non-AppError returns 500 and always releases the limiter", async () => {
+    const release = jest.fn();
+
+    jest.doMock("../src/api/analysisLimiter", () => ({
+      analysisLimiter: { acquire: jest.fn(async () => release) },
+    }));
+
+    jest.doMock("../src/core/analyzer", () => ({
+      analyzeUrl: jest.fn(async () => {
+        throw new Error("Unexpected crash");
+      }),
+    }));
+    jest.doMock("../src/core/report/cleanReport", () => ({ buildSimpleReport: jest.fn() }));
+
+    const { handleAnalyze } = require("../src/api/routes/analyze");
+    const res = mkRes();
+    await handleAnalyze({}, res, mkUrl("/analyze?url=https://example.com"));
+
+    expect(res.statusCode).toBe(500);
+    const json = JSON.parse(res.body);
+    expect(json.ok).toBe(false);
     expect(release).toHaveBeenCalledTimes(1);
   });
 });

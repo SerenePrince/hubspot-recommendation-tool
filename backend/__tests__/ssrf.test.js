@@ -14,6 +14,13 @@ describe("core/fetch/ssrf", () => {
     jest.restoreAllMocks();
   });
 
+  test("isBlockedIp blocks 0.0.0.0/8 (current-network addresses)", () => {
+    const { isBlockedIp } = require("../src/core/fetch/ssrf");
+
+    expect(isBlockedIp("0.0.0.0")).toBe(true);
+    expect(isBlockedIp("0.255.255.255")).toBe(true);
+  });
+
   test("isBlockedIp blocks common IPv4 reserved/private ranges", () => {
     const { isBlockedIp } = require("../src/core/fetch/ssrf");
 
@@ -66,6 +73,13 @@ describe("core/fetch/ssrf", () => {
     expect(isBlockedIp("2001:4860:4860::8888")).toBe(false);
   });
 
+  test("assertPublicHost rejects empty hostname", async () => {
+    const { assertPublicHost } = require("../src/core/fetch/ssrf");
+
+    await expect(assertPublicHost("")).rejects.toMatchObject({ code: "SSRF_BLOCKED_HOST" });
+    await expect(assertPublicHost("   ")).rejects.toMatchObject({ code: "SSRF_BLOCKED_HOST" });
+  });
+
   test("assertPublicHost blocks localhost-ish hostnames", async () => {
     const { assertPublicHost } = require("../src/core/fetch/ssrf");
 
@@ -89,6 +103,15 @@ describe("core/fetch/ssrf", () => {
     const { assertPublicHost } = require("../src/core/fetch/ssrf");
 
     await expect(assertPublicHost("8.8.8.8")).resolves.toEqual({ ips: ["8.8.8.8"] });
+  });
+
+  test("assertPublicHost rejects with SSRF_DNS_EMPTY when DNS returns no records", async () => {
+    jest.spyOn(dns, "lookup").mockResolvedValueOnce([]);
+
+    const { assertPublicHost } = require("../src/core/fetch/ssrf");
+    await expect(assertPublicHost("empty.example.com")).rejects.toMatchObject({
+      code: "SSRF_DNS_EMPTY",
+    });
   });
 
   test("assertPublicHost rejects when DNS fails", async () => {

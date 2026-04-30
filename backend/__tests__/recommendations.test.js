@@ -113,6 +113,30 @@ describe("core/report/recommendations - buildRecommendations", () => {
     expect(out).toEqual([]);
   });
 
+  test("byCategoryId trigger matches on numeric category id", () => {
+    const mappingPath = writeTmpMapping({
+      byCategoryId: {
+        42: [{ title: "Sync CRM data", hubspotProduct: "Operations Hub", priority: "medium" }],
+      },
+    });
+
+    const { buildRecommendations } = require("../src/core/report/recommendations");
+    const detections = [
+      {
+        name: "Zendesk",
+        slug: "Zendesk",
+        confidence: 90,
+        categories: [{ id: 42, name: "CRM" }],
+        groups: [],
+      },
+    ];
+
+    const out = buildRecommendations(detections, { mappingPath });
+    expect(out).toHaveLength(1);
+    expect(out[0].hubspotProduct).toBe("Operations Hub");
+    expect(out[0].triggeredBy[0]).toMatchObject({ triggerType: "categoryId", key: 42 });
+  });
+
   test("caps group-noise: only best group-triggered rec per hubspotProduct is kept", () => {
     const mappingPath = writeTmpMapping({
       byGroup: {
