@@ -6,21 +6,9 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "vite",
-    "dev:backend": "cd ../hubspot-recommendation-tool-backend && npm run dev",
+    "dev:backend": "cd ../backend && npm run dev",
     "build": "vite build",
-    "preview": "vite preview",
-    "dev:api": "node src/api/server.js",
-    "cli": "node src/cli/index.js",
-    "cli:human": "node src/cli/index.js --format human",
-    "cli:pretty": "node src/cli/index.js --format json-pretty",
-    "cli:tax": "node src/cli/taxonomy.js",
-    "smoke": "node src/scripts/smokeTest.js",
-    "validate-config": "node src/scripts/validateConfig.js",
-    "prestart": "npm run validate-config",
-    "start": "node src/api/server.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "preview": "vite preview"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
