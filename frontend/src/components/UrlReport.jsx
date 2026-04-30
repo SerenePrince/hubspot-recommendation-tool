@@ -1,11 +1,5 @@
-import React from "react";
+import { mapApiToTableData } from "../utils/mapApiToTableData";
 
-/**
- * Renders analysis output as a table for Inbox users.
- *
- * @param {{urlAnalysisData: object|null, hasAttemptedAnalysis: boolean}} props - Report payload and interaction state
- * @returns {JSX.Element|null} Report UI or null when no analysis was attempted yet
- */
 export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
   if (!hasAttemptedAnalysis) return null;
 
@@ -20,8 +14,8 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
     );
   }
 
-  const technologies = urlAnalysisData.technologies;
-  const urlDisplay = urlAnalysisData.url || urlAnalysisData.finalUrl || "";
+  const rows = mapApiToTableData(urlAnalysisData);
+  const urlDisplay = urlAnalysisData.finalUrl || urlAnalysisData.url || "";
   const urlHref = urlAnalysisData.finalUrl || urlAnalysisData.url || "#";
 
   return (
@@ -38,40 +32,41 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
       <table className="report__table">
         <thead>
           <tr>
-            <th>Found Technology</th>
+            <th>Technology</th>
             <th>Description</th>
-            <th>Recommendation</th>
+            <th>HubSpot Replacement</th>
           </tr>
         </thead>
         <tbody>
-          {technologies.map((tech, idx) => {
-            const key = tech?.id || tech?.name || idx;
-            const categoryNames =
-              tech?.categories?.map((cat) => cat?.name).filter(Boolean) || [];
-
-            return (
-              <tr key={key}>
-                <td data-label="Technology">{tech?.name || "Unknown"}</td>
-                <td data-label="Description">
-                  <ul>
-                    <li>Category: {categoryNames.join(", ") || "Unknown"}</li>
-                    {tech?.description && <li>{tech.description}</li>}
-                  </ul>
-                </td>
-                <td data-label="Recommendation">
-                  {tech?.hubspot?.products?.length ? (
-                    <ul>
-                      {tech.hubspot.products.map((product, i) => (
-                        <li key={i}>{product?.hubspotProduct}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <span>No mapped HubSpot product</span>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
+          {rows.map((row, idx) => (
+            <tr key={row.name || idx}>
+              <td data-label="Technology">
+                <span className="tech-name">{row.name}</span>
+                {row.category && (
+                  <span className="tech-category">{row.category}</span>
+                )}
+              </td>
+              <td data-label="Description">
+                {row.description || "No description available"}
+              </td>
+              <td data-label="HubSpot Replacement">
+                {row.primaryProduct ? (
+                  <>
+                    <span className="replacement-product">
+                      {row.primaryProduct}
+                    </span>
+                    {row.recommendationTitle && (
+                      <span className="replacement-title">
+                        {row.recommendationTitle}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="replacement-none">No direct replacement</span>
+                )}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

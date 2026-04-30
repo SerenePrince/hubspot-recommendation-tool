@@ -1,12 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useWebsiteAnalysis } from "../hooks/useWebsiteAnalysis";
 
-/**
- * Collects a URL, validates basic format, and triggers backend analysis.
- *
- * @param {{onAnalysisComplete?: (report: object) => void}} props - Callback invoked after successful analysis
- * @returns {JSX.Element} URL input form
- */
 export default function UrlInput({ onAnalysisComplete }) {
   const [urlInput, setUrlInput] = useState("");
   const [lastSubmittedUrl, setLastSubmittedUrl] = useState("");
@@ -17,8 +11,8 @@ export default function UrlInput({ onAnalysisComplete }) {
     if (!trimmed) return null;
     try {
       const parsed = new URL(trimmed);
-      if (!["http:", "https:"].includes(parsed.protocol)) {
-        return "Only http:// and https:// URLs are accepted.";
+      if (parsed.protocol !== "https:") {
+        return "Only https:// URLs are accepted.";
       }
       return null;
     } catch {
@@ -27,9 +21,8 @@ export default function UrlInput({ onAnalysisComplete }) {
   }
 
   const validationError = validateUrl(urlInput);
-  // Prevent accidental duplicate submissions that would produce the same result
-  // while still allowing edits to re-enable submit.
-  const isDuplicate = urlInput === lastSubmittedUrl;
+  // Prevent duplicate submissions by comparing trimmed input against the last successful URL.
+  const isDuplicate = urlInput.trim() === lastSubmittedUrl;
   const isSubmitDisabled =
     loading || !urlInput.trim() || Boolean(validationError) || isDuplicate;
 
@@ -37,9 +30,10 @@ export default function UrlInput({ onAnalysisComplete }) {
     event.preventDefault();
     if (isSubmitDisabled) return;
 
-    const report = await analyzeUrl(urlInput);
+    const normalized = urlInput.trim();
+    const report = await analyzeUrl(normalized);
     if (report) {
-      setLastSubmittedUrl(urlInput);
+      setLastSubmittedUrl(normalized);
       onAnalysisComplete?.(report);
     }
   };
@@ -54,7 +48,7 @@ export default function UrlInput({ onAnalysisComplete }) {
     message = { text: validationError, type: "error" };
   } else if (errorMessage) {
     message = { text: errorMessage, type: "error" };
-  } else if (!urlInput.trim() && !loading) {
+  } else if (!urlInput.trim()) {
     message = {
       text: "Paste a URL above to see a technology and HubSpot recommendations report.",
       type: "helper",

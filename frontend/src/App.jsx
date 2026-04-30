@@ -1,16 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import UrlInput from "./components/UrlInput";
 import UrlReport from "./components/UrlReport";
 
-/**
- * Top-level application shell that coordinates URL submission and report display.
- *
- * @returns {JSX.Element} Full app layout
- */
 export default function App() {
   const [analysisResult, setAnalysisResult] = useState(null);
+  // Stays false until the first successful analysis so the report area stays hidden initially.
   const [hasAttemptedAnalysis, setHasAttemptedAnalysis] = useState(false);
 
   const handleAnalysisCompleted = (report) => {
