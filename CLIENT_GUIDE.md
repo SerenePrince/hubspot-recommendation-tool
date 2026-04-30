@@ -36,7 +36,7 @@ Paste in a website address and the tool will:
 
 ### URL is rejected
 
-- Make sure the URL starts with `https://` or `http://`.
+- Make sure the URL starts with `https://`.
 - Use the full website address.
 
 ### No results or an error

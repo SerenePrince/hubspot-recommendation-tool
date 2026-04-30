@@ -59,6 +59,7 @@ From `backend/package.json`:
 - `npm run test`: Jest test run
 - `npm run test:watch`: Jest watch mode
 - `npm run test:coverage`: Jest coverage run
+- `npm run cli:check`: CLI smoke check (help, taxonomy, and all format/flag combinations)
 - `npm run cli`: CLI analyzer (`src/cli/index.js`)
 - `npm run cli:help`: CLI help
 - `npm run cli:human`: CLI human format
