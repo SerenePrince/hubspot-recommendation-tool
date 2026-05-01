@@ -4,6 +4,8 @@ This project is the capstone handoff for Team Debug (Algonquin College, Computer
 
 Inbox previously did this work manually during client discovery. This tool reduces that process from hours to seconds by automating fetch, detection, and recommendation steps.
 
+**Live site:** https://hubspot-recommendation-tool.onrender.com/
+
 ## Start Here (30 seconds)
 
 1. Run with Docker:
