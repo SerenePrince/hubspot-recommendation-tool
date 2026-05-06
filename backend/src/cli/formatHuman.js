@@ -197,11 +197,16 @@ function formatHuman(report, options = {}) {
       if (replacement) mappedCount += 1;
       else if (unmappedNames.length < 8 && name !== "Unknown") unmappedNames.push(name);
 
-      return [name, confidence, version, replacement, cats, groups];
+      // Primary category only — groups and confidence are developer detail, not useful for discovery
+      const primaryCat = (Array.isArray(t?.categories) ? t.categories : [])
+        .map((c) => c && c.name)
+        .filter(Boolean)[0] || "";
+
+      return [name, version, primaryCat, replacement];
     });
 
     const techTable = table(
-      ["Technology", "Conf", "Version", "HubSpot Replacement (Primary → Secondary)", "Categories", "Groups"],
+      ["Technology", "Version", "Category", "HubSpot Recommendation"],
       rows,
       { mode, maxWidth }
     );
@@ -238,16 +243,16 @@ function formatHuman(report, options = {}) {
     lines.push("");
   } else {
     const recRows = recommendations.slice(0, 100).map((rec) => {
-      const title = String(rec?.title || "").trim() || "Untitled";
       const product = String(rec?.hubspotProduct || "").trim() || "HubSpot";
       const priority = String(rec?.priority || "").trim() || "medium";
+      const title = String(rec?.title || "").trim() || "Untitled";
       const desc = String(rec?.description || rec?.reason || "").trim();
-      const triggered = summarizeTriggeredBy(rec?.triggeredBy, { maxItems: 3, maxLen: 120 });
-      return [priority, product, title, desc, triggered];
+      // Triggered by is omitted here — use --inspect <technology> for that detail
+      return [product, priority, title, desc];
     });
 
     const recTable = table(
-      ["Priority", "Product", "Recommendation", "Description", "Triggered by"],
+      ["Product", "Priority", "Recommendation", "Notes"],
       recRows,
       { mode, maxWidth }
     );
@@ -267,10 +272,10 @@ function formatHuman(report, options = {}) {
     }
   }
 
-  // Interpretation footer (helps clients)
-  lines.push(dim("Notes: Technology-triggered recommendations are strongest; category-triggered recommendations are broader."));
-  lines.push(dim("Primary replacement is shown first. Use --wide or --wrap to view full text."));
-  lines.push(dim("Tip: use --format json (default) to get machine-readable output."));
+  // Interpretation footer
+  lines.push(dim("Notes: Technologies without a mapped recommendation show no HubSpot product."));
+  lines.push(dim("Use --inspect <technology> for a full breakdown of any specific tool."));
+  lines.push(dim("Use --wide or --wrap to see full text without truncation."));
 
   return lines.join("\n");
 }

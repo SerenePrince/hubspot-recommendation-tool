@@ -38,11 +38,21 @@ Human format-only flags:
 - `--wide`
   - No truncation; output may exceed terminal width
 - `--wrap`
-  - Wrap long cells to fit table width
+  - Wrap long cells to fit table width instead of truncating
 - `--max-width <n>`
-  - Override table width (`40..400` clamp)
+  - Override table width (`40..400` clamp); defaults to `110`
 - `--inspect <tech>`
-  - Detailed output for one detected technology
+  - Detailed output for one detected technology (exact casing required)
+
+## Human format output
+
+The `--human` flag produces a terminal report with three sections:
+
+1. **Top Recommendations** — up to 5 highest-priority HubSpot products, sorted by priority then product name.
+2. **Technologies table** — columns: `Technology`, `Version`, `Category`, `HubSpot Recommendation`. One row per detected technology. Technologies without a mapped recommendation show a blank HubSpot Recommendation cell.
+3. **Recommendations table** — columns: `Product`, `Priority`, `Recommendation`, `Notes`. One row per triggered recommendation. Use `--inspect <technology>` to see which technologies triggered a specific recommendation.
+
+A coverage summary is printed below the Technologies table: e.g. `Mapped replacements: 12/34 technologies`.
 
 ## Working Examples
 
@@ -58,25 +68,25 @@ Pretty JSON:
 npm run cli -- https://react.dev --format json-pretty
 ```
 
-Human format:
+Human format (recommended for prospect discovery):
 
 ```bash
-npm run cli -- https://react.dev --format human
+npm run cli -- https://react.dev --human
 ```
 
-Human format wide:
+Human format — no truncation:
 
 ```bash
 npm run cli -- https://react.dev --human --wide
 ```
 
-Human format wrapped at width 100:
+Human format — word-wrap at custom width:
 
 ```bash
-npm run cli -- https://react.dev --human --wrap --max-width 100
+npm run cli -- https://react.dev --human --wrap --max-width 120
 ```
 
-Inspect one technology:
+Inspect a single detected technology:
 
 ```bash
 npm run cli -- https://react.dev --human --inspect WordPress --wide
@@ -108,13 +118,18 @@ Equivalent direct:
 node src/cli/taxonomy.js
 ```
 
-Flag:
+Flags:
 
-- `--pretty`: pretty-print JSON
+- `--human`: human-readable category list grouped by type — use this when editing `hubspot-mapping.json` to find exact category names
+- `--pretty`: pretty-print JSON (includes category IDs for programmatic use)
 
-Example:
+Examples:
 
 ```bash
+# Readable list for mapping work
+npm run cli:tax -- --human
+
+# Full JSON with IDs
 npm run cli:tax -- --pretty
 ```
 
@@ -122,4 +137,6 @@ npm run cli:tax -- --pretty
 
 - URL must be absolute `http` or `https`
 - Invalid URLs exit with code `1`
-- Analyzer CLI uses same core pipeline as API (`analyzeUrl()`)
+- Analyzer CLI uses the same core pipeline as the API (`analyzeUrl()`)
+- Technology names in `--inspect` are case-sensitive — use the Technologies table output to confirm exact casing
+- Changes to `hubspot-mapping.json` take effect immediately without restarting the server
