@@ -1,5 +1,6 @@
 // backend/src/core/detect/matchers/dom.js
 const { compilePattern } = require("../compilePattern");
+const { resolveVersion } = require("./resolveVersion");
 
 /**
  * DOM matcher:
@@ -96,15 +97,6 @@ function matchDom(db, signals) {
   }
 
   return out;
-}
-
-function resolveVersion(template, match) {
-  if (!template) return undefined;
-  try {
-    return template.replace(/\\(\d+)/g, (_, g) => match[Number(g)] || "");
-  } catch {
-    return undefined;
-  }
 }
 
 module.exports = { matchDom };

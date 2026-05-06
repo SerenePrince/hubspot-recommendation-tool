@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Always run relative to repo root
+# Always run relative to backend root (BACKEND_ROOT = backend/ dir, not repo root)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../" && pwd)"
+BACKEND_ROOT="$(cd "${SCRIPT_DIR}/../../" && pwd)"
 
-DEST_ROOT="${REPO_ROOT}/data/vendor/webappanalyzer"
+DEST_ROOT="${BACKEND_ROOT}/data/vendor/webappanalyzer"
 DEST_SRC="${DEST_ROOT}/src"
 
 OWNER="enthec"
@@ -16,12 +16,12 @@ TMP_DIR="$(mktemp -d)"
 cleanup() { rm -rf "$TMP_DIR"; }
 trap cleanup EXIT
 
-echo "==> Repo root: ${REPO_ROOT}"
+echo "==> Repo root: ${BACKEND_ROOT}"
 echo "==> Updating into: ${DEST_SRC}"
 
 echo "==> Fetching latest commit SHA for ${OWNER}/${REPO}@${BRANCH}..."
 SHA="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/commits/${BRANCH}" | \
-  python -c "import sys,json; print(json.load(sys.stdin)['sha'])")"
+  python3 -c "import sys,json; print(json.load(sys.stdin)['sha'])")"
 
 echo "==> Downloading archive for ${SHA}..."
 curl -fsSL -o "${TMP_DIR}/repo.zip" \

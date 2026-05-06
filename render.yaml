@@ -11,12 +11,9 @@ services:
     envVars:
       - key: PORT
         sync: false
-      - key: AUTH_ENABLED
-        sync: false
-      - key: AUTH_USERNAME
-        sync: false
-      - key: AUTH_PASSWORD
-        sync: false
+      # Auth is off by default (AUTH_ENABLED=0 in the Dockerfile).
+      # To enable: add AUTH_ENABLED=1, AUTH_USERNAME, and AUTH_PASSWORD as
+      # secret environment variables in the Render dashboard.
     region: oregon
     dockerContext: .
     dockerfilePath: ./Dockerfile

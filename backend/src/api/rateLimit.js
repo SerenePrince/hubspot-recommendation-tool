@@ -115,4 +115,6 @@ function createRateLimiter(opts) {
   };
 }
 
-module.exports = { createRateLimiter, getClientIp };
+// getClientIp is exposed on each limiter instance (createRateLimiter returns it).
+// It is not exported at module level since callers always use the instance method.
+module.exports = { createRateLimiter };

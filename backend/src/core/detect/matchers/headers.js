@@ -1,5 +1,6 @@
 // backend/src/core/detect/matchers/headers.js
 const { compilePattern } = require("../compilePattern");
+const { resolveVersion } = require("./resolveVersion");
 
 /**
  * Matches header rules against normalized response headers.
@@ -50,16 +51,6 @@ function matchHeaders(db, signals) {
   }
 
   return out;
-}
-
-function resolveVersion(template, match) {
-  if (!template) return undefined;
-  try {
-    // Replace \1, \2, etc.
-    return template.replace(/\\(\d+)/g, (_, g) => match[Number(g)] || "");
-  } catch {
-    return undefined;
-  }
 }
 
 module.exports = { matchHeaders };

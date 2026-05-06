@@ -1,5 +1,6 @@
 // backend/src/core/detect/matchers/meta.js
 const { compilePattern } = require("../compilePattern");
+const { resolveVersion } = require("./resolveVersion");
 
 /**
  * Matches technology meta-tag rules against normalized meta key/value signals.
@@ -43,15 +44,6 @@ function matchMeta(db, signals) {
   }
 
   return out;
-}
-
-function resolveVersion(template, match) {
-  if (!template) return undefined;
-  try {
-    return template.replace(/\\(\d+)/g, (_, g) => match[Number(g)] || "");
-  } catch {
-    return undefined;
-  }
 }
 
 module.exports = { matchMeta };

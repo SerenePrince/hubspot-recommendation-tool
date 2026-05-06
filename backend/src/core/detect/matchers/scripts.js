@@ -1,5 +1,6 @@
 // backend/src/core/detect/matchers/scripts.js
 const { compilePattern } = require("../compilePattern");
+const { resolveVersion } = require("./resolveVersion");
 
 /**
  * Matches technology rules against concatenated inline and fetched script bodies.
@@ -46,15 +47,6 @@ function normalizePatternList(v) {
   if (!v) return [];
   if (Array.isArray(v)) return v.map(String).filter(Boolean);
   return [String(v)];
-}
-
-function resolveVersion(template, match) {
-  if (!template) return undefined;
-  try {
-    return template.replace(/\\(\d+)/g, (_, g) => match[Number(g)] || "");
-  } catch {
-    return undefined;
-  }
 }
 
 module.exports = { matchScripts };

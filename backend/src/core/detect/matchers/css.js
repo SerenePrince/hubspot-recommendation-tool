@@ -1,5 +1,6 @@
 // backend/src/core/detect/matchers/css.js
 const { compilePattern } = require("../compilePattern");
+const { resolveVersion } = require("./resolveVersion");
 
 /**
  * Matches CSS-related rules against inline stylesheet text and stylesheet URLs.
@@ -68,15 +69,6 @@ function normalizePatternList(v) {
   if (!v) return [];
   if (Array.isArray(v)) return v.map(String).filter(Boolean);
   return [String(v)];
-}
-
-function resolveVersion(template, match) {
-  if (!template) return undefined;
-  try {
-    return template.replace(/\\(\d+)/g, (_, g) => match[Number(g)] || "");
-  } catch {
-    return undefined;
-  }
 }
 
 module.exports = { matchCss };

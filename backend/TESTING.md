@@ -39,17 +39,17 @@ docker compose up -d --build
 curl -i http://localhost:3001/health
 ```
 
-### Auth gate (should be 401)
+### Auth gate (only applies when `AUTH_ENABLED=1`)
 
 ```bash
+# Without credentials — should be 401 when auth is enabled:
 curl -i http://localhost:3001/
-```
 
-### Auth success (should be 200)
-
-```bash
+# With credentials — should be 200:
 curl -i -u "$AUTH_USERNAME:$AUTH_PASSWORD" http://localhost:3001/
 ```
+
+> Auth is off by default (`AUTH_ENABLED=0`). Skip these steps unless auth is enabled.
 
 ---
 

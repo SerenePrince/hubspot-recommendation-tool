@@ -1,3 +1,10 @@
+# Client Guide
+
+> **Note:** The canonical client guide is at the project root: [`CLIENT_GUIDE.md`](../../CLIENT_GUIDE.md).
+> This file is kept for reference only — please update the root copy.
+
+---
+
 # Client Guide – HubSpot Recommendation Tool
 
 ## 1. What This Tool Is

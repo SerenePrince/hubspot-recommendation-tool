@@ -16,10 +16,11 @@ Use this checklist during handoff to ensure the client has everything needed to 
 
 ## Authentication & Security
 
-- [ ] Provide shared username/password via a secure channel
-- [ ] Confirm auth is enabled (`AUTH_ENABLED=1`)
-- [ ] Confirm health endpoints behave as expected (`AUTH_ALLOW_HEALTH`)
-- [ ] Confirm auth rate limiting is enabled and configured
+- [ ] Decide whether to enable auth (`AUTH_ENABLED=0` is the default — off)
+- [ ] If enabling auth: provide shared username/password via a secure channel
+- [ ] If enabling auth: confirm health endpoints behave as expected (`AUTH_ALLOW_HEALTH=1`)
+- [ ] If enabling auth: confirm auth rate limiting is enabled and configured
+- [ ] If the tool is public-facing (no auth): confirm analysis concurrency limits are set appropriately (`MAX_CONCURRENT_ANALYSES`, `MAX_QUEUED_ANALYSES`)
 
 ## Verification
 
@@ -46,11 +47,11 @@ Use this checklist during handoff to ensure the client has everything needed to 
 
 - [ ] Service created as a **Web Service** (Docker)
 - [ ] Health check path set to `/health`
-- [ ] `AUTH_USERNAME` and `AUTH_PASSWORD` set as **Secrets**
-- [ ] Confirm login prompt appears on the main URL
+- [ ] If enabling auth: set `AUTH_ENABLED=1`, `AUTH_USERNAME`, and `AUTH_PASSWORD` as **Secrets** in Render dashboard
+- [ ] If auth enabled: confirm login prompt appears on the main URL
 - [ ] Confirm `/health` returns 200 without auth
 - [ ] Confirm an analysis succeeds from the UI
 - [ ] Confirm the client receives:
   - the URL
-  - the username/password delivery method (out of band)
+  - credentials (if auth enabled) delivered out of band
   - the Client Guide (non-technical)
