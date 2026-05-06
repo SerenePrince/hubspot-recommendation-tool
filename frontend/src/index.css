@@ -1,33 +1,33 @@
 /* design tokens — colours from Inbox Brand Guidelines */
 :root {
-  --bg: #e6e7e8;     /* Color 6 — light grey */
+  --bg: #e6e7e8; /* Color 6 — light grey */
   --app-bg: #ffffff;
-  --fg: #302e2f;     /* Color 2 — brand dark (body text) */
-  --acc1: #f78f22;   /* Color 1 — orange */
-  --acc2: #e56d66;   /* Color 3 — coral */
-  --acc3: #006f5f;   /* Color 5 — teal */
-  --acc4: #900049;   /* Color 4 — magenta */
+  --fg: #302e2f; /* Color 2 — brand dark (body text) */
+  --acc1: #f78f22; /* Color 1 — orange */
+  --acc2: #e56d66; /* Color 3 — coral */
+  --acc3: #006f5f; /* Color 5 — teal */
+  --acc4: #900049; /* Color 4 — magenta */
   --muted: #6b7280;
-  --hdft: #302e2f;   /* Color 2 — brand dark (header/footer) */
+  --hdft: #302e2f; /* Color 2 — brand dark (header/footer) */
 }
 
 @font-face {
-  font-family: 'AvenirNext';
-  src: url('/fonts/avenirnextltpro-regular-webfont.woff') format('woff');
+  font-family: "AvenirNext";
+  src: url("/fonts/avenirnextltpro-regular-webfont.woff") format("woff");
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'AvenirNext';
-  src: url('/fonts/avenirnextltpro-bold-webfont.woff') format('woff');
+  font-family: "AvenirNext";
+  src: url("/fonts/avenirnextltpro-bold-webfont.woff") format("woff");
   font-weight: 700;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'AvenirNext';
-  src: url('/fonts/avenirnextltpro-it-webfont.woff') format('woff');
+  font-family: "AvenirNext";
+  src: url("/fonts/avenirnextltpro-it-webfont.woff") format("woff");
   font-style: italic;
   font-weight: 400;
 }
@@ -52,7 +52,14 @@ html {
 }
 
 body {
-  font-family: 'AvenirNext', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-family:
+    "AvenirNext",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    sans-serif;
   background: var(--bg);
   color: var(--fg);
   line-height: 1.5;
@@ -122,7 +129,7 @@ body {
   color: var(--acc1);
 }
 .app__heading p {
-  font-size: 24px;
+  font-size: 20px;
   max-width: 79%;
   margin: 0 auto 40px;
 }
