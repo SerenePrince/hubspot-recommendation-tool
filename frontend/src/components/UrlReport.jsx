@@ -45,6 +45,9 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
                 {row.category && (
                   <span className="tech-category">{row.category}</span>
                 )}
+                {row.version && (
+                  <span className="tech-version">{row.version}</span>
+                )}
               </td>
               <td data-label="Description">
                 {row.description || "No description available"}
@@ -60,9 +63,14 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
                         {row.recommendationTitle}
                       </span>
                     )}
+                    {row.additionalProducts?.map((product) => (
+                      <span key={product} className="replacement-secondary">
+                        {product}
+                      </span>
+                    ))}
                   </>
                 ) : (
-                  <span className="replacement-none">No direct replacement</span>
+                  <span className="replacement-none">No recommendation mapped</span>
                 )}
               </td>
             </tr>
