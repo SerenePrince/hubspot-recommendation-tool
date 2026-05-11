@@ -6,26 +6,23 @@ import UrlReport from "./components/UrlReport";
 
 export default function App() {
   const [analysisResult, setAnalysisResult] = useState(null);
-  // Stays false until the first successful analysis so the report area stays hidden initially.
-  const [hasAttemptedAnalysis, setHasAttemptedAnalysis] = useState(false);
+  // Stays false until the first successful analysis so the report area stays hidden.
+  const [hasReport, setHasReport] = useState(false);
 
   const handleAnalysisCompleted = (report) => {
     if (report != null) {
       setAnalysisResult(report);
-      setHasAttemptedAnalysis(true);
+      setHasReport(true);
     }
   };
 
   return (
     <>
       <Header />
-      <div className="app">
+      <main className="app">
         <div className="app__heading">
           <h1>
-            <b>
-              HubSpot <span className="app__highlight">Recommendation</span>{" "}
-              Tool
-            </b>
+            HubSpot <span className="app__highlight">Recommendation</span> Tool
           </h1>
           <p>
             Generate a concise report detailing the tech stack of any given
@@ -41,10 +38,10 @@ export default function App() {
         <div className="app__report">
           <UrlReport
             urlAnalysisData={analysisResult}
-            hasAttemptedAnalysis={hasAttemptedAnalysis}
+            hasAttemptedAnalysis={hasReport}
           />
         </div>
-      </div>
+      </main>
       <Footer />
     </>
   );

@@ -5,10 +5,12 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
 
   if (!urlAnalysisData?.technologies?.length) {
     return (
-      <div className="report">
+      <div className="report" role="status">
         <div className="report__heading">
-          <h3>No technologies detected</h3>
-          <p>This site may block analysis or use uncommon tools.</p>
+          <h2 className="report__heading-title">No technologies detected</h2>
+          <p className="report__heading-subtitle">
+            This site may block analysis or use uncommon tools.
+          </p>
         </div>
       </div>
     );
@@ -21,20 +23,23 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
   return (
     <div className="report">
       <div className="report__heading">
-        <h3>Tech-stack analysis for:</h3>
-        <h3>
+        <h2 className="report__heading-title">Tech-stack analysis</h2>
+        <p className="report__heading-subtitle">
           <a href={urlHref} target="_blank" rel="noopener noreferrer">
             {urlDisplay}
           </a>
-        </h3>
+        </p>
       </div>
 
-      <table className="report__table">
+      <table
+        className="report__table"
+        aria-label="Detected technologies and HubSpot recommendations"
+      >
         <thead>
           <tr>
-            <th>Technology</th>
-            <th>Description</th>
-            <th>HubSpot Replacement</th>
+            <th scope="col">Technology</th>
+            <th scope="col">Description</th>
+            <th scope="col">HubSpot Replacement</th>
           </tr>
         </thead>
         <tbody>
