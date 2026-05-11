@@ -1,8 +1,8 @@
 {
   "info": {
-    "name": "HubSpot Recommendation Tool (Backend)",
+    "name": "HubSpot Recommendation Tool",
     "_postman_id": "6c1c12c2-3a0a-4e73-9d44-51c93c19b9a1",
-    "description": "Surface-level website technology detection + HubSpot-focused recommendations.\n\n## Purpose\nThis API analyzes a **single public URL** and returns:\n- Technologies detected (surface-level)\n- Categories and groups\n- HubSpot recommendations (config-driven)\n\n## Guardrails\nThis is **not** a recon/scanning tool:\n- No crawling\n- No enumeration\n- No brute forcing\n- No login bypass\n- No private network access (SSRF protections)\n\n## Environment variables used\n- `{{baseUrl}}` (example: http://localhost:3001)\n- `{{exampleUrl}}` (example: https://react.dev/)\n- `{{username}}` + `{{password}}` (Basic Auth)\n\n## Workflow\n1. Run **Health**\n2. Run **Analyze** (default)\n3. Try Analyze options (pretty / includeMeta)\n4. Validate config locally (`npm run validate-config`)\n5. Use the CLI for deeper inspection:\n- `npm run cli -- {{exampleUrl}} --format human --wrap`\n- `npm run cli:pretty -- {{exampleUrl}}`",
+    "description": "Surface-level website technology detection with HubSpot-focused recommendations.\n\n## What this collection tests\n- Health endpoint availability\n- Core analysis: correct shape, `ok: true`, `apiVersion` match\n- Query parameter variants: `pretty`, `includeMeta`\n- Input validation: 400 error for invalid URL\n\n## Endpoints\n- `GET /health` — process health probe\n- `GET /analyze?url=<url>` — analyze a public website URL\n\n## Environment variables\n- `{{baseUrl}}` — e.g. `http://localhost:3001` or your deployed URL\n- `{{exampleUrl}}` — e.g. `https://react.dev/`\n- `{{apiVersion}}` — must match the API (currently `2.0`)\n- `{{username}}` / `{{password}}` — only required when `AUTH_ENABLED=1` (off by default)\n\n## Authentication\nAuth is **disabled by default**. If your deployment has auth enabled, the collection-level Basic Auth will send credentials automatically. If auth is off, the credentials are sent but ignored.\n\n## Suggested workflow\n1. Run **Health** — confirm the server is reachable\n2. Run **Analyze (default)** — core smoke test\n3. Run **Analyze (pretty + meta)** — verify optional parameters work\n4. Run **Analyze (invalid URL)** — verify input validation returns 400\n5. Use the CLI for deeper inspection:\n   - `npm run cli -- {{exampleUrl}} --human --wide`\n   - `npm run cli -- {{exampleUrl}} --human --inspect <TechName>`",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
 
@@ -17,7 +17,7 @@
   "item": [
     {
       "name": "Health",
-      "description": "Use this folder to confirm the backend is running.\n\n### When to use\n- Before demos\n- After deployment\n- After changing `.env`\n- After updating the vendor dataset\n\n### Expected behavior\n- If `AUTH_ALLOW_HEALTH=1`: returns HTTP 200 without requiring auth.\n- Otherwise: will require auth (still should return 200 with auth).",
+      "description": "Confirm the backend is running and healthy.\n\n**When to use:**\n- Before demos or QA\n- After deployment or `.env` changes\n- After updating the vendor dataset\n\n**Expected behavior:** returns HTTP 200 with `ok: true`. If auth is enabled and `AUTH_ALLOW_HEALTH=0`, this will require credentials — but the default is to exempt health endpoints from auth.",
       "item": [
         {
           "name": "GET /health",
@@ -27,7 +27,8 @@
               "raw": "{{baseUrl}}/health",
               "host": ["{{baseUrl}}"],
               "path": ["health"]
-            }
+            },
+            "description": "Process health probe. Returns `ok: true` and `shuttingDown: false` when the server is up and accepting requests."
           },
           "event": [
             {
@@ -35,11 +36,22 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP status is 200', function () { pm.response.to.have.status(200); });",
-                  "pm.test('Response is JSON', function () { pm.response.to.be.json; });",
+                  "pm.test('HTTP status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response is JSON', function () {",
+                  "  pm.response.to.be.json;",
+                  "});",
                   "const body = pm.response.json();",
-                  "pm.test('ok is true', function () { pm.expect(body.ok).to.eql(true); });",
-                  "pm.test('service field exists', function () { pm.expect(body).to.have.property('service'); });"
+                  "pm.test('ok is true', function () {",
+                  "  pm.expect(body.ok).to.eql(true);",
+                  "});",
+                  "pm.test('service field is present', function () {",
+                  "  pm.expect(body).to.have.property('service');",
+                  "});",
+                  "pm.test('shuttingDown is false', function () {",
+                  "  pm.expect(body.shuttingDown).to.eql(false);",
+                  "});"
                 ]
               }
             }
@@ -49,10 +61,10 @@
     },
     {
       "name": "Analyze",
-      "description": "Core endpoint for running a **single-page, surface-level** tech analysis.\n\n## GET /analyze\nThis endpoint:\n1. Fetches a single URL (HTML + headers + cookies + referenced JS/CSS, bounded)\n2. Extracts public signals\n3. Detects technologies using fingerprint patterns\n4. Generates HubSpot recommendations based on detected technologies and categories\n\n## Query parameters\n### pretty\n- `pretty=1` → pretty-printed JSON\n\n### includeMeta\n- `includeMeta=1` → includes lightweight metadata (cache + timings + fetch summary)\n\n## Notes\n- Only one URL is fetched (no crawling).\n- SSRF protections block localhost/private IPs.\n- The analysis result may be cached by URL for a short TTL.",
+      "description": "Core endpoint: fetches a single public URL and returns detected technologies with HubSpot recommendations.\n\n**What happens per request:**\n1. Fetches the target URL (HTML, headers, cookies, referenced JS/CSS — bounded)\n2. Extracts public signals\n3. Detects technologies via fingerprint patterns\n4. Generates HubSpot recommendations from the mapping file\n\n**Guardrails:** SSRF protections block localhost and private IPs. No crawling — only the single URL is fetched.\n\n**Query parameters:**\n- `url` (required) — absolute `https://` URL\n- `pretty=1` — pretty-print the JSON response\n- `includeMeta=1` — include `meta.fetch` and `meta.timings` in the response",
       "item": [
         {
-          "name": "GET /analyze (compact)",
+          "name": "GET /analyze (default)",
           "request": {
             "method": "GET",
             "url": {
@@ -60,7 +72,8 @@
               "host": ["{{baseUrl}}"],
               "path": ["analyze"],
               "query": [{ "key": "url", "value": "{{exampleUrl}}" }]
-            }
+            },
+            "description": "Standard analysis request. Returns compact JSON with detected technologies and HubSpot recommendations."
           },
           "event": [
             {
@@ -68,18 +81,35 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('HTTP status is 200', function () { pm.response.to.have.status(200); });",
-                  "pm.test('Response is valid JSON', function () { pm.expect(() => pm.response.json()).to.not.throw(); });",
+                  "pm.test('HTTP status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response is valid JSON', function () {",
+                  "  pm.expect(() => pm.response.json()).to.not.throw();",
+                  "});",
                   "const body = pm.response.json();",
-                  "pm.test('ok is true', function () { pm.expect(body.ok).to.eql(true); });",
-                  "pm.test('apiVersion matches env', function () { pm.expect(body.apiVersion).to.eql(pm.environment.get('apiVersion')); });"
+                  "pm.test('ok is true', function () {",
+                  "  pm.expect(body.ok).to.eql(true);",
+                  "});",
+                  "pm.test('apiVersion matches environment', function () {",
+                  "  pm.expect(body.apiVersion).to.eql(pm.environment.get('apiVersion'));",
+                  "});",
+                  "pm.test('technologies is an array', function () {",
+                  "  pm.expect(body.technologies).to.be.an('array');",
+                  "});",
+                  "pm.test('recommendations is an array', function () {",
+                  "  pm.expect(body.recommendations).to.be.an('array');",
+                  "});",
+                  "pm.test('summary object is present', function () {",
+                  "  pm.expect(body.summary).to.be.an('object');",
+                  "});"
                 ]
               }
             }
           ]
         },
         {
-          "name": "GET /analyze?pretty=1 (compact)",
+          "name": "GET /analyze?pretty=1",
           "request": {
             "method": "GET",
             "url": {
@@ -90,11 +120,35 @@
                 { "key": "url", "value": "{{exampleUrl}}" },
                 { "key": "pretty", "value": "1" }
               ]
+            },
+            "description": "Same analysis with pretty-printed JSON. The shape should be identical to the compact response — only formatting differs."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('ok is true', function () {",
+                  "  pm.expect(body.ok).to.eql(true);",
+                  "});",
+                  "pm.test('apiVersion matches environment', function () {",
+                  "  pm.expect(body.apiVersion).to.eql(pm.environment.get('apiVersion'));",
+                  "});",
+                  "pm.test('meta is not present (pretty does not add meta)', function () {",
+                  "  pm.expect(body.meta).to.be.undefined;",
+                  "});"
+                ]
+              }
             }
-          }
+          ]
         },
         {
-          "name": "GET /analyze?includeMeta=1 (compact + meta)",
+          "name": "GET /analyze?includeMeta=1",
           "request": {
             "method": "GET",
             "url": {
@@ -105,8 +159,68 @@
                 { "key": "url", "value": "{{exampleUrl}}" },
                 { "key": "includeMeta", "value": "1" }
               ]
+            },
+            "description": "Includes lightweight metadata in the response: `meta.fetch` (HTTP status, bytes, timing) and `meta.timings` (analysis and total duration). Useful for debugging slow analyses."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('ok is true', function () {",
+                  "  pm.expect(body.ok).to.eql(true);",
+                  "});",
+                  "pm.test('meta object is present when includeMeta=1', function () {",
+                  "  pm.expect(body.meta).to.be.an('object');",
+                  "});",
+                  "pm.test('meta.fetch is present', function () {",
+                  "  pm.expect(body.meta.fetch).to.be.an('object');",
+                  "});",
+                  "pm.test('meta.timings is present', function () {",
+                  "  pm.expect(body.meta.timings).to.be.an('object');",
+                  "});"
+                ]
+              }
             }
-          }
+          ]
+        },
+        {
+          "name": "GET /analyze — invalid URL (400)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analyze?url=not-a-valid-url",
+              "host": ["{{baseUrl}}"],
+              "path": ["analyze"],
+              "query": [{ "key": "url", "value": "not-a-valid-url" }]
+            },
+            "description": "Validates that an unparseable URL returns a 400 Bad Request with `ok: false` and a human-readable error message. The server should never crash on bad input."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP status is 400', function () {",
+                  "  pm.response.to.have.status(400);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('ok is false', function () {",
+                  "  pm.expect(body.ok).to.eql(false);",
+                  "});",
+                  "pm.test('error message is present', function () {",
+                  "  pm.expect(body.error).to.be.a('string').and.not.empty;",
+                  "});"
+                ]
+              }
+            }
+          ]
         }
       ]
     }
