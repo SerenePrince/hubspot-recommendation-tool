@@ -1,6 +1,22 @@
 import { useState } from "react";
 import { useWebsiteAnalysis } from "../hooks/useWebsiteAnalysis";
 
+/**
+ * URL input form.
+ *
+ * Renders a labelled text input + "Analyze" button. Handles client-side
+ * validation, submission, and all message states (loading, error, helper).
+ *
+ * Validation is intentionally deferred — errors only appear after the user
+ * blurs the field or attempts a submit, so they are never punished mid-type.
+ *
+ * Message priority (highest to lowest):
+ *   loading → validation error → API error → duplicate URL → helper prompt
+ *
+ * @param {{ onAnalysisComplete: (report: object) => void }} props
+ *   onAnalysisComplete — called with the raw API response after a successful
+ *   fetch; not called on errors or cancelled requests.
+ */
 export default function UrlInput({ onAnalysisComplete }) {
   const [urlInput, setUrlInput] = useState("");
   const [lastSubmittedUrl, setLastSubmittedUrl] = useState("");

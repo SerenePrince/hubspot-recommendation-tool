@@ -36,13 +36,12 @@
      automatically between mobile and desktop. No font-size
      overrides are needed inside any media query.
 
-     Scale:
-       --text-xs    12px  badges, labels
-       --text-sm    14px  secondary / small text
-       --text-base  16px  body copy
-       --text-lg    16–20px  subtitle, form inputs
-       --text-xl    16–24px  primary button
-       --text-h1    22–48px  page title
+     Scale (5 sizes — update this block only when rebranding):
+       --text-xs    12px fixed   category badges, footer copyright, mobile labels
+       --text-sm    14px fixed   secondary text, table cells, form messages
+       --text-base  16px fixed   body copy
+       --text-lg    16–20px fluid  headings, form label, inputs, button, subtitle
+       --text-h1    22–48px fluid  page title only
      ─────────────────────────────────────────────────────────── */
   --font-body:
     "AvenirNext", system-ui, -apple-system, "Segoe UI",
@@ -52,7 +51,6 @@
   --text-sm:   0.875rem;                     /* 14px fixed                  */
   --text-base: 1rem;                         /* 16px fixed                  */
   --text-lg:   clamp(1rem, 2vw, 1.25rem);    /* 16–20px fluid               */
-  --text-xl:   clamp(1rem, 2.5vw, 1.5rem);   /* 16–24px fluid               */
   --text-h1:   clamp(1.375rem, 5vw, 3rem);   /* 22–48px fluid               */
 }
 
@@ -139,7 +137,6 @@ body {
   font-weight: 700;
   max-width: 79%;
   margin: 0 auto 0.25rem;
-  white-space: nowrap;
 }
 .app__highlight {
   color: var(--acc1);
@@ -165,6 +162,7 @@ body {
 /* ─── URL input block ─────────────────────────────────────────── */
 .app__url-input {
   width: 100%;
+  /* 69.44% ≈ 828px / 1192px (design spec card width inside the max-width container) */
   min-width: 69.44%;
   background: var(--bg);
   border-radius: 16px;
@@ -200,7 +198,6 @@ body {
 }
 .url-form__input {
   flex: 1;
-  max-width: 85.6%;
   height: 72px;
   padding-left: 24px;
   font-size: var(--text-lg);
@@ -214,7 +211,7 @@ body {
 }
 .url-form__button {
   padding: 0 28px;
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   color: var(--app-bg);
   background-color: var(--acc1);
   border: none;
@@ -283,8 +280,7 @@ body {
   border-left: 3px solid var(--info-fg);
 }
 @media (max-width: 768px) {
-  .url-form__message-area { min-height: 3.5rem; margin-top: 0.5rem; }
-  .url-form__message      { padding: 0.4rem 0.6rem; }
+  .url-form__message { padding: 0.4rem 0.6rem; }
 }
 
 /* ─── Report block ────────────────────────────────────────────── */
@@ -300,6 +296,7 @@ body {
 }
 .report {
   width: 100%;
+  /* Matches .app__url-input width so the card edges align vertically */
   min-width: 69.44%;
   background: var(--bg);
   border-radius: 16px;
@@ -353,12 +350,16 @@ body {
 
 /* ─── Table ───────────────────────────────────────────────────── */
 .report__table {
-  width: 100%;
+  /* calc(100% + 12px) + margin: 0 -6px is the standard pattern for removing
+     outer gutters from border-spacing: each side gains 6px so column edges
+     stay flush with the heading above while 6px gaps appear between columns. */
+  width: calc(100% + 12px);
   border-collapse: separate;
-  border-spacing: 8px;
+  border-spacing: 6px 8px;
+  margin: 0 -6px;
 }
 .report__table thead th {
-  padding: 14px 10px;
+  padding: 14px 14px;
   border-radius: 8px;
   color: var(--app-bg);
   background-color: var(--acc3);
@@ -376,7 +377,7 @@ body {
 .report__table tbody td {
   background-color: var(--app-bg);
   border-radius: 8px;
-  padding: 12px 10px;
+  padding: 12px 14px;
   vertical-align: top;
   font-size: var(--text-sm);
   line-height: 1.5;
@@ -433,7 +434,6 @@ body {
   letter-spacing: 0.05em;
   color: var(--muted);
   margin-top: 3px;
-  white-space: nowrap;
 }
 .tech-version {
   display: block;
@@ -443,28 +443,38 @@ body {
 }
 
 /* ─── HubSpot Replacement column ─────────────────────────────── */
+
+/* Each product recommendation is a self-contained block. The first block
+   (primary) gets full visual weight; subsequent blocks are more subdued so
+   the hierarchy is immediately readable at a glance. */
+.replacement-block {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.replacement-block--secondary {
+  margin-top: 10px;
+  opacity: 0.65;
+}
+
 .replacement-product {
   display: block;
   font-weight: 600;
   color: var(--acc3);
 }
-.replacement-title {
+.replacement-block--secondary .replacement-product {
+  font-weight: 500;
+}
+
+.replacement-description {
   display: block;
   font-size: var(--text-sm);
   color: var(--sub);
-  margin-top: 3px;
 }
-.replacement-secondary {
-  display: block;
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--acc3);
-  opacity: 0.75;
-  margin-top: 4px;
-}
+
 .replacement-none {
   display: block;
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   font-style: italic;
   color: var(--muted);
   text-align: center;
@@ -541,7 +551,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0;
 }
 .footer__logo-right {
   max-width: 96px;
@@ -575,13 +584,14 @@ body {
     flex-direction: row-reverse;
     gap: 12px;
   }
-  .footer__center       { order: 3; justify-content: center; text-align: center; }
-  .footer__links-right  { align-items: flex-start; }
-  .footer__logo-right   { padding-right: 15px; }
+  .footer__center     { order: 3; justify-content: center; text-align: center; }
+  .footer__logo-right { padding-right: 15px; }
 }
 @media (max-width: 768px) {
   .footer { padding: 14px 5%; }
   .footer__logo-left,
   .footer__logo-right { max-width: 60px; }
   .footer a           { font-size: var(--text-xs); }
+  /* Ensure social links meet the 44px minimum tap target on touch screens */
+  .footer__social-list li a { display: inline-block; padding: 6px 0; }
 }

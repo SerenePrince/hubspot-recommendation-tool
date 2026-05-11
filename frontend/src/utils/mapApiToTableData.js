@@ -8,24 +8,28 @@
  *   version: string|null,
  *   description: string|null,
  *   category: string|null,
- *   primaryProduct: string|null,
- *   recommendationTitle: string|null,
- *   additionalProducts: string[]
+ *   products: { name: string, description: string|null }[]
  * }[]}
  */
 export function mapApiToTableData(apiResponse) {
   return (apiResponse?.technologies ?? []).map((tech) => {
-    const products = tech?.hubspot?.products ?? [];
+    // Products are already ordered by priority in the API response, so index 0
+    // is the primary recommendation and the rest are secondary.
+    const rawProducts = tech?.hubspot?.products ?? [];
     return {
       name: tech?.name ?? "Unknown",
       // Only populated when the detection regex captured a version string.
       version: tech?.version ?? null,
       description: tech?.description ?? null,
       category: tech?.categories?.[0]?.name ?? null,
-      primaryProduct: tech?.hubspot?.primaryProduct ?? null,
-      recommendationTitle: products[0]?.title ?? null,
-      // Products beyond the first, shown as secondary lines in the table.
-      additionalProducts: products.slice(1).map((p) => p.name).filter(Boolean),
+      products: rawProducts
+        .filter((p) => p?.hubspotProduct)
+        .map((p) => ({
+          name: p.hubspotProduct,
+          // Plain-English pitch for why this product fits — more useful in a
+          // sales context than the action-oriented title field.
+          description: p.description ?? null,
+        })),
     };
   });
 }

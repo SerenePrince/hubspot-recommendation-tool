@@ -1,5 +1,31 @@
 import { mapApiToTableData } from "../utils/mapApiToTableData";
 
+/**
+ * Tech-stack analysis report.
+ *
+ * Renders nothing until the first successful analysis (hasAttemptedAnalysis
+ * controls visibility so the report area doesn't flash on initial load).
+ *
+ * Three render states:
+ *   1. Not yet attempted — returns null (component is not mounted).
+ *   2. No technologies detected — shows a status message; handles sites that
+ *      block analysis or return an empty technologies array.
+ *   3. Technologies found — renders a three-column table (Technology,
+ *      Description, HubSpot Replacement) with one row per detected tech.
+ *      Rows are mapped through mapApiToTableData to decouple the component
+ *      from the raw API shape.
+ *
+ * The table switches to a stacked card layout on mobile via CSS; each cell
+ * carries a data-label attribute so the label can be surfaced via ::before.
+ *
+ * @param {{
+ *   urlAnalysisData: object|null,
+ *   hasAttemptedAnalysis: boolean
+ * }} props
+ *   urlAnalysisData      — raw response from GET /api/analyze, or null.
+ *   hasAttemptedAnalysis — true only after a successful analysis; prevents
+ *                          the report area from rendering on first load.
+ */
 export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
   if (!hasAttemptedAnalysis) return null;
 
@@ -58,22 +84,24 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
                 {row.description || "No description available"}
               </td>
               <td data-label="HubSpot Replacement">
-                {row.primaryProduct ? (
-                  <>
-                    <span className="replacement-product">
-                      {row.primaryProduct}
-                    </span>
-                    {row.recommendationTitle && (
-                      <span className="replacement-title">
-                        {row.recommendationTitle}
-                      </span>
-                    )}
-                    {row.additionalProducts?.map((product) => (
-                      <span key={product} className="replacement-secondary">
-                        {product}
-                      </span>
-                    ))}
-                  </>
+                {row.products?.length > 0 ? (
+                  row.products.map((product, i) => (
+                    <div
+                      key={product.name}
+                      className={
+                        i === 0
+                          ? "replacement-block replacement-block--primary"
+                          : "replacement-block replacement-block--secondary"
+                      }
+                    >
+                      <span className="replacement-product">{product.name}</span>
+                      {product.description && (
+                        <span className="replacement-description">
+                          {product.description}
+                        </span>
+                      )}
+                    </div>
+                  ))
                 ) : (
                   <span className="replacement-none">No recommendation mapped</span>
                 )}

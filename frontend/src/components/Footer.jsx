@@ -1,3 +1,15 @@
+/**
+ * Site footer.
+ *
+ * Three-column layout (collapses to a stacked column below 1024 px):
+ *   Left   — HubSpot Platinum Solutions Partner badge + social media links
+ *             (Facebook, X/Twitter, LinkedIn) wrapped in a <nav> for
+ *             screen-reader landmark navigation.
+ *   Centre — dynamic copyright year.
+ *   Right  — Inbox logo linking to inboxcommunications.com.
+ *
+ * Purely presentational — no props, no state.
+ */
 export default function Footer() {
   return (
     <footer className="footer">
