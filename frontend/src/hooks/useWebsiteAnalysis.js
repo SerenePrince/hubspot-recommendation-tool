@@ -45,11 +45,14 @@ export function useWebsiteAnalysis() {
         signal: controller.signal,
       });
 
-      const data = await response.json();
-
+      // Check 503 before attempting to parse JSON: a load-balancer or gateway
+      // timeout returns 503 with a non-JSON body, so parsing first would throw
+      // an unhelpful "unexpected token" SyntaxError instead of this message.
       if (response.status === 503) {
         throw new Error("The server is busy — please try again in a moment.");
       }
+
+      const data = await response.json();
 
       if (!response.ok || !data?.ok) {
         // Backend already normalizes error messages; prefer those where available.
