@@ -106,7 +106,6 @@ function cleanRecommendations(recs) {
     if (!r) continue;
 
     out.push({
-      title: r.title,
       hubspotProduct: r.hubspotProduct,
       priority: r.priority,
 
@@ -125,7 +124,7 @@ function cleanRecommendations(recs) {
     const pa = priorityWeight(a.priority);
     const pb = priorityWeight(b.priority);
     if (pb !== pa) return pb - pa;
-    return String(a.title || "").localeCompare(String(b.title || ""));
+    return String(a.hubspotProduct || "").localeCompare(String(b.hubspotProduct || ""));
   });
 
   return out;
@@ -143,7 +142,6 @@ function addToProductsIndex(index, techName, product, rank, rec, recIndex) {
       priority: rec.priority,
       firstSeen: recIndex,
       description: rec.description ?? null,
-      title: rec.title ?? null,
     });
   } else {
     const meta = productMap.get(product);
@@ -195,7 +193,6 @@ function buildTechnologyProductsIndex(recommendations, detections) {
       .map((x) => ({
         hubspotProduct: x.hubspotProduct,
         priority: x.priority,
-        title: x.title,
         description: x.description,
       }));
 
@@ -236,11 +233,10 @@ function buildTopRecommendations(recommendations, max = 5) {
       const pa = prioRank(a.priority);
       const pb = prioRank(b.priority);
       if (pa !== pb) return pa - pb;
-      return String(a.title || "").localeCompare(String(b.title || ""));
+      return String(a.hubspotProduct || "").localeCompare(String(b.hubspotProduct || ""));
     })
     .slice(0, max)
     .map((r) => ({
-      title: r.title,
       hubspotProduct: r.hubspotProduct,
       priority: r.priority,
       description: r.description ?? null,

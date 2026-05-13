@@ -70,7 +70,7 @@ function computeScore(rec) {
 }
 
 function recKey(rec) {
-  return `${(rec.title || "").trim().toLowerCase()}||${(rec.hubspotProduct || "").trim().toLowerCase()}`;
+  return (rec.hubspotProduct || "").trim().toLowerCase();
 }
 
 /**
@@ -136,7 +136,7 @@ function buildRecommendations(detections, options = {}) {
     }
   }
 
-  // Merge duplicates by (title, hubspotProduct), union triggeredBy.
+  // Merge duplicates by hubspotProduct, union triggeredBy.
   // Preserve report-aligned optional fields like `reason` and `inboxOffer`.
   const merged = new Map();
   for (const r of recs) {
@@ -145,7 +145,6 @@ function buildRecommendations(detections, options = {}) {
 
     if (!existing) {
       merged.set(k, {
-        title: r.title,
         hubspotProduct: r.hubspotProduct,
         priority: r.priority,
 
@@ -193,7 +192,7 @@ function buildRecommendations(detections, options = {}) {
 
   out.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
-    return String(a.title || "").localeCompare(String(b.title || ""));
+    return String(a.hubspotProduct || "").localeCompare(String(b.hubspotProduct || ""));
   });
 
   return capGroupNoise(out);

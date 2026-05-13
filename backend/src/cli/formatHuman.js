@@ -87,18 +87,17 @@ function formatHuman(report, options = {}) {
         // stable-ish tie-breaker
         const pa = String(a?.hubspotProduct || "");
         const pb = String(b?.hubspotProduct || "");
-        if (pa !== pb) return pa.localeCompare(pb);
-        return String(a?.title || "").localeCompare(String(b?.title || ""));
+        return pa.localeCompare(pb);
       })
       .slice(0, 5);
 
     top.forEach((rec, idx) => {
       const product = String(rec?.hubspotProduct || "").trim() || "HubSpot";
       const priority = String(rec?.priority || "medium").trim().toLowerCase();
-      const title = String(rec?.title || "").trim() || "Untitled";
+      const desc = String(rec?.description || "").trim();
       const triggered = summarizeTriggeredBy(rec?.triggeredBy, { maxItems: 2, maxLen: 90 });
       const triggerSuffix = triggered ? ` (Triggered by: ${triggered})` : "";
-      lines.push(`${idx + 1}) ${product} (${priority}) — ${title}${triggerSuffix}`);
+      lines.push(`${idx + 1}) ${product} (${priority})${desc ? " — " + desc : ""}${triggerSuffix}`);
     });
   }
   lines.push("");
@@ -139,15 +138,14 @@ function formatHuman(report, options = {}) {
       lines.push("No recommendations were triggered by this technology.");
     } else {
       const rows = recs.map((rec) => {
-        const title = String(rec?.title || "").trim() || "Untitled";
         const product = String(rec?.hubspotProduct || "").trim() || "HubSpot";
         const priority = String(rec?.priority || "").trim() || "medium";
         const desc = String(rec?.description || rec?.reason || "").trim();
         const triggered = summarizeTriggeredBy(rec?.triggeredBy, { maxItems: 3, maxLen: 120 });
-        return [priority, product, title, desc, triggered];
+        return [priority, product, desc, triggered];
       });
       const recTable = table(
-        ["Priority", "Product", "Recommendation", "Description", "Triggered by"],
+        ["Priority", "Product", "Description", "Triggered by"],
         rows,
         { mode, maxWidth }
       );
@@ -245,14 +243,13 @@ function formatHuman(report, options = {}) {
     const recRows = recommendations.slice(0, 100).map((rec) => {
       const product = String(rec?.hubspotProduct || "").trim() || "HubSpot";
       const priority = String(rec?.priority || "").trim() || "medium";
-      const title = String(rec?.title || "").trim() || "Untitled";
       const desc = String(rec?.description || rec?.reason || "").trim();
       // Triggered by is omitted here — use --inspect <technology> for that detail
-      return [product, priority, title, desc];
+      return [product, priority, desc];
     });
 
     const recTable = table(
-      ["Product", "Priority", "Recommendation", "Notes"],
+      ["Product", "Priority", "Description"],
       recRows,
       { mode, maxWidth }
     );

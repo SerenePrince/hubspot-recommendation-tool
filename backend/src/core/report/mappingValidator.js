@@ -52,7 +52,6 @@ function validateRecommendationItem(item, path, errors) {
     return;
   }
 
-  if (!isNonEmptyString(item.title)) errors.push(`${path}.title is required.`);
   if (!isNonEmptyString(item.hubspotProduct)) errors.push(`${path}.hubspotProduct is required.`);
   if (!isNonEmptyString(item.priority) || !ALLOWED_PRIORITIES.has(item.priority)) {
     errors.push(`${path}.priority must be one of: high, medium, low.`);
