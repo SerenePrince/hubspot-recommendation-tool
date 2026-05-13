@@ -54,10 +54,16 @@ const config = {
     // at the Vite build output directory.
     enabled: bool(process.env.SERVE_STATIC, false),
     // Path to built frontend assets; resolved from process working directory at startup.
-    distDir: path.resolve(process.cwd(), str(process.env.STATIC_DIST_DIR, "./public")),
+    distDir: path.resolve(
+      process.cwd(),
+      str(process.env.STATIC_DIST_DIR, "./public"),
+    ),
     // Basic caching: in production, immutable hashed assets can be cached longer.
     // (index.html is always served with no-store.)
-    assetCacheSeconds: num(process.env.STATIC_ASSET_CACHE_SECONDS, 60 * 60 * 24 * 30),
+    assetCacheSeconds: num(
+      process.env.STATIC_ASSET_CACHE_SECONDS,
+      60 * 60 * 24 * 30,
+    ),
   },
 
   api: {

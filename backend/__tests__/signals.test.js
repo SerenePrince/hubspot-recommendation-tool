@@ -35,8 +35,20 @@ describe("core/normalize/signals - buildSignals", () => {
         </html>
       `,
       external: {
-        scripts: [{ url: "https://example.com/js/external.js", body: "/* external */", bytes: 12 }],
-        stylesheets: [{ url: "https://example.com/css/external.css", body: "body{}", bytes: 6 }],
+        scripts: [
+          {
+            url: "https://example.com/js/external.js",
+            body: "/* external */",
+            bytes: 12,
+          },
+        ],
+        stylesheets: [
+          {
+            url: "https://example.com/css/external.css",
+            body: "body{}",
+            bytes: 6,
+          },
+        ],
       },
     };
 
@@ -71,7 +83,10 @@ describe("core/normalize/signals - buildSignals", () => {
     expect(s.text).toContain("Hello world");
 
     // URL params extracted as stable pairs
-    expect(s.urlParams).toEqual([{ key: "a", value: "1" }, { key: "b", value: "2" }]);
+    expect(s.urlParams).toEqual([
+      { key: "a", value: "1" },
+      { key: "b", value: "2" },
+    ]);
 
     // DOM signal is a cheerio function
     expect(typeof s.dom).toBe("function");
@@ -127,7 +142,10 @@ describe("core/normalize/signals - buildSignals", () => {
   });
 
   test("limits URL param pairs to configured cap", () => {
-    const params = new Array(200).fill(null).map((_, i) => `k${i}=v${i}`).join("&");
+    const params = new Array(200)
+      .fill(null)
+      .map((_, i) => `k${i}=v${i}`)
+      .join("&");
     const fetchResult = {
       finalUrl: `https://example.com/?${params}`,
       headers: {},

@@ -10,7 +10,8 @@ const { resolveVersion } = require("./resolveVersion");
  * @returns {Array<object>} Candidate detections from CSS evidence
  */
 function matchCss(db, signals) {
-  const cssObj = signals?.css && typeof signals.css === "object" ? signals.css : {};
+  const cssObj =
+    signals?.css && typeof signals.css === "object" ? signals.css : {};
   const cssText = typeof cssObj.inline === "string" ? cssObj.inline : "";
   const hrefs = Array.isArray(cssObj.hrefs) ? cssObj.hrefs : [];
 
@@ -18,7 +19,9 @@ function matchCss(db, signals) {
 
   const out = [];
 
-  const techNames = Array.isArray(db?.index?.css) ? db.index.css : Object.keys(db.technologies || {});
+  const techNames = Array.isArray(db?.index?.css)
+    ? db.index.css
+    : Object.keys(db.technologies || {});
   for (const slug of techNames) {
     const tech = db.technologies?.[slug];
     if (!tech) continue;

@@ -11,7 +11,10 @@ let cachedMapping = null;
  * @returns {string} Absolute mapping JSON path
  */
 function getDefaultMappingPath() {
-  return path.resolve(__dirname, "../../../data/alternatives/hubspot-mapping.json");
+  return path.resolve(
+    __dirname,
+    "../../../data/alternatives/hubspot-mapping.json",
+  );
 }
 
 /**
@@ -35,14 +38,19 @@ function ensureMappingLoaded(mappingPath) {
       // Mapping validation errors should not take down analysis:
       // - detection should still work (this is often the more valuable output)
       // - recommendations degrade gracefully to empty until the mapping is fixed
-      console.error("Recommendation mapping is invalid. Falling back to empty mapping.");
-      for (const err of validation.errors.slice(0, 50)) console.error(" -", err);
+      console.error(
+        "Recommendation mapping is invalid. Falling back to empty mapping.",
+      );
+      for (const err of validation.errors.slice(0, 50))
+        console.error(" -", err);
       cachedMapping = {};
     } else {
       cachedMapping = loaded;
     }
   } catch (e) {
-    console.error("Failed to load recommendation mapping. Falling back to empty mapping.");
+    console.error(
+      "Failed to load recommendation mapping. Falling back to empty mapping.",
+    );
     console.error(e?.message || e);
     cachedMapping = {};
   }
@@ -63,8 +71,10 @@ function computeScore(rec) {
   score += Math.min(3, n);
 
   if (rec.triggerType === "technology") score += 2;
-  if (rec.triggerType === "categoryId" || rec.triggerType === "category") score += 1;
-  if (rec.triggerType === "groupId" || rec.triggerType === "group") score += 0.5;
+  if (rec.triggerType === "categoryId" || rec.triggerType === "category")
+    score += 1;
+  if (rec.triggerType === "groupId" || rec.triggerType === "group")
+    score += 0.5;
 
   return score;
 }
@@ -89,7 +99,9 @@ function buildRecommendations(detections, options = {}) {
 
   // Keep recommendation triggers aligned with report defaults:
   // - below-threshold detections are considered too noisy for client-facing recommendations
-  const filtered = (detections || []).filter((d) => (d?.confidence || 0) >= minConfidence);
+  const filtered = (detections || []).filter(
+    (d) => (d?.confidence || 0) >= minConfidence,
+  );
 
   const recs = [];
   const addAll = (items, triggerType, key, matched) => {
@@ -113,7 +125,8 @@ function buildRecommendations(detections, options = {}) {
   for (const d of filtered) {
     const techKey = (d.name || d.slug || "").trim();
     if (!techKey) continue;
-    if (byTechnology[techKey]) addAll(byTechnology[techKey], "technology", techKey, techKey);
+    if (byTechnology[techKey])
+      addAll(byTechnology[techKey], "technology", techKey, techKey);
   }
 
   const byCategory = mapping.byCategory || {};
@@ -121,8 +134,10 @@ function buildRecommendations(detections, options = {}) {
   for (const d of filtered) {
     const cats = Array.isArray(d.categories) ? d.categories : [];
     for (const c of cats) {
-      if (c?.name && byCategory[c.name]) addAll(byCategory[c.name], "category", c.name, c.name);
-      if (c?.id && byCategoryId[c.id]) addAll(byCategoryId[c.id], "categoryId", c.id, c.name || c.id);
+      if (c?.name && byCategory[c.name])
+        addAll(byCategory[c.name], "category", c.name, c.name);
+      if (c?.id && byCategoryId[c.id])
+        addAll(byCategoryId[c.id], "categoryId", c.id, c.name || c.id);
     }
   }
 
@@ -131,8 +146,10 @@ function buildRecommendations(detections, options = {}) {
   for (const d of filtered) {
     const groups = Array.isArray(d.groups) ? d.groups : [];
     for (const g of groups) {
-      if (g?.name && byGroup[g.name]) addAll(byGroup[g.name], "group", g.name, g.name);
-      if (g?.id && byGroupId[g.id]) addAll(byGroupId[g.id], "groupId", g.id, g.name || g.id);
+      if (g?.name && byGroup[g.name])
+        addAll(byGroup[g.name], "group", g.name, g.name);
+      if (g?.id && byGroupId[g.id])
+        addAll(byGroupId[g.id], "groupId", g.id, g.name || g.id);
     }
   }
 
@@ -173,14 +190,24 @@ function buildRecommendations(detections, options = {}) {
     existing.inboxOffer = existing.inboxOffer || r.inboxOffer || null;
 
     // Merge tags
-    const tags = new Set([...(existing.tags || []), ...(Array.isArray(r.tags) ? r.tags : [])].map(String));
+    const tags = new Set(
+      [...(existing.tags || []), ...(Array.isArray(r.tags) ? r.tags : [])].map(
+        String,
+      ),
+    );
     existing.tags = Array.from(tags).filter((t) => t.trim());
 
     // Merge triggeredBy
-    existing.triggeredBy = dedupeTriggeredBy([...(existing.triggeredBy || []), ...(r.triggeredBy || [])]);
+    existing.triggeredBy = dedupeTriggeredBy([
+      ...(existing.triggeredBy || []),
+      ...(r.triggeredBy || []),
+    ]);
 
     // Keep more specific triggerType if possible
-    existing.triggerType = pickMoreSpecificTrigger(existing.triggerType, r.triggerType);
+    existing.triggerType = pickMoreSpecificTrigger(
+      existing.triggerType,
+      r.triggerType,
+    );
 
     merged.set(k, existing);
   }
@@ -192,14 +219,17 @@ function buildRecommendations(detections, options = {}) {
 
   out.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
-    return String(a.hubspotProduct || "").localeCompare(String(b.hubspotProduct || ""));
+    return String(a.hubspotProduct || "").localeCompare(
+      String(b.hubspotProduct || ""),
+    );
   });
 
   return capGroupNoise(out);
 }
 
 function pickHigherPriority(a, b) {
-  const w = (p) => (p === "high" ? 3 : p === "medium" ? 2 : p === "low" ? 1 : 1);
+  const w = (p) =>
+    p === "high" ? 3 : p === "medium" ? 2 : p === "low" ? 1 : 1;
   return w(b) > w(a) ? b : a;
 }
 
@@ -230,9 +260,10 @@ function capGroupNoise(recs) {
 
   for (const r of recs) {
     if (r.triggerType !== "group") continue;
-    const productKey = String((r.hubspotProduct || "__none__")).trim();
+    const productKey = String(r.hubspotProduct || "__none__").trim();
     const best = bestByProduct.get(productKey);
-    if (!best || (r.score || 0) > (best.score || 0)) bestByProduct.set(productKey, r);
+    if (!best || (r.score || 0) > (best.score || 0))
+      bestByProduct.set(productKey, r);
   }
 
   const kept = [];
@@ -241,11 +272,15 @@ function capGroupNoise(recs) {
       kept.push(r);
       continue;
     }
-    const productKey = String((r.hubspotProduct || "__none__")).trim();
+    const productKey = String(r.hubspotProduct || "__none__").trim();
     if (bestByProduct.get(productKey) === r) kept.push(r);
   }
 
   return kept;
 }
 
-module.exports = { buildRecommendations, ensureMappingLoaded, getDefaultMappingPath };
+module.exports = {
+  buildRecommendations,
+  ensureMappingLoaded,
+  getDefaultMappingPath,
+};

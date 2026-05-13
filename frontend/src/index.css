@@ -7,27 +7,30 @@
    ═══════════════════════════════════════════════════════════════ */
 :root {
   /* Brand palette (Color N = Inbox Brand Guidelines reference) */
-  --bg:     #e6e7e8;  /* Color 6 — light grey (page background)    */
-  --app-bg: #ffffff;  /* white (card / surface background)          */
-  --fg:     #302e2f;  /* Color 2 — brand dark (body text)           */
-  --hdft:   #302e2f;  /* Color 2 — brand dark (header / footer)     */
-  --muted:  #6b7280;  /* secondary / label text                     */
-  --sub:    #4b5563;  /* supporting body text (e.g. table subtitles)*/
+  --bg: #e6e7e8; /* Color 6 — light grey (page background)    */
+  --app-bg: #ffffff; /* white (card / surface background)          */
+  --fg: #302e2f; /* Color 2 — brand dark (body text)           */
+  --hdft: #302e2f; /* Color 2 — brand dark (header / footer)     */
+  --muted: #6b7280; /* secondary / label text                     */
+  --sub: #4b5563; /* supporting body text (e.g. table subtitles)*/
 
   /* Accent palette */
-  --acc1: #f78f22;  /* Color 1 — orange  */
-  --acc2: #e56d66;  /* Color 3 — coral   */
-  --acc3: #006f5f;  /* Color 5 — teal    */
-  --acc4: #900049;  /* Color 4 — magenta */
+  --acc1: #f78f22; /* Color 1 — orange  */
+  --acc2: #e56d66; /* Color 3 — coral   */
+  --acc3: #006f5f; /* Color 5 — teal    */
+  --acc4: #900049; /* Color 4 — magenta */
 
   /* UI surface tones */
-  --row-alt:   #f9fafb;  /* table even-row stripe     */
-  --row-hover: #f3f4f6;  /* table row hover (desktop) */
+  --row-alt: #f9fafb; /* table even-row stripe     */
+  --row-hover: #f3f4f6; /* table row hover (desktop) */
 
   /* Message state colours */
-  --error-bg:  #fee2e2;  --error-fg:  #b00020;
-  --helper-bg: #f0f0f0;  --helper-fg: #555555;
-  --info-bg:   #e6f3ff;  --info-fg:   #0066cc;
+  --error-bg: #fee2e2;
+  --error-fg: #b00020;
+  --helper-bg: #f0f0f0;
+  --helper-fg: #555555;
+  --info-bg: #e6f3ff;
+  --info-fg: #0066cc;
 
   /* ── Typography ──────────────────────────────────────────────
      To swap the brand font: update --font-body only.
@@ -44,14 +47,14 @@
        --text-h1    22–48px fluid  page title only
      ─────────────────────────────────────────────────────────── */
   --font-body:
-    "AvenirNext", system-ui, -apple-system, "Segoe UI",
-    Roboto, "Helvetica Neue", sans-serif;
+    "AvenirNext", system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", sans-serif;
 
-  --text-xs:   0.75rem;                      /* 12px fixed                  */
-  --text-sm:   0.875rem;                     /* 14px fixed                  */
-  --text-base: 1rem;                         /* 16px fixed                  */
-  --text-lg:   clamp(1rem, 2vw, 1.25rem);    /* 16–20px fluid               */
-  --text-h1:   clamp(1.375rem, 5vw, 3rem);   /* 22–48px fluid               */
+  --text-xs: 0.75rem; /* 12px fixed                  */
+  --text-sm: 0.875rem; /* 14px fixed                  */
+  --text-base: 1rem; /* 16px fixed                  */
+  --text-lg: clamp(1rem, 2vw, 1.25rem); /* 16–20px fluid               */
+  --text-h1: clamp(1.375rem, 5vw, 3rem); /* 22–48px fluid               */
 }
 
 /* ─── Font faces ──────────────────────────────────────────────── */
@@ -80,7 +83,10 @@
   padding: 0;
   box-sizing: border-box;
 }
-input, button, select, textarea {
+input,
+button,
+select,
+textarea {
   font-family: inherit;
   font-size: inherit;
 }
@@ -119,10 +125,15 @@ body {
   box-shadow: 0px 4px 50px 50px #00000033;
 }
 @media (max-width: 1024px) {
-  .app { padding: 48px 40px; }
+  .app {
+    padding: 48px 40px;
+  }
 }
 @media (max-width: 768px) {
-  .app { padding: 24px 16px; box-shadow: none; }
+  .app {
+    padding: 24px 16px;
+    box-shadow: none;
+  }
 }
 
 /* ─── Page heading ────────────────────────────────────────────── */
@@ -147,16 +158,28 @@ body {
   margin: 0 auto 40px;
 }
 @media (max-width: 1024px) {
-  .app__heading        { margin-bottom: 48px; }
+  .app__heading {
+    margin-bottom: 48px;
+  }
   .app__heading h1,
-  .app__heading p      { max-width: 90%; }
-  .app__heading p      { margin-bottom: 32px; }
+  .app__heading p {
+    max-width: 90%;
+  }
+  .app__heading p {
+    margin-bottom: 32px;
+  }
 }
 @media (max-width: 768px) {
-  .app__heading        { margin-bottom: 36px; }
+  .app__heading {
+    margin-bottom: 36px;
+  }
   .app__heading h1,
-  .app__heading p      { max-width: 100%; }
-  .app__heading p      { margin-bottom: 24px; }
+  .app__heading p {
+    max-width: 100%;
+  }
+  .app__heading p {
+    margin-bottom: 24px;
+  }
 }
 
 /* ─── URL input block ─────────────────────────────────────────── */
@@ -221,17 +244,28 @@ body {
   transition: all 0.15s ease;
   white-space: nowrap;
 }
-.url-form__button:hover:not(:disabled) { transform: translateY(-1px); }
-.url-form__button:active:not(:disabled) { transform: translateY(0); }
+.url-form__button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.url-form__button:active:not(:disabled) {
+  transform: translateY(0);
+}
 .url-form__button:focus-visible {
   outline: 3px solid var(--acc3);
   outline-offset: 2px;
 }
-.url-form__button:disabled { opacity: 0.6; cursor: not-allowed; }
+.url-form__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 @media (max-width: 1024px) {
-  .url-form__input  { height: 60px; }
-  .url-form__button { padding: 0 20px; }
+  .url-form__input {
+    height: 60px;
+  }
+  .url-form__button {
+    padding: 0 20px;
+  }
 }
 @media (max-width: 768px) {
   .url-form__row {
@@ -280,7 +314,9 @@ body {
   border-left: 3px solid var(--info-fg);
 }
 @media (max-width: 768px) {
-  .url-form__message { padding: 0.4rem 0.6rem; }
+  .url-form__message {
+    padding: 0.4rem 0.6rem;
+  }
 }
 
 /* ─── Report block ────────────────────────────────────────────── */
@@ -306,14 +342,28 @@ body {
   animation: fadeIn 0.3s ease;
 }
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @media (max-width: 1024px) {
-  .report { min-width: 100%; margin: 48px 0 0; padding: 12px; }
+  .report {
+    min-width: 100%;
+    margin: 48px 0 0;
+    padding: 12px;
+  }
 }
 @media (max-width: 768px) {
-  .report { margin-top: 28px; padding: 8px; border-radius: 8px; }
+  .report {
+    margin-top: 28px;
+    padding: 8px;
+    border-radius: 8px;
+  }
 }
 
 /* ─── Report heading ──────────────────────────────────────────── */
@@ -345,7 +395,9 @@ body {
   outline: none;
 }
 @media (max-width: 768px) {
-  .report__heading { padding: 16px 12px; }
+  .report__heading {
+    padding: 16px 12px;
+  }
 }
 
 /* ─── Table ───────────────────────────────────────────────────── */
@@ -370,9 +422,15 @@ body {
   background-color: var(--acc1);
 }
 /* 20 / 30 / 50 column split — recommendation is the most valuable column */
-.report__table thead th:nth-child(1) { width: 20%; }
-.report__table thead th:nth-child(2) { width: 30%; }
-.report__table thead th:nth-child(3) { width: 50%; }
+.report__table thead th:nth-child(1) {
+  width: 20%;
+}
+.report__table thead th:nth-child(2) {
+  width: 30%;
+}
+.report__table thead th:nth-child(3) {
+  width: 50%;
+}
 
 .report__table tbody td {
   background-color: var(--app-bg);
@@ -393,10 +451,15 @@ body {
   }
 }
 @media (max-width: 1024px) {
-  .report__table thead th { padding: 10px 8px; font-size: var(--text-sm); }
+  .report__table thead th {
+    padding: 10px 8px;
+    font-size: var(--text-sm);
+  }
 }
 @media (max-width: 768px) {
-  .report__table thead { display: none; }
+  .report__table thead {
+    display: none;
+  }
   .report__table tbody tr {
     display: flex;
     flex-direction: column;
@@ -525,15 +588,27 @@ body {
   padding: 0 24px;
   box-shadow: 0px 4px 15px 5px #00000040;
 }
-.header__logo { max-width: 140px; }
+.header__logo {
+  max-width: 140px;
+}
 
 @media (max-width: 1024px) {
-  .header       { min-height: 64px; padding: 0 20px; }
-  .header__logo { max-width: 115px; }
+  .header {
+    min-height: 64px;
+    padding: 0 20px;
+  }
+  .header__logo {
+    max-width: 115px;
+  }
 }
 @media (max-width: 768px) {
-  .header       { min-height: 50px; padding: 0 16px; }
-  .header__logo { max-width: 100px; }
+  .header {
+    min-height: 50px;
+    padding: 0 16px;
+  }
+  .header__logo {
+    max-width: 100px;
+  }
 }
 
 /* ─── Footer ──────────────────────────────────────────────────── */
@@ -597,7 +672,9 @@ body {
   font-size: var(--text-sm);
   text-decoration: none;
 }
-.footer a:hover { text-decoration: underline; }
+.footer a:hover {
+  text-decoration: underline;
+}
 .footer a:focus-visible {
   outline: 2px solid var(--app-bg);
   outline-offset: 2px;
@@ -605,28 +682,48 @@ body {
 }
 
 @media (max-width: 1024px) {
-  .footer { padding: 14px 8%; }
+  .footer {
+    padding: 14px 8%;
+  }
   .footer__content {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 14px;
   }
-  .footer__left  { order: 1; justify-content: center; }
+  .footer__left {
+    order: 1;
+    justify-content: center;
+  }
   .footer__right {
     order: 2;
     justify-content: center;
     flex-direction: row-reverse;
     gap: 12px;
   }
-  .footer__center     { order: 3; justify-content: center; text-align: center; }
-  .footer__logo-right { padding-right: 15px; }
+  .footer__center {
+    order: 3;
+    justify-content: center;
+    text-align: center;
+  }
+  .footer__logo-right {
+    padding-right: 15px;
+  }
 }
 @media (max-width: 768px) {
-  .footer { padding: 14px 5%; }
+  .footer {
+    padding: 14px 5%;
+  }
   .footer__logo-left,
-  .footer__logo-right { max-width: 60px; }
-  .footer a           { font-size: var(--text-xs); }
+  .footer__logo-right {
+    max-width: 60px;
+  }
+  .footer a {
+    font-size: var(--text-xs);
+  }
   /* Ensure social links meet the 44px minimum tap target on touch screens */
-  .footer__social-list li a { display: inline-block; padding: 6px 0; }
+  .footer__social-list li a {
+    display: inline-block;
+    padding: 6px 0;
+  }
 }

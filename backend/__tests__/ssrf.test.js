@@ -76,33 +76,55 @@ describe("core/fetch/ssrf", () => {
   test("assertPublicHost rejects empty hostname", async () => {
     const { assertPublicHost } = require("../src/core/fetch/ssrf");
 
-    await expect(assertPublicHost("")).rejects.toMatchObject({ code: "SSRF_BLOCKED_HOST" });
-    await expect(assertPublicHost("   ")).rejects.toMatchObject({ code: "SSRF_BLOCKED_HOST" });
+    await expect(assertPublicHost("")).rejects.toMatchObject({
+      code: "SSRF_BLOCKED_HOST",
+    });
+    await expect(assertPublicHost("   ")).rejects.toMatchObject({
+      code: "SSRF_BLOCKED_HOST",
+    });
   });
 
   test("assertPublicHost blocks localhost-ish hostnames", async () => {
     const { assertPublicHost } = require("../src/core/fetch/ssrf");
 
-    await expect(assertPublicHost("localhost")).rejects.toMatchObject({ code: "SSRF_BLOCKED_HOST" });
-    await expect(assertPublicHost("myapp.localhost")).rejects.toMatchObject({ code: "SSRF_BLOCKED_HOST" });
+    await expect(assertPublicHost("localhost")).rejects.toMatchObject({
+      code: "SSRF_BLOCKED_HOST",
+    });
+    await expect(assertPublicHost("myapp.localhost")).rejects.toMatchObject({
+      code: "SSRF_BLOCKED_HOST",
+    });
 
-    await expect(assertPublicHost("corp.local")).rejects.toMatchObject({ code: "SSRF_BLOCKED_HOST" });
-    await expect(assertPublicHost("service.internal")).rejects.toMatchObject({ code: "SSRF_BLOCKED_HOST" });
-    await expect(assertPublicHost("router.lan")).rejects.toMatchObject({ code: "SSRF_BLOCKED_HOST" });
+    await expect(assertPublicHost("corp.local")).rejects.toMatchObject({
+      code: "SSRF_BLOCKED_HOST",
+    });
+    await expect(assertPublicHost("service.internal")).rejects.toMatchObject({
+      code: "SSRF_BLOCKED_HOST",
+    });
+    await expect(assertPublicHost("router.lan")).rejects.toMatchObject({
+      code: "SSRF_BLOCKED_HOST",
+    });
   });
 
   test("assertPublicHost blocks IP literals in blocked ranges", async () => {
     const { assertPublicHost } = require("../src/core/fetch/ssrf");
 
-    await expect(assertPublicHost("127.0.0.1")).rejects.toMatchObject({ code: "SSRF_BLOCKED_IP" });
-    await expect(assertPublicHost("10.0.0.5")).rejects.toMatchObject({ code: "SSRF_BLOCKED_IP" });
-    await expect(assertPublicHost("::1")).rejects.toMatchObject({ code: "SSRF_BLOCKED_IP" });
+    await expect(assertPublicHost("127.0.0.1")).rejects.toMatchObject({
+      code: "SSRF_BLOCKED_IP",
+    });
+    await expect(assertPublicHost("10.0.0.5")).rejects.toMatchObject({
+      code: "SSRF_BLOCKED_IP",
+    });
+    await expect(assertPublicHost("::1")).rejects.toMatchObject({
+      code: "SSRF_BLOCKED_IP",
+    });
   });
 
   test("assertPublicHost allows public IP literals", async () => {
     const { assertPublicHost } = require("../src/core/fetch/ssrf");
 
-    await expect(assertPublicHost("8.8.8.8")).resolves.toEqual({ ips: ["8.8.8.8"] });
+    await expect(assertPublicHost("8.8.8.8")).resolves.toEqual({
+      ips: ["8.8.8.8"],
+    });
   });
 
   test("assertPublicHost rejects with SSRF_DNS_EMPTY when DNS returns no records", async () => {
@@ -118,7 +140,9 @@ describe("core/fetch/ssrf", () => {
     jest.spyOn(dns, "lookup").mockRejectedValueOnce(new Error("DNS down"));
 
     const { assertPublicHost } = require("../src/core/fetch/ssrf");
-    await expect(assertPublicHost("example.com")).rejects.toMatchObject({ code: "SSRF_DNS_FAIL" });
+    await expect(assertPublicHost("example.com")).rejects.toMatchObject({
+      code: "SSRF_DNS_FAIL",
+    });
   });
 
   test("assertPublicHost rejects if ANY resolved record is blocked", async () => {
@@ -128,7 +152,9 @@ describe("core/fetch/ssrf", () => {
     ]);
 
     const { assertPublicHost } = require("../src/core/fetch/ssrf");
-    await expect(assertPublicHost("mixed.example")).rejects.toMatchObject({ code: "SSRF_BLOCKED_IP" });
+    await expect(assertPublicHost("mixed.example")).rejects.toMatchObject({
+      code: "SSRF_BLOCKED_IP",
+    });
   });
 
   test("assertPublicHost returns all resolved IPs when public", async () => {

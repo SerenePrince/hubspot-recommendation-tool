@@ -57,7 +57,9 @@ function compilePatternUncached(raw) {
     re,
     confidence: clampConfidence(directives.confidence ?? 100),
     version:
-      typeof directives.version === "string" && directives.version.length ? directives.version : undefined,
+      typeof directives.version === "string" && directives.version.length
+        ? directives.version
+        : undefined,
   };
 }
 

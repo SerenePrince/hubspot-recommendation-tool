@@ -10,10 +10,15 @@ const { resolveVersion } = require("./resolveVersion");
  * @returns {Array<object>} Candidate detections from HTTP header evidence
  */
 function matchHeaders(db, signals) {
-  const headers = signals?.headers && typeof signals.headers === "object" ? signals.headers : {};
+  const headers =
+    signals?.headers && typeof signals.headers === "object"
+      ? signals.headers
+      : {};
   const out = [];
 
-  const techNames = Array.isArray(db?.index?.headers) ? db.index.headers : Object.keys(db.technologies || {});
+  const techNames = Array.isArray(db?.index?.headers)
+    ? db.index.headers
+    : Object.keys(db.technologies || {});
   for (const slug of techNames) {
     const tech = db.technologies?.[slug];
     if (!tech) continue;
@@ -21,7 +26,9 @@ function matchHeaders(db, signals) {
     if (!headerRules || typeof headerRules !== "object") continue;
 
     for (const [headerNameRaw, patternRaw] of Object.entries(headerRules)) {
-      const headerName = String(headerNameRaw || "").toLowerCase().trim();
+      const headerName = String(headerNameRaw || "")
+        .toLowerCase()
+        .trim();
       if (!headerName) continue;
 
       const headerVal = headers[headerName];

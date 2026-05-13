@@ -123,7 +123,9 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
                             : "replacement-block replacement-block--secondary"
                         }
                       >
-                        <span className="replacement-product">{product.name}</span>
+                        <span className="replacement-product">
+                          {product.name}
+                        </span>
                         {product.description && (
                           <span className="replacement-description">
                             {product.description}
@@ -132,7 +134,9 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
                       </div>
                     ))
                   ) : (
-                    <span className="replacement-none">No recommendation mapped</span>
+                    <span className="replacement-none">
+                      No recommendation mapped
+                    </span>
                   )}
                 </td>
               </tr>

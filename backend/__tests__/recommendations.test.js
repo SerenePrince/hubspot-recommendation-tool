@@ -26,13 +26,20 @@ describe("core/report/recommendations - buildRecommendations", () => {
 
   test("returns empty list when mapping is invalid (validation fallback)", () => {
     // Option A: silence expected console.error noise for this test only
-    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     try {
       const badPath = writeTmpMapping({ byTechnology: { React: "nope" } });
 
-      const { buildRecommendations } = require("../src/core/report/recommendations");
-      const out = buildRecommendations([{ name: "React", slug: "React", confidence: 99 }], { mappingPath: badPath });
+      const {
+        buildRecommendations,
+      } = require("../src/core/report/recommendations");
+      const out = buildRecommendations(
+        [{ name: "React", slug: "React", confidence: 99 }],
+        { mappingPath: badPath },
+      );
 
       expect(out).toEqual([]);
     } finally {
@@ -44,22 +51,39 @@ describe("core/report/recommendations - buildRecommendations", () => {
     const mappingPath = writeTmpMapping({
       byTechnology: {
         React: [
-          { hubspotProduct: "CMS Hub", priority: "high", tags: ["cms"], reason: "tech" },
+          {
+            hubspotProduct: "CMS Hub",
+            priority: "high",
+            tags: ["cms"],
+            reason: "tech",
+          },
         ],
       },
       byCategory: {
         Ecommerce: [
-          { hubspotProduct: "CMS Hub", priority: "medium", tags: ["web"], reason: "cat" },
+          {
+            hubspotProduct: "CMS Hub",
+            priority: "medium",
+            tags: ["web"],
+            reason: "cat",
+          },
         ],
       },
       byGroup: {
         Analytics: [
-          { hubspotProduct: "CMS Hub", priority: "low", tags: ["analytics"], reason: "group" },
+          {
+            hubspotProduct: "CMS Hub",
+            priority: "low",
+            tags: ["analytics"],
+            reason: "group",
+          },
         ],
       },
     });
 
-    const { buildRecommendations } = require("../src/core/report/recommendations");
+    const {
+      buildRecommendations,
+    } = require("../src/core/report/recommendations");
     const detections = [
       {
         name: "React",
@@ -70,7 +94,10 @@ describe("core/report/recommendations - buildRecommendations", () => {
       },
     ];
 
-    const out = buildRecommendations(detections, { mappingPath, minConfidence: 50 });
+    const out = buildRecommendations(detections, {
+      mappingPath,
+      minConfidence: 50,
+    });
     expect(out).toHaveLength(1);
 
     const rec = out[0];
@@ -103,11 +130,16 @@ describe("core/report/recommendations - buildRecommendations", () => {
       byTechnology: { React: [{ hubspotProduct: "p", priority: "high" }] },
     });
 
-    const { buildRecommendations } = require("../src/core/report/recommendations");
-    const out = buildRecommendations([{ name: "React", slug: "React", confidence: 49 }], {
-      mappingPath,
-      minConfidence: 50,
-    });
+    const {
+      buildRecommendations,
+    } = require("../src/core/report/recommendations");
+    const out = buildRecommendations(
+      [{ name: "React", slug: "React", confidence: 49 }],
+      {
+        mappingPath,
+        minConfidence: 50,
+      },
+    );
 
     expect(out).toEqual([]);
   });
@@ -119,7 +151,9 @@ describe("core/report/recommendations - buildRecommendations", () => {
       },
     });
 
-    const { buildRecommendations } = require("../src/core/report/recommendations");
+    const {
+      buildRecommendations,
+    } = require("../src/core/report/recommendations");
     const detections = [
       {
         name: "Zendesk",
@@ -133,7 +167,10 @@ describe("core/report/recommendations - buildRecommendations", () => {
     const out = buildRecommendations(detections, { mappingPath });
     expect(out).toHaveLength(1);
     expect(out[0].hubspotProduct).toBe("Data Hub");
-    expect(out[0].triggeredBy[0]).toMatchObject({ triggerType: "categoryId", key: 42 });
+    expect(out[0].triggeredBy[0]).toMatchObject({
+      triggerType: "categoryId",
+      key: 42,
+    });
   });
 
   test("caps group-noise: only best group-triggered rec per hubspotProduct is kept", () => {
@@ -144,8 +181,12 @@ describe("core/report/recommendations - buildRecommendations", () => {
       },
     });
 
-    const { buildRecommendations } = require("../src/core/report/recommendations");
-    const detections = [{ confidence: 90, groups: [{ name: "GroupA" }, { name: "GroupB" }] }];
+    const {
+      buildRecommendations,
+    } = require("../src/core/report/recommendations");
+    const detections = [
+      { confidence: 90, groups: [{ name: "GroupA" }, { name: "GroupB" }] },
+    ];
 
     const out = buildRecommendations(detections, { mappingPath });
 

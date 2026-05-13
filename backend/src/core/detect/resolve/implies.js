@@ -42,7 +42,10 @@ function resolveImplies(detections, db) {
       } else {
         // If already present, keep higher confidence
         const existing = bySlug.get(target);
-        existing.confidence = Math.max(existing.confidence || 0, clampConfidence(imp.confidence ?? 50));
+        existing.confidence = Math.max(
+          existing.confidence || 0,
+          clampConfidence(imp.confidence ?? 50),
+        );
         bySlug.set(target, existing);
       }
     }

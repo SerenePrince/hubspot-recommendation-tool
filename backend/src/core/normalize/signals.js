@@ -74,24 +74,38 @@ function buildSignals(fetchResult, options = {}) {
   const cssHrefs = resolveToAbsolute(cssRel, url);
 
   // Best-effort fetched resources from Phase 2 (bounded).
-  const externalScripts = Array.isArray(fetchResult?.external?.scripts) ? fetchResult.external.scripts : [];
-  const externalStylesheets = Array.isArray(fetchResult?.external?.stylesheets) ? fetchResult.external.stylesheets : [];
+  const externalScripts = Array.isArray(fetchResult?.external?.scripts)
+    ? fetchResult.external.scripts
+    : [];
+  const externalStylesheets = Array.isArray(fetchResult?.external?.stylesheets)
+    ? fetchResult.external.stylesheets
+    : [];
 
   const fetchedScriptsText = capText(
-    externalScripts.map((r) => (r && typeof r.body === "string" ? r.body : "")).join("\n\n"),
+    externalScripts
+      .map((r) => (r && typeof r.body === "string" ? r.body : ""))
+      .join("\n\n"),
     maxScriptsChars,
   );
 
   const fetchedCssText = capText(
-    externalStylesheets.map((r) => (r && typeof r.body === "string" ? r.body : "")).join("\n\n"),
+    externalStylesheets
+      .map((r) => (r && typeof r.body === "string" ? r.body : ""))
+      .join("\n\n"),
     maxCssChars,
   );
 
-  const scripts = capText([inlineScripts, fetchedScriptsText].filter(Boolean).join("\n\n"), maxScriptsChars);
+  const scripts = capText(
+    [inlineScripts, fetchedScriptsText].filter(Boolean).join("\n\n"),
+    maxScriptsChars,
+  );
 
   const css = {
     hrefs: cssHrefs,
-    inline: capText([inlineCss, fetchedCssText].filter(Boolean).join("\n\n"), maxCssChars),
+    inline: capText(
+      [inlineCss, fetchedCssText].filter(Boolean).join("\n\n"),
+      maxCssChars,
+    ),
   };
 
   const text = extractVisibleText($, html, maxTextChars);

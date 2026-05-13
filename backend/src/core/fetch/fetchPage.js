@@ -117,7 +117,10 @@ function resolveUrls(urls, baseUrl) {
  * - Node/undici can follow redirects automatically, but we need to re-check SSRF policy
  *   for every hop (hostname can change on redirects).
  */
-async function fetchResource(resourceUrl, { deadlineMs, accept, userAgent, maxBytes, maxRedirects }) {
+async function fetchResource(
+  resourceUrl,
+  { deadlineMs, accept, userAgent, maxBytes, maxRedirects },
+) {
   let currentUrl = resourceUrl;
 
   for (let redirects = 0; redirects <= maxRedirects; redirects++) {
@@ -195,7 +198,10 @@ async function fetchResource(resourceUrl, { deadlineMs, accept, userAgent, maxBy
 
     // Manual redirect handling is intentional: automatic follow would skip our
     // per-hop host validation guarantees.
-    if ([301, 302, 303, 307, 308].includes(res.status) && res.headers.get("location")) {
+    if (
+      [301, 302, 303, 307, 308].includes(res.status) &&
+      res.headers.get("location")
+    ) {
       if (redirects === maxRedirects) {
         throw new AppError({
           code: "FETCH_TOO_MANY_REDIRECTS",
@@ -318,8 +324,14 @@ async function fetchPage(inputUrl, options = {}) {
   // (keeps matchers effective while bounding latency and bytes).
   const ext = extractExternalResources(html);
 
-  const scriptUrls = resolveUrls(ext.scripts, baseUrl).slice(0, maxExternalScripts);
-  const styleUrls = resolveUrls(ext.styles, baseUrl).slice(0, maxExternalStylesheets);
+  const scriptUrls = resolveUrls(ext.scripts, baseUrl).slice(
+    0,
+    maxExternalScripts,
+  );
+  const styleUrls = resolveUrls(ext.styles, baseUrl).slice(
+    0,
+    maxExternalStylesheets,
+  );
 
   const external = {
     scripts: [],
@@ -336,14 +348,16 @@ async function fetchPage(inputUrl, options = {}) {
     const out = [];
     let i = 0;
 
-    const workers = new Array(Math.min(limit, items.length)).fill(null).map(async () => {
-      while (true) {
-        const idx = i++;
-        if (idx >= items.length) return;
-        const val = await fn(items[idx]);
-        if (val) out.push(val);
-      }
-    });
+    const workers = new Array(Math.min(limit, items.length))
+      .fill(null)
+      .map(async () => {
+        while (true) {
+          const idx = i++;
+          if (idx >= items.length) return;
+          const val = await fn(items[idx]);
+          if (val) out.push(val);
+        }
+      });
 
     await Promise.all(workers);
     return out;
@@ -383,7 +397,9 @@ async function fetchPage(inputUrl, options = {}) {
     mapLimit(scriptUrls, maxExternalConcurrency, (u) =>
       fetchExternal(u, "application/javascript,text/javascript,*/*;q=0.8"),
     ),
-    mapLimit(styleUrls, maxExternalConcurrency, (u) => fetchExternal(u, "text/css,*/*;q=0.8")),
+    mapLimit(styleUrls, maxExternalConcurrency, (u) =>
+      fetchExternal(u, "text/css,*/*;q=0.8"),
+    ),
   ]);
 
   external.scripts = scriptBodies.filter(Boolean);

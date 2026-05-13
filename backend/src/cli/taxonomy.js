@@ -38,13 +38,17 @@ async function main() {
     .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
 
   if (human) {
-    process.stdout.write(formatHumanTaxonomy(categories, groups, db.meta) + "\n");
+    process.stdout.write(
+      formatHumanTaxonomy(categories, groups, db.meta) + "\n",
+    );
     return;
   }
 
   const payload = { categories, groups, meta: db.meta || null };
 
-  process.stdout.write((pretty ? formatPretty(payload) : JSON.stringify(payload)) + "\n");
+  process.stdout.write(
+    (pretty ? formatPretty(payload) : JSON.stringify(payload)) + "\n",
+  );
 }
 
 /**
@@ -59,7 +63,9 @@ function formatHumanTaxonomy(categories, groups, meta) {
 
   for (const cat of categories) {
     const groupId = cat.groups[0] ?? null;
-    const groupName = groupId ? (groupNamesById.get(groupId) ?? `Group ${groupId}`) : "Other";
+    const groupName = groupId
+      ? (groupNamesById.get(groupId) ?? `Group ${groupId}`)
+      : "Other";
     if (!byGroup.has(groupName)) byGroup.set(groupName, []);
     byGroup.get(groupName).push(cat.name ?? `Category ${cat.id}`);
   }
@@ -75,7 +81,11 @@ function formatHumanTaxonomy(categories, groups, meta) {
   const border = "─".repeat(60);
 
   lines.push("┌" + border + "┐");
-  lines.push("│" + "  Technology Categories — HubSpot Recommendation Tool".padEnd(60) + "│");
+  lines.push(
+    "│" +
+      "  Technology Categories — HubSpot Recommendation Tool".padEnd(60) +
+      "│",
+  );
   lines.push("└" + border + "┘");
   lines.push("");
 
@@ -84,7 +94,9 @@ function formatHumanTaxonomy(categories, groups, meta) {
     lines.push("");
   }
 
-  lines.push(`${categories.length} categories across ${sortedGroups.length} groups`);
+  lines.push(
+    `${categories.length} categories across ${sortedGroups.length} groups`,
+  );
   lines.push("");
 
   for (const groupName of sortedGroups) {
@@ -96,7 +108,9 @@ function formatHumanTaxonomy(categories, groups, meta) {
     lines.push("");
   }
 
-  lines.push("Tip: use these category names when editing hubspot-mapping.json (byCategory section).");
+  lines.push(
+    "Tip: use these category names when editing hubspot-mapping.json (byCategory section).",
+  );
   lines.push("Tip: use --pretty (JSON) to get IDs for programmatic use.");
 
   return lines.join("\n");

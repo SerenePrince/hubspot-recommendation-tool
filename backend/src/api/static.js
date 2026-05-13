@@ -129,7 +129,8 @@ async function tryServeStatic(req, res, requestUrl, options) {
   }
 
   // Cache hashed assets aggressively; keep HTML un-cached.
-  const isHtml = target.endsWith(path.sep + "index.html") || target.endsWith(".html");
+  const isHtml =
+    target.endsWith(path.sep + "index.html") || target.endsWith(".html");
   const cacheControl = isHtml
     ? "no-store"
     : isProbablyHashedAssetPath(requestUrl.pathname)

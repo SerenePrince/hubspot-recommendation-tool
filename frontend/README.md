@@ -16,9 +16,9 @@ Run the backend separately (see `backend/README.md`). The Vite dev server proxie
 
 ### Environment Variable
 
-| Variable        | Default | Purpose                            |
-| --------------- | ------- | ---------------------------------- |
-| `VITE_API_URL`  | `/api`  | API base URL used by the fetch hook |
+| Variable       | Default | Purpose                             |
+| -------------- | ------- | ----------------------------------- |
+| `VITE_API_URL` | `/api`  | API base URL used by the fetch hook |
 
 ```bash
 VITE_API_URL=http://localhost:3001/api npm run dev
@@ -62,21 +62,21 @@ The table uses three columns. `mapApiToTableData` extracts only what is needed:
         "products": [
           {
             "hubspotProduct": "HubSpot CMS Hub",
-            "priority": "high"
-          }
-        ]
-      }
-    }
-  ]
+            "priority": "high",
+          },
+        ],
+      },
+    },
+  ],
 }
 ```
 
 Mapped to table rows:
-| Column             | Source field                              | Fallback                  |
+| Column | Source field | Fallback |
 | ------------------ | ----------------------------------------- | ------------------------- |
-| Technology         | `tech.name` + `tech.categories[0].name`   | `"Unknown"`               |
-| Description        | `tech.description`                        | `"No description available"` |
-| HubSpot Replacement| `tech.hubspot.primaryProduct`                       | `"No direct replacement"` |
+| Technology | `tech.name` + `tech.categories[0].name` | `"Unknown"` |
+| Description | `tech.description` | `"No description available"` |
+| HubSpot Replacement| `tech.hubspot.primaryProduct` | `"No direct replacement"` |
 
 ## Constraints
 

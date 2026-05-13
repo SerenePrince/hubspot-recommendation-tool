@@ -13,9 +13,14 @@
 function formatHuman(report, options = {}) {
   const r = report && typeof report === "object" ? report : {};
 
-  const mode = options.mode === "wide" || options.mode === "wrap" ? options.mode : "truncate";
+  const mode =
+    options.mode === "wide" || options.mode === "wrap"
+      ? options.mode
+      : "truncate";
   const maxWidth =
-    Number.isFinite(options.maxWidth) && options.maxWidth > 0 ? Math.floor(options.maxWidth) : 110;
+    Number.isFinite(options.maxWidth) && options.maxWidth > 0
+      ? Math.floor(options.maxWidth)
+      : 110;
 
   const inspect = options.inspect ? String(options.inspect).trim() : null;
 
@@ -26,7 +31,9 @@ function formatHuman(report, options = {}) {
       ? r.detections
       : [];
 
-  const recommendations = Array.isArray(r.recommendations) ? r.recommendations : [];
+  const recommendations = Array.isArray(r.recommendations)
+    ? r.recommendations
+    : [];
   const summary = r.summary && typeof r.summary === "object" ? r.summary : null;
 
   // Best-effort map: detected technology -> recommended HubSpot product(s), ordered primary-first.
@@ -49,15 +56,24 @@ function formatHuman(report, options = {}) {
     const timings = r.meta.timings || null;
 
     if (fetch && typeof fetch === "object") {
-      lines.push(kvLine("HTTP Status", fetch.status != null ? String(fetch.status) : "n/a"));
-      if (fetch.contentType) lines.push(kvLine("Content Type", String(fetch.contentType)));
+      lines.push(
+        kvLine(
+          "HTTP Status",
+          fetch.status != null ? String(fetch.status) : "n/a",
+        ),
+      );
+      if (fetch.contentType)
+        lines.push(kvLine("Content Type", String(fetch.contentType)));
       if (fetch.bytes != null) lines.push(kvLine("Bytes", String(fetch.bytes)));
-      if (fetch.timingMs != null) lines.push(kvLine("Fetch Time", `${fetch.timingMs} ms`));
+      if (fetch.timingMs != null)
+        lines.push(kvLine("Fetch Time", `${fetch.timingMs} ms`));
     }
 
     if (timings && typeof timings === "object") {
-      if (timings.analysisMs != null) lines.push(kvLine("Analysis Time", `${timings.analysisMs} ms`));
-      if (timings.totalMs != null) lines.push(kvLine("Total Time", `${timings.totalMs} ms`));
+      if (timings.analysisMs != null)
+        lines.push(kvLine("Analysis Time", `${timings.analysisMs} ms`));
+      if (timings.totalMs != null)
+        lines.push(kvLine("Total Time", `${timings.totalMs} ms`));
     }
   }
 
@@ -66,8 +82,20 @@ function formatHuman(report, options = {}) {
   // Summary block (best-effort)
   if (summary && typeof summary === "object") {
     lines.push(section("Summary"));
-    const totals = summary.totals && typeof summary.totals === "object" ? summary.totals : {};
-    lines.push(kvLine("Technologies detected", String(totals.detections ?? totals.technologiesDetected ?? technologies.length)));
+    const totals =
+      summary.totals && typeof summary.totals === "object"
+        ? summary.totals
+        : {};
+    lines.push(
+      kvLine(
+        "Technologies detected",
+        String(
+          totals.detections ??
+            totals.technologiesDetected ??
+            technologies.length,
+        ),
+      ),
+    );
     lines.push(kvLine("Groups", String(totals.groups ?? "n/a")));
     lines.push(kvLine("Categories", String(totals.categories ?? "n/a")));
     lines.push("");
@@ -93,11 +121,18 @@ function formatHuman(report, options = {}) {
 
     top.forEach((rec, idx) => {
       const product = String(rec?.hubspotProduct || "").trim() || "HubSpot";
-      const priority = String(rec?.priority || "medium").trim().toLowerCase();
+      const priority = String(rec?.priority || "medium")
+        .trim()
+        .toLowerCase();
       const desc = String(rec?.description || "").trim();
-      const triggered = summarizeTriggeredBy(rec?.triggeredBy, { maxItems: 2, maxLen: 90 });
+      const triggered = summarizeTriggeredBy(rec?.triggeredBy, {
+        maxItems: 2,
+        maxLen: 90,
+      });
       const triggerSuffix = triggered ? ` (Triggered by: ${triggered})` : "";
-      lines.push(`${idx + 1}) ${product} (${priority})${desc ? " — " + desc : ""}${triggerSuffix}`);
+      lines.push(
+        `${idx + 1}) ${product} (${priority})${desc ? " — " + desc : ""}${triggerSuffix}`,
+      );
     });
   }
   lines.push("");
@@ -105,17 +140,28 @@ function formatHuman(report, options = {}) {
   // Inspect mode
   if (inspect) {
     lines.push(section(`Inspect: ${inspect}`));
-    const { tech, recs } = inspectTechnology(technologies, recommendations, inspect);
+    const { tech, recs } = inspectTechnology(
+      technologies,
+      recommendations,
+      inspect,
+    );
     if (!tech) {
       lines.push(`No detected technology matched: ${inspect}`);
       lines.push("");
-      lines.push(dim("Tip: check exact casing (technology names are case-sensitive in the dataset)."));
+      lines.push(
+        dim(
+          "Tip: check exact casing (technology names are case-sensitive in the dataset).",
+        ),
+      );
       return lines.join("\n");
     }
 
-    lines.push(kvLine("Technology", String(tech.name || tech.slug || "Unknown")));
+    lines.push(
+      kvLine("Technology", String(tech.name || tech.slug || "Unknown")),
+    );
     if (tech.version) lines.push(kvLine("Version", String(tech.version)));
-    if (tech.confidence != null) lines.push(kvLine("Confidence", String(tech.confidence)));
+    if (tech.confidence != null)
+      lines.push(kvLine("Confidence", String(tech.confidence)));
 
     const cats = (Array.isArray(tech.categories) ? tech.categories : [])
       .map((c) => c && c.name)
@@ -128,7 +174,12 @@ function formatHuman(report, options = {}) {
     if (cats) lines.push(kvLine("Categories", cats));
     if (groups) lines.push(kvLine("Groups", groups));
 
-    const replacement = resolveReplacement(tech, techToHubSpotProducts, String(tech.name || tech.slug || ""), { maxProducts: 5 });
+    const replacement = resolveReplacement(
+      tech,
+      techToHubSpotProducts,
+      String(tech.name || tech.slug || ""),
+      { maxProducts: 5 },
+    );
     if (replacement) lines.push(kvLine("HubSpot Replacement", replacement));
 
     lines.push("");
@@ -141,19 +192,24 @@ function formatHuman(report, options = {}) {
         const product = String(rec?.hubspotProduct || "").trim() || "HubSpot";
         const priority = String(rec?.priority || "").trim() || "medium";
         const desc = String(rec?.description || rec?.reason || "").trim();
-        const triggered = summarizeTriggeredBy(rec?.triggeredBy, { maxItems: 3, maxLen: 120 });
+        const triggered = summarizeTriggeredBy(rec?.triggeredBy, {
+          maxItems: 3,
+          maxLen: 120,
+        });
         return [priority, product, desc, triggered];
       });
       const recTable = table(
         ["Priority", "Product", "Description", "Triggered by"],
         rows,
-        { mode, maxWidth }
+        { mode, maxWidth },
       );
       lines.push(recTable.text);
       if (recTable.truncated && mode !== "wide") {
         lines.push("");
         lines.push(
-          dim("⚠ Some cells were truncated. Re-run with --wide for full values, or --wrap to avoid truncation.")
+          dim(
+            "⚠ Some cells were truncated. Re-run with --wide for full values, or --wrap to avoid truncation.",
+          ),
         );
       }
     }
@@ -193,12 +249,14 @@ function formatHuman(report, options = {}) {
       const replacement = resolveReplacement(t, techToHubSpotProducts, name);
 
       if (replacement) mappedCount += 1;
-      else if (unmappedNames.length < 8 && name !== "Unknown") unmappedNames.push(name);
+      else if (unmappedNames.length < 8 && name !== "Unknown")
+        unmappedNames.push(name);
 
       // Primary category only — groups and confidence are developer detail, not useful for discovery
-      const primaryCat = (Array.isArray(t?.categories) ? t.categories : [])
-        .map((c) => c && c.name)
-        .filter(Boolean)[0] || "";
+      const primaryCat =
+        (Array.isArray(t?.categories) ? t.categories : [])
+          .map((c) => c && c.name)
+          .filter(Boolean)[0] || "";
 
       return [name, version, primaryCat, replacement];
     });
@@ -206,7 +264,7 @@ function formatHuman(report, options = {}) {
     const techTable = table(
       ["Technology", "Version", "Category", "HubSpot Recommendation"],
       rows,
-      { mode, maxWidth }
+      { mode, maxWidth },
     );
     lines.push(techTable.text);
 
@@ -214,21 +272,27 @@ function formatHuman(report, options = {}) {
     lines.push("");
     lines.push(
       `Mapped replacements: ${mappedCount}/${Math.min(technologies.length, 200)} technologies` +
-        (technologies.length > 200 ? " (first 200 shown)" : "")
+        (technologies.length > 200 ? " (first 200 shown)" : ""),
     );
     if (unmappedNames.length) {
-      lines.push(`No replacement mapped for: ${unmappedNames.join(", ")}${technologies.length > 200 ? ", …" : ""}`);
+      lines.push(
+        `No replacement mapped for: ${unmappedNames.join(", ")}${technologies.length > 200 ? ", …" : ""}`,
+      );
     }
 
     if (technologies.length > 200) {
       lines.push("");
-      lines.push(`(Showing first 200 technologies. Total: ${technologies.length})`);
+      lines.push(
+        `(Showing first 200 technologies. Total: ${technologies.length})`,
+      );
     }
     lines.push("");
 
     if (techTable.truncated && mode !== "wide") {
       lines.push(
-        dim("⚠ Some cells were truncated. Re-run with --wide for full values, or --wrap to avoid truncation.")
+        dim(
+          "⚠ Some cells were truncated. Re-run with --wide for full values, or --wrap to avoid truncation.",
+        ),
       );
       lines.push("");
     }
@@ -248,30 +312,41 @@ function formatHuman(report, options = {}) {
       return [product, priority, desc];
     });
 
-    const recTable = table(
-      ["Product", "Priority", "Description"],
-      recRows,
-      { mode, maxWidth }
-    );
+    const recTable = table(["Product", "Priority", "Description"], recRows, {
+      mode,
+      maxWidth,
+    });
     lines.push(recTable.text);
 
     if (recommendations.length > 100) {
       lines.push("");
-      lines.push(`(Showing first 100 recommendations. Total: ${recommendations.length})`);
+      lines.push(
+        `(Showing first 100 recommendations. Total: ${recommendations.length})`,
+      );
     }
     lines.push("");
 
     if (recTable.truncated && mode !== "wide") {
       lines.push(
-        dim("⚠ Some cells were truncated. Re-run with --wide for full values, or --wrap to avoid truncation.")
+        dim(
+          "⚠ Some cells were truncated. Re-run with --wide for full values, or --wrap to avoid truncation.",
+        ),
       );
       lines.push("");
     }
   }
 
   // Interpretation footer
-  lines.push(dim("Notes: Technologies without a mapped recommendation show no HubSpot product."));
-  lines.push(dim("Use --inspect <technology> for a full breakdown of any specific tool."));
+  lines.push(
+    dim(
+      "Notes: Technologies without a mapped recommendation show no HubSpot product.",
+    ),
+  );
+  lines.push(
+    dim(
+      "Use --inspect <technology> for a full breakdown of any specific tool.",
+    ),
+  );
   lines.push(dim("Use --wide or --wrap to see full text without truncation."));
 
   return lines.join("\n");
@@ -288,14 +363,17 @@ function inspectTechnology(technologies, recommendations, inspect) {
 
   if (!tech) return { tech: null, recs: [] };
 
-  const keyCandidates = new Set([String(tech.name || "").trim(), String(tech.slug || "").trim()]);
+  const keyCandidates = new Set([
+    String(tech.name || "").trim(),
+    String(tech.slug || "").trim(),
+  ]);
 
   // Match technology-triggered recs by exact name/slug, and category-triggered recs
   // by checking whether this technology belongs to the matched category.
   const techCategoryNames = new Set(
     (Array.isArray(tech.categories) ? tech.categories : [])
       .map((c) => String(c?.name || "").trim())
-      .filter(Boolean)
+      .filter(Boolean),
   );
 
   const recs = (recommendations || []).filter((rec) => {
@@ -358,16 +436,27 @@ function prioRank(p) {
  * map for raw report format where `hubspot.products` is absent.
  */
 function resolveReplacement(tech, map, nameForFallback, opts = {}) {
-  const maxProducts = Number.isFinite(opts.maxProducts) ? Math.max(1, Math.floor(opts.maxProducts)) : 2;
-  const products = Array.isArray(tech?.hubspot?.products) ? tech.hubspot.products : [];
+  const maxProducts = Number.isFinite(opts.maxProducts)
+    ? Math.max(1, Math.floor(opts.maxProducts))
+    : 2;
+  const products = Array.isArray(tech?.hubspot?.products)
+    ? tech.hubspot.products
+    : [];
 
   if (products.length) {
-    const shown = products.slice(0, maxProducts).map((p) => String(p?.hubspotProduct || "")).filter(Boolean);
-    const extra = products.length > maxProducts ? ` +${products.length - maxProducts}` : "";
+    const shown = products
+      .slice(0, maxProducts)
+      .map((p) => String(p?.hubspotProduct || ""))
+      .filter(Boolean);
+    const extra =
+      products.length > maxProducts ? ` +${products.length - maxProducts}` : "";
     return shown.join(" → ") + extra;
   }
 
-  return formatProductsForTech(map, nameForFallback, tech?.slug, { maxProducts, style: "arrow" });
+  return formatProductsForTech(map, nameForFallback, tech?.slug, {
+    maxProducts,
+    style: "arrow",
+  });
 }
 
 /**
@@ -393,7 +482,10 @@ function buildTechToHubSpotProductsMap(recommendations) {
       const productMap = map.get(techKey);
 
       if (!productMap.has(product)) {
-        productMap.set(product, { bestPriorityRank: rank, firstSeen: recIndex });
+        productMap.set(product, {
+          bestPriorityRank: rank,
+          firstSeen: recIndex,
+        });
       } else {
         const meta = productMap.get(product);
         meta.bestPriorityRank = Math.min(meta.bestPriorityRank, rank);
@@ -410,8 +502,13 @@ function buildTechToHubSpotProductsMap(recommendations) {
  * @param {Map<string, Map<string, {bestPriorityRank:number, firstSeen:number}>>} map
  */
 function formatProductsForTech(map, techName, techSlug, opts = {}) {
-  const keys = [String(techName || "").trim(), String(techSlug || "").trim()].filter(Boolean);
-  const maxProducts = Number.isFinite(opts.maxProducts) ? Math.max(1, Math.floor(opts.maxProducts)) : 2;
+  const keys = [
+    String(techName || "").trim(),
+    String(techSlug || "").trim(),
+  ].filter(Boolean);
+  const maxProducts = Number.isFinite(opts.maxProducts)
+    ? Math.max(1, Math.floor(opts.maxProducts))
+    : 2;
   const style = opts.style === "comma" ? "comma" : "arrow";
 
   // Aggregate product metadata across possible keys (name/slug)
@@ -426,7 +523,10 @@ function formatProductsForTech(map, techName, techSlug, opts = {}) {
         productMeta.set(product, { ...meta });
       } else {
         const cur = productMeta.get(product);
-        cur.bestPriorityRank = Math.min(cur.bestPriorityRank, meta.bestPriorityRank);
+        cur.bestPriorityRank = Math.min(
+          cur.bestPriorityRank,
+          meta.bestPriorityRank,
+        );
         cur.firstSeen = Math.min(cur.firstSeen, meta.firstSeen);
       }
     }
@@ -434,8 +534,10 @@ function formatProductsForTech(map, techName, techSlug, opts = {}) {
 
   const ordered = Array.from(productMeta.entries())
     .sort((a, b) => {
-      const ma = a[1], mb = b[1];
-      if (ma.bestPriorityRank !== mb.bestPriorityRank) return ma.bestPriorityRank - mb.bestPriorityRank;
+      const ma = a[1],
+        mb = b[1];
+      if (ma.bestPriorityRank !== mb.bestPriorityRank)
+        return ma.bestPriorityRank - mb.bestPriorityRank;
       return ma.firstSeen - mb.firstSeen;
     })
     .map(([product]) => product);
@@ -454,8 +556,12 @@ function summarizeTriggeredBy(triggeredBy, opts = {}) {
   const items = Array.isArray(triggeredBy) ? triggeredBy : [];
   if (!items.length) return "";
 
-  const maxItems = Number.isFinite(opts.maxItems) ? Math.max(1, Math.floor(opts.maxItems)) : 3;
-  const maxLen = Number.isFinite(opts.maxLen) ? Math.max(30, Math.floor(opts.maxLen)) : 120;
+  const maxItems = Number.isFinite(opts.maxItems)
+    ? Math.max(1, Math.floor(opts.maxItems))
+    : 3;
+  const maxLen = Number.isFinite(opts.maxLen)
+    ? Math.max(30, Math.floor(opts.maxLen))
+    : 120;
 
   // Prefer technology + category triggers; keep stable order as provided.
   const formatted = [];
@@ -493,7 +599,10 @@ function summarizeTriggeredBy(triggeredBy, opts = {}) {
  * @returns {{ text: string, truncated: boolean }}
  */
 function table(headers, rows, options = {}) {
-  const mode = options.mode === "wide" || options.mode === "wrap" ? options.mode : "truncate";
+  const mode =
+    options.mode === "wide" || options.mode === "wrap"
+      ? options.mode
+      : "truncate";
   const maxWidth = Number.isFinite(options.maxWidth) ? options.maxWidth : 110;
 
   const cols = headers.length;
@@ -535,7 +644,11 @@ function table(headers, rows, options = {}) {
   if (mode === "wrap") {
     out.push(...renderWrappedRow(headers.map(String), widths));
   } else {
-    const hdr = renderTruncatedRow(headers.map(String), widths, mode === "wide");
+    const hdr = renderTruncatedRow(
+      headers.map(String),
+      widths,
+      mode === "wide",
+    );
     truncated = truncated || hdr.truncated;
     out.push(hdr.text);
   }
@@ -544,9 +657,18 @@ function table(headers, rows, options = {}) {
 
   for (const row of rows) {
     if (mode === "wrap") {
-      out.push(...renderWrappedRow(row.map((c) => String(c ?? "")), widths));
+      out.push(
+        ...renderWrappedRow(
+          row.map((c) => String(c ?? "")),
+          widths,
+        ),
+      );
     } else {
-      const rr = renderTruncatedRow(row.map((c) => String(c ?? "")), widths, mode === "wide");
+      const rr = renderTruncatedRow(
+        row.map((c) => String(c ?? "")),
+        widths,
+        mode === "wide",
+      );
       truncated = truncated || rr.truncated;
       out.push(rr.text);
     }
@@ -567,7 +689,10 @@ function renderTruncatedRow(cells, widths, allowOverflow) {
       return " " + v + " ".repeat(pad) + " ";
     }
 
-    const { text, didTruncate } = truncateToWidth(String(cell ?? ""), widths[i]);
+    const { text, didTruncate } = truncateToWidth(
+      String(cell ?? ""),
+      widths[i],
+    );
     if (didTruncate) rowTruncated = true;
     return " " + text.padEnd(widths[i], " ") + " ";
   });
@@ -576,7 +701,9 @@ function renderTruncatedRow(cells, widths, allowOverflow) {
 }
 
 function renderWrappedRow(cells, widths) {
-  const wrapped = cells.map((cell, i) => wrapToWidth(String(cell ?? ""), widths[i]));
+  const wrapped = cells.map((cell, i) =>
+    wrapToWidth(String(cell ?? ""), widths[i]),
+  );
   const height = Math.max(1, ...wrapped.map((lines) => lines.length));
 
   const lines = [];

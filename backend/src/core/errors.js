@@ -33,7 +33,12 @@ class AppError extends Error {
  * @returns {boolean} True when the value is an AppError instance shape
  */
 function isAppError(err) {
-  return Boolean(err && typeof err === "object" && err.name === "AppError" && "statusCode" in err);
+  return Boolean(
+    err &&
+    typeof err === "object" &&
+    err.name === "AppError" &&
+    "statusCode" in err,
+  );
 }
 
 /**
@@ -69,4 +74,10 @@ function serviceUnavailable(code, message) {
   return new AppError({ code, message, statusCode: 503, expose: true });
 }
 
-module.exports = { AppError, isAppError, badRequest, tooManyRequests, serviceUnavailable };
+module.exports = {
+  AppError,
+  isAppError,
+  badRequest,
+  tooManyRequests,
+  serviceUnavailable,
+};

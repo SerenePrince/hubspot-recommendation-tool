@@ -21,7 +21,9 @@ function matchDom(db, signals) {
 
   const out = [];
 
-  const techNames = Array.isArray(db?.index?.dom) ? db.index.dom : Object.keys(db.technologies || {});
+  const techNames = Array.isArray(db?.index?.dom)
+    ? db.index.dom
+    : Object.keys(db.technologies || {});
   for (const slug of techNames) {
     const tech = db.technologies?.[slug];
     if (!tech) continue;
@@ -65,7 +67,9 @@ function matchDom(db, signals) {
 
         // attributes: { attrName: "regex;confidence:80" }
         if (rule.attributes && typeof rule.attributes === "object") {
-          for (const [attrName, patternRaw] of Object.entries(rule.attributes)) {
+          for (const [attrName, patternRaw] of Object.entries(
+            rule.attributes,
+          )) {
             const compiled = compilePattern(patternRaw);
             if (!compiled) continue;
 

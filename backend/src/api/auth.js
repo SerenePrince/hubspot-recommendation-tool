@@ -51,7 +51,9 @@ function safeEq(a, b) {
 function isAuthorized(req, expectedUser, expectedPass) {
   const creds = parseBasicAuth(req.headers.authorization);
   if (!creds) return false;
-  return safeEq(creds.username, expectedUser) && safeEq(creds.password, expectedPass);
+  return (
+    safeEq(creds.username, expectedUser) && safeEq(creds.password, expectedPass)
+  );
 }
 
 /**
@@ -63,7 +65,10 @@ function isAuthorized(req, expectedUser, expectedPass) {
  */
 function sendAuthChallenge(res, realm = "Restricted") {
   res.statusCode = 401;
-  res.setHeader("WWW-Authenticate", `Basic realm="${String(realm).replace(/"/g, "")}", charset="UTF-8"`);
+  res.setHeader(
+    "WWW-Authenticate",
+    `Basic realm="${String(realm).replace(/"/g, "")}", charset="UTF-8"`,
+  );
   res.setHeader("Cache-Control", "no-store");
   res.end("Authentication required");
 }

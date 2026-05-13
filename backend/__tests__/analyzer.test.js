@@ -23,17 +23,35 @@ describe("core/analyzer - initTechDb / analyzeUrl", () => {
     jest.doMock("../src/core/techdb/loadTechDb", () => ({ loadTechDb }));
 
     // Minimal mocks to satisfy require graph
-    jest.doMock("../src/core/fetch/fetchPage", () => ({ fetchPage: jest.fn() }));
-    jest.doMock("../src/core/normalize/signals", () => ({ buildSignals: jest.fn() }));
-    jest.doMock("../src/core/detect/detectTechnologies", () => ({ detectTechnologies: jest.fn(() => []) }));
-    jest.doMock("../src/core/report/enrichDetections", () => ({ enrichDetections: jest.fn(() => []) }));
-    jest.doMock("../src/core/report/recommendations", () => ({ buildRecommendations: jest.fn(() => []) }));
-    jest.doMock("../src/core/report/summarize", () => ({ buildSummary: jest.fn(() => ({})) }));
-    jest.doMock("../src/core/report/groupDetections", () => ({ groupDetections: jest.fn(() => ({})) }));
+    jest.doMock("../src/core/fetch/fetchPage", () => ({
+      fetchPage: jest.fn(),
+    }));
+    jest.doMock("../src/core/normalize/signals", () => ({
+      buildSignals: jest.fn(),
+    }));
+    jest.doMock("../src/core/detect/detectTechnologies", () => ({
+      detectTechnologies: jest.fn(() => []),
+    }));
+    jest.doMock("../src/core/report/enrichDetections", () => ({
+      enrichDetections: jest.fn(() => []),
+    }));
+    jest.doMock("../src/core/report/recommendations", () => ({
+      buildRecommendations: jest.fn(() => []),
+    }));
+    jest.doMock("../src/core/report/summarize", () => ({
+      buildSummary: jest.fn(() => ({})),
+    }));
+    jest.doMock("../src/core/report/groupDetections", () => ({
+      groupDetections: jest.fn(() => ({})),
+    }));
 
     const { initTechDb } = require("../src/core/analyzer");
 
-    const [a, b, c] = await Promise.all([initTechDb(), initTechDb(), initTechDb()]);
+    const [a, b, c] = await Promise.all([
+      initTechDb(),
+      initTechDb(),
+      initTechDb(),
+    ]);
     expect(a).toBe(db);
     expect(b).toBe(db);
     expect(c).toBe(db);
@@ -41,9 +59,13 @@ describe("core/analyzer - initTechDb / analyzeUrl", () => {
   });
 
   test("analyzeUrl produces a stable report and sorted detections", async () => {
-    const db = { technologies: { React: { name: "React" }, Vue: { name: "Vue" } } };
+    const db = {
+      technologies: { React: { name: "React" }, Vue: { name: "Vue" } },
+    };
 
-    jest.doMock("../src/core/techdb/loadTechDb", () => ({ loadTechDb: jest.fn(async () => db) }));
+    jest.doMock("../src/core/techdb/loadTechDb", () => ({
+      loadTechDb: jest.fn(async () => db),
+    }));
 
     jest.doMock("../src/core/fetch/fetchPage", () => ({
       fetchPage: jest.fn(async () => ({
@@ -58,7 +80,9 @@ describe("core/analyzer - initTechDb / analyzeUrl", () => {
       })),
     }));
 
-    jest.doMock("../src/core/normalize/signals", () => ({ buildSignals: jest.fn(() => ({ url: "https://example.com/" })) }));
+    jest.doMock("../src/core/normalize/signals", () => ({
+      buildSignals: jest.fn(() => ({ url: "https://example.com/" })),
+    }));
 
     // Return unsorted detections, analyzer should enrich then sort by confidence desc then name asc
     jest.doMock("../src/core/detect/detectTechnologies", () => ({
@@ -78,12 +102,20 @@ describe("core/analyzer - initTechDb / analyzeUrl", () => {
       ),
     }));
 
-    jest.doMock("../src/core/report/summarize", () => ({ buildSummary: jest.fn(() => ({ totalDetections: 2 })) }));
-    jest.doMock("../src/core/report/groupDetections", () => ({ groupDetections: jest.fn(() => ({ byCategory: {} })) }));
-    jest.doMock("../src/core/report/recommendations", () => ({ buildRecommendations: jest.fn(() => [{ hubspotProduct: "x" }]) }));
+    jest.doMock("../src/core/report/summarize", () => ({
+      buildSummary: jest.fn(() => ({ totalDetections: 2 })),
+    }));
+    jest.doMock("../src/core/report/groupDetections", () => ({
+      groupDetections: jest.fn(() => ({ byCategory: {} })),
+    }));
+    jest.doMock("../src/core/report/recommendations", () => ({
+      buildRecommendations: jest.fn(() => [{ hubspotProduct: "x" }]),
+    }));
 
     // Ensure debugSignals off for this test
-    jest.doMock("../src/core/config", () => ({ config: { debugSignals: false } }));
+    jest.doMock("../src/core/config", () => ({
+      config: { debugSignals: false },
+    }));
 
     const { analyzeUrl } = require("../src/core/analyzer");
     const report = await analyzeUrl("https://example.com/");
@@ -101,7 +133,9 @@ describe("core/analyzer - initTechDb / analyzeUrl", () => {
   test("includes _debugSignals only when enabled via config", async () => {
     const db = { technologies: {} };
 
-    jest.doMock("../src/core/techdb/loadTechDb", () => ({ loadTechDb: jest.fn(async () => db) }));
+    jest.doMock("../src/core/techdb/loadTechDb", () => ({
+      loadTechDb: jest.fn(async () => db),
+    }));
     jest.doMock("../src/core/fetch/fetchPage", () => ({
       fetchPage: jest.fn(async () => ({
         timingMs: 1,
@@ -115,15 +149,31 @@ describe("core/analyzer - initTechDb / analyzeUrl", () => {
       })),
     }));
     jest.doMock("../src/core/normalize/signals", () => ({
-      buildSignals: jest.fn(() => ({ meta: { a: "b" }, scriptSrc: ["x"], cookies: ["a"] })),
+      buildSignals: jest.fn(() => ({
+        meta: { a: "b" },
+        scriptSrc: ["x"],
+        cookies: ["a"],
+      })),
     }));
-    jest.doMock("../src/core/detect/detectTechnologies", () => ({ detectTechnologies: jest.fn(() => []) }));
-    jest.doMock("../src/core/report/enrichDetections", () => ({ enrichDetections: jest.fn(() => []) }));
-    jest.doMock("../src/core/report/summarize", () => ({ buildSummary: jest.fn(() => ({})) }));
-    jest.doMock("../src/core/report/groupDetections", () => ({ groupDetections: jest.fn(() => ({})) }));
-    jest.doMock("../src/core/report/recommendations", () => ({ buildRecommendations: jest.fn(() => []) }));
+    jest.doMock("../src/core/detect/detectTechnologies", () => ({
+      detectTechnologies: jest.fn(() => []),
+    }));
+    jest.doMock("../src/core/report/enrichDetections", () => ({
+      enrichDetections: jest.fn(() => []),
+    }));
+    jest.doMock("../src/core/report/summarize", () => ({
+      buildSummary: jest.fn(() => ({})),
+    }));
+    jest.doMock("../src/core/report/groupDetections", () => ({
+      groupDetections: jest.fn(() => ({})),
+    }));
+    jest.doMock("../src/core/report/recommendations", () => ({
+      buildRecommendations: jest.fn(() => []),
+    }));
 
-    jest.doMock("../src/core/config", () => ({ config: { debugSignals: true } }));
+    jest.doMock("../src/core/config", () => ({
+      config: { debugSignals: true },
+    }));
 
     const { analyzeUrl } = require("../src/core/analyzer");
     const report = await analyzeUrl("https://example.com/");

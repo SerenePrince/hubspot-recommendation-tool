@@ -74,24 +74,26 @@ async function analyzeUrl(url) {
   const signals = buildSignals(fetched);
 
   // Optional internal-only debug signals (never required for frontend output)
-  const debugSignals =
-    config.debugSignals
-      ? {
-          metaKeys: Object.keys(signals.meta || {}).slice(0, 50),
-          scriptSrcPreview: (signals.scriptSrc || []).slice(0, 20),
-          cookieNames: Array.isArray(signals.cookies) ? signals.cookies : [],
-        }
-      : undefined;
+  const debugSignals = config.debugSignals
+    ? {
+        metaKeys: Object.keys(signals.meta || {}).slice(0, 50),
+        scriptSrcPreview: (signals.scriptSrc || []).slice(0, 20),
+        cookieNames: Array.isArray(signals.cookies) ? signals.cookies : [],
+      }
+    : undefined;
 
   // Phase 4: run Wappalyzer-style matchers across multiple signal types (headers, DOM, etc.)
-  const detections = detectTechnologies(db, signals, { minConfidence: MIN_CONFIDENCE });
+  const detections = detectTechnologies(db, signals, {
+    minConfidence: MIN_CONFIDENCE,
+  });
   // Phase 5: attach taxonomy + human-friendly metadata (used by report + recommendation logic)
   const enriched = enrichDetections(db, detections);
 
   // Keep output ordering deterministic so repeated runs are stable and diff-friendly.
   // Stable ordering: confidence desc, then name asc
   enriched.sort((a, b) => {
-    if ((b.confidence || 0) !== (a.confidence || 0)) return (b.confidence || 0) - (a.confidence || 0);
+    if ((b.confidence || 0) !== (a.confidence || 0))
+      return (b.confidence || 0) - (a.confidence || 0);
     return (a.name || "").localeCompare(b.name || "");
   });
 
@@ -99,7 +101,9 @@ async function analyzeUrl(url) {
   const groupedDetections = groupDetections(enriched);
 
   // Keep recommendations consistent with the report’s detection threshold unless a stricter value is explicitly desired.
-  const recommendations = buildRecommendations(enriched, { minConfidence: MIN_CONFIDENCE });
+  const recommendations = buildRecommendations(enriched, {
+    minConfidence: MIN_CONFIDENCE,
+  });
 
   const analysisMs = Date.now() - analysisStart;
   const totalMs = Date.now() - totalStart;

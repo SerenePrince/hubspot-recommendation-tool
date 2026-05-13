@@ -73,7 +73,9 @@ describe("api/routes/analyze - handleAnalyze", () => {
         url: "https://example.com/",
         finalUrl: "https://example.com/",
         detections: [{ slug: "React", name: "React", confidence: 90 }],
-        recommendations: [{ hubspotProduct: "Marketing Hub", priority: "high" }],
+        recommendations: [
+          { hubspotProduct: "Marketing Hub", priority: "high" },
+        ],
         summary: { total: 1 },
         groups: {},
         fetch: { status: 200 },
@@ -83,17 +85,29 @@ describe("api/routes/analyze - handleAnalyze", () => {
 
     // cleanReport is used to create a frontend-friendly response. We'll validate it's called via its output.
     jest.doMock("../src/core/report/cleanReport", () => ({
-      buildSimpleReport: jest.fn((report) => ({ ok: report.ok, url: report.url, detections: report.detections })),
+      buildSimpleReport: jest.fn((report) => ({
+        ok: report.ok,
+        url: report.url,
+        detections: report.detections,
+      })),
     }));
 
     const { handleAnalyze } = require("../src/api/routes/analyze");
     const res = mkRes();
 
-    await handleAnalyze({}, res, mkUrl("/analyze?url=https://example.com&pretty=1"));
+    await handleAnalyze(
+      {},
+      res,
+      mkUrl("/analyze?url=https://example.com&pretty=1"),
+    );
 
     expect(res.statusCode).toBe(200);
     const json = JSON.parse(res.body);
-    expect(json).toEqual({ ok: true, url: "https://example.com/", detections: [{ slug: "React", name: "React", confidence: 90 }] });
+    expect(json).toEqual({
+      ok: true,
+      url: "https://example.com/",
+      detections: [{ slug: "React", name: "React", confidence: 90 }],
+    });
 
     // limiter release always called
     expect(release).toHaveBeenCalledTimes(1);
@@ -109,10 +123,17 @@ describe("api/routes/analyze - handleAnalyze", () => {
     const { AppError } = require("../src/core/errors");
     jest.doMock("../src/core/analyzer", () => ({
       analyzeUrl: jest.fn(async () => {
-        throw new AppError({ code: "FETCH_TIMEOUT", message: "Fetch timed out", statusCode: 504, expose: true });
+        throw new AppError({
+          code: "FETCH_TIMEOUT",
+          message: "Fetch timed out",
+          statusCode: 504,
+          expose: true,
+        });
       }),
     }));
-    jest.doMock("../src/core/report/cleanReport", () => ({ buildSimpleReport: jest.fn() }));
+    jest.doMock("../src/core/report/cleanReport", () => ({
+      buildSimpleReport: jest.fn(),
+    }));
 
     const { handleAnalyze } = require("../src/api/routes/analyze");
     const res = mkRes();
@@ -135,7 +156,11 @@ describe("api/routes/analyze - handleAnalyze", () => {
     const { handleAnalyze } = require("../src/api/routes/analyze");
     const res = mkRes();
     const longUrl = "https://example.com/" + "a".repeat(2100);
-    await handleAnalyze({}, res, mkUrl(`/analyze?url=${encodeURIComponent(longUrl)}`));
+    await handleAnalyze(
+      {},
+      res,
+      mkUrl(`/analyze?url=${encodeURIComponent(longUrl)}`),
+    );
 
     expect(res.statusCode).toBe(400);
     const json = JSON.parse(res.body);
@@ -176,7 +201,9 @@ describe("api/routes/analyze - handleAnalyze", () => {
         });
       }),
     }));
-    jest.doMock("../src/core/report/cleanReport", () => ({ buildSimpleReport: jest.fn() }));
+    jest.doMock("../src/core/report/cleanReport", () => ({
+      buildSimpleReport: jest.fn(),
+    }));
 
     const { handleAnalyze } = require("../src/api/routes/analyze");
     const res = mkRes();
@@ -202,7 +229,9 @@ describe("api/routes/analyze - handleAnalyze", () => {
         throw new Error("Unexpected crash");
       }),
     }));
-    jest.doMock("../src/core/report/cleanReport", () => ({ buildSimpleReport: jest.fn() }));
+    jest.doMock("../src/core/report/cleanReport", () => ({
+      buildSimpleReport: jest.fn(),
+    }));
 
     const { handleAnalyze } = require("../src/api/routes/analyze");
     const res = mkRes();

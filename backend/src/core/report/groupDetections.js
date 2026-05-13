@@ -32,7 +32,8 @@ function groupDetectionsByGroup(detections) {
   // Sort each group: confidence desc then name
   for (const g of Object.keys(out)) {
     out[g].sort((a, b) => {
-      if ((b.confidence || 0) !== (a.confidence || 0)) return (b.confidence || 0) - (a.confidence || 0);
+      if ((b.confidence || 0) !== (a.confidence || 0))
+        return (b.confidence || 0) - (a.confidence || 0);
       return String(a.name || "").localeCompare(String(b.name || ""));
     });
   }

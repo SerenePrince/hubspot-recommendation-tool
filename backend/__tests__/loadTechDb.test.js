@@ -19,16 +19,34 @@ const os = require("node:os");
 const path = require("node:path");
 
 describe("core/techdb/loadTechDb", () => {
-  const letters = ["_.json", ...Array.from({ length: 26 }, (_, i) => String.fromCharCode(97 + i) + ".json")];
+  const letters = [
+    "_.json",
+    ...Array.from(
+      { length: 26 },
+      (_, i) => String.fromCharCode(97 + i) + ".json",
+    ),
+  ];
 
   function mkRoot() {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "techdb-"));
     fs.mkdirSync(path.join(root, "technologies"));
-    fs.writeFileSync(path.join(root, "categories.json"), JSON.stringify({ 1: { id: 1, name: "Cat" } }), "utf8");
-    fs.writeFileSync(path.join(root, "groups.json"), JSON.stringify({ 1: { id: 1, name: "Group" } }), "utf8");
+    fs.writeFileSync(
+      path.join(root, "categories.json"),
+      JSON.stringify({ 1: { id: 1, name: "Cat" } }),
+      "utf8",
+    );
+    fs.writeFileSync(
+      path.join(root, "groups.json"),
+      JSON.stringify({ 1: { id: 1, name: "Group" } }),
+      "utf8",
+    );
 
     for (const f of letters) {
-      fs.writeFileSync(path.join(root, "technologies", f), JSON.stringify({}), "utf8");
+      fs.writeFileSync(
+        path.join(root, "technologies", f),
+        JSON.stringify({}),
+        "utf8",
+      );
     }
     return root;
   }
@@ -42,7 +60,9 @@ describe("core/techdb/loadTechDb", () => {
     fs.unlinkSync(path.join(root, "technologies", "c.json"));
 
     const { loadTechDb } = require("../src/core/techdb/loadTechDb");
-    await expect(loadTechDb({ rootSrc: root })).rejects.toThrow(/missing required files/i);
+    await expect(loadTechDb({ rootSrc: root })).rejects.toThrow(
+      /missing required files/i,
+    );
   });
 
   test("throws with a helpful message on JSON parse failure", async () => {
@@ -50,7 +70,9 @@ describe("core/techdb/loadTechDb", () => {
     fs.writeFileSync(path.join(root, "categories.json"), "{not-json", "utf8");
 
     const { loadTechDb } = require("../src/core/techdb/loadTechDb");
-    await expect(loadTechDb({ rootSrc: root })).rejects.toThrow(/Failed to parse JSON/);
+    await expect(loadTechDb({ rootSrc: root })).rejects.toThrow(
+      /Failed to parse JSON/,
+    );
   });
 
   test("merges technologies from all files and builds a deterministic index", async () => {

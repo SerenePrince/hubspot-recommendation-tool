@@ -15,7 +15,9 @@ function matchUrl(db, signals) {
 
   const out = [];
 
-  const techNames = Array.isArray(db?.index?.url) ? db.index.url : Object.keys(db.technologies || {});
+  const techNames = Array.isArray(db?.index?.url)
+    ? db.index.url
+    : Object.keys(db.technologies || {});
   for (const slug of techNames) {
     const tech = db.technologies?.[slug];
     if (!tech) continue;

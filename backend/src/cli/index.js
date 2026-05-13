@@ -87,7 +87,8 @@ async function main() {
   if (!urlArg || urlArg === "help" || flags.has("--help") || flags.has("-h")) {
     printHelp();
     // Exit 0 when help was explicitly requested; exit 1 when no URL was provided at all.
-    const helpRequested = flags.has("--help") || flags.has("-h") || urlArg === "help";
+    const helpRequested =
+      flags.has("--help") || flags.has("-h") || urlArg === "help";
     process.exit(helpRequested ? 0 : 1);
   }
 
@@ -99,13 +100,12 @@ async function main() {
   const wantsMeta = flags.has("--meta"); // kept for compatibility; default already includes meta
 
   // Output format selection
-  const format =
-    (
-      getFlagValue(args, "--format") ||
-      (flags.has("--human") ? "human" : null) ||
-      (flags.has("--pretty") ? "json-pretty" : null) ||
-      "json"
-    ).toLowerCase();
+  const format = (
+    getFlagValue(args, "--format") ||
+    (flags.has("--human") ? "human" : null) ||
+    (flags.has("--pretty") ? "json-pretty" : null) ||
+    "json"
+  ).toLowerCase();
 
   let payload;
   if (wantsRaw) {
@@ -128,7 +128,11 @@ async function main() {
   const defaultMaxWidth = Math.min(120, Math.max(80, terminalWidth));
 
   const humanOptions = {
-    mode: flags.has("--wide") ? "wide" : flags.has("--wrap") ? "wrap" : "truncate",
+    mode: flags.has("--wide")
+      ? "wide"
+      : flags.has("--wrap")
+        ? "wrap"
+        : "truncate",
     maxWidth: maxWidthArg ? clampInt(maxWidthArg, 40, 400) : defaultMaxWidth,
     inspect: inspect ? String(inspect) : null,
   };

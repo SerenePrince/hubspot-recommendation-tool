@@ -44,8 +44,12 @@ describe("core/report/mappingValidator - validateMapping", () => {
     expect(r.ok).toBe(false);
 
     // Ensure it flags both section errors and key errors.
-    expect(r.errors.some((e) => e.includes("byCategory must be an object"))).toBe(true);
-    expect(r.errors.some((e) => e.includes("byTechnology.\"Bad\" must be an array"))).toBe(true);
+    expect(
+      r.errors.some((e) => e.includes("byCategory must be an object")),
+    ).toBe(true);
+    expect(
+      r.errors.some((e) => e.includes('byTechnology."Bad" must be an array')),
+    ).toBe(true);
   });
 
   test("rejects invalid priorities and missing required fields", () => {

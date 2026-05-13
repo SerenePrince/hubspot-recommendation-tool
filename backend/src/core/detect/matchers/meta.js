@@ -10,10 +10,13 @@ const { resolveVersion } = require("./resolveVersion");
  * @returns {Array<object>} Candidate detections from meta tag evidence
  */
 function matchMeta(db, signals) {
-  const meta = signals?.meta && typeof signals.meta === "object" ? signals.meta : {};
+  const meta =
+    signals?.meta && typeof signals.meta === "object" ? signals.meta : {};
   const out = [];
 
-  const techNames = Array.isArray(db?.index?.meta) ? db.index.meta : Object.keys(db.technologies || {});
+  const techNames = Array.isArray(db?.index?.meta)
+    ? db.index.meta
+    : Object.keys(db.technologies || {});
   for (const slug of techNames) {
     const tech = db.technologies?.[slug];
     if (!tech) continue;
@@ -21,7 +24,9 @@ function matchMeta(db, signals) {
     if (!metaRules || typeof metaRules !== "object") continue;
 
     for (const [metaKeyRaw, patternRaw] of Object.entries(metaRules)) {
-      const metaKey = String(metaKeyRaw || "").toLowerCase().trim();
+      const metaKey = String(metaKeyRaw || "")
+        .toLowerCase()
+        .trim();
       if (!metaKey) continue;
 
       const val = meta[metaKey];

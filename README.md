@@ -45,7 +45,7 @@ AUTH_USERNAME=your-user
 AUTH_PASSWORD=your-pass
 ```
 
-   Auth is off by default (`AUTH_ENABLED=0`). Skip this step for open access.
+Auth is off by default (`AUTH_ENABLED=0`). Skip this step for open access.
 
 3. Build and start the integrated app.
 

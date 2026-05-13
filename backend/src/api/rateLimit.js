@@ -27,8 +27,12 @@ function parseForwardedFor(v) {
 function getClientIp(req) {
   // If you're behind a reverse proxy, ensure it sets X-Forwarded-For / X-Real-IP correctly.
   const xf = parseForwardedFor(req.headers["x-forwarded-for"]);
-  const xr = req.headers["x-real-ip"] && String(req.headers["x-real-ip"]).trim();
-  const remote = (req.socket && req.socket.remoteAddress) ? String(req.socket.remoteAddress) : "";
+  const xr =
+    req.headers["x-real-ip"] && String(req.headers["x-real-ip"]).trim();
+  const remote =
+    req.socket && req.socket.remoteAddress
+      ? String(req.socket.remoteAddress)
+      : "";
   return xf || xr || remote || "unknown";
 }
 
@@ -81,7 +85,7 @@ function createRateLimiter(opts) {
     s.lastSeen = n;
 
     // Failure window elapsed; start a new one
-    if (!s.firstAt || (n - s.firstAt) > windowMs) {
+    if (!s.firstAt || n - s.firstAt > windowMs) {
       s.firstAt = n;
       s.count = 1;
       s.blockedUntil = 0;

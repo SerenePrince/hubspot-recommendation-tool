@@ -15,7 +15,9 @@ function matchScripts(db, signals) {
 
   const out = [];
 
-  const techNames = Array.isArray(db?.index?.scripts) ? db.index.scripts : Object.keys(db.technologies || {});
+  const techNames = Array.isArray(db?.index?.scripts)
+    ? db.index.scripts
+    : Object.keys(db.technologies || {});
   for (const slug of techNames) {
     const tech = db.technologies?.[slug];
     if (!tech) continue;

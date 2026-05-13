@@ -8,13 +8,20 @@
 // - simple, stable shape for frontend devs
 // - includes the information end-users want (like the CLI), without CLI formatting
 
-const { ensureMappingLoaded, getDefaultMappingPath } = require("./recommendations");
+const {
+  ensureMappingLoaded,
+  getDefaultMappingPath,
+} = require("./recommendations");
 
 const asArray = (v) => (Array.isArray(v) ? v : []);
 
 // Strip markdown link syntax from vendor dataset names: [text](url) → text
-const sanitizeName = (name) => String(name || "").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").trim();
-const slimTaxonomy = (items) => asArray(items).map((x) => ({ id: x.id, name: x.name }));
+const sanitizeName = (name) =>
+  String(name || "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .trim();
+const slimTaxonomy = (items) =>
+  asArray(items).map((x) => ({ id: x.id, name: x.name }));
 const slimGroupItem = (d) => ({
   name: d.name,
   confidence: d.confidence,
@@ -47,7 +54,9 @@ function buildByGroup(report, technologies) {
   }
 
   for (const t of technologies) {
-    const groupNames = asArray(t.groups).map((g) => g.name).filter(Boolean);
+    const groupNames = asArray(t.groups)
+      .map((g) => g.name)
+      .filter(Boolean);
     const buckets = groupNames.length ? groupNames : ["Other"];
 
     for (const g of buckets) {
@@ -58,7 +67,8 @@ function buildByGroup(report, technologies) {
 
   for (const g of Object.keys(byGroup)) {
     byGroup[g].sort((a, b) => {
-      if ((b.confidence || 0) !== (a.confidence || 0)) return (b.confidence || 0) - (a.confidence || 0);
+      if ((b.confidence || 0) !== (a.confidence || 0))
+        return (b.confidence || 0) - (a.confidence || 0);
       return String(a.name || "").localeCompare(String(b.name || ""));
     });
   }
@@ -78,7 +88,9 @@ function summarizeTriggeredBy(triggeredBy, options = {}) {
   const items = asArray(triggeredBy);
   if (!items.length) return null;
 
-  const maxItems = Number.isFinite(options.maxItems) ? Math.max(1, Math.floor(options.maxItems)) : 3;
+  const maxItems = Number.isFinite(options.maxItems)
+    ? Math.max(1, Math.floor(options.maxItems))
+    : 3;
 
   const out = [];
   for (const t of items) {
@@ -124,7 +136,9 @@ function cleanRecommendations(recs) {
     const pa = priorityWeight(a.priority);
     const pb = priorityWeight(b.priority);
     if (pb !== pa) return pb - pa;
-    return String(a.hubspotProduct || "").localeCompare(String(b.hubspotProduct || ""));
+    return String(a.hubspotProduct || "").localeCompare(
+      String(b.hubspotProduct || ""),
+    );
   });
 
   return out;
@@ -148,7 +162,8 @@ function addToProductsIndex(index, techName, product, rank, rec, recIndex) {
     meta.bestPriorityRank = Math.min(meta.bestPriorityRank, rank);
     meta.firstSeen = Math.min(meta.firstSeen, recIndex);
     if (rank < prioRank(meta.priority)) meta.priority = rec.priority;
-    if (!meta.description && rec.description) meta.description = rec.description;
+    if (!meta.description && rec.description)
+      meta.description = rec.description;
   }
 }
 
@@ -169,14 +184,17 @@ function buildTechnologyProductsIndex(recommendations, detections) {
     for (const trigger of asArray(rec?.triggeredBy)) {
       if (trigger?.triggerType === "technology") {
         const techName = sanitizeName(trigger.key);
-        if (techName) addToProductsIndex(index, techName, product, rank, rec, recIndex);
-
+        if (techName)
+          addToProductsIndex(index, techName, product, rank, rec, recIndex);
       } else if (trigger?.triggerType === "category") {
         // Reverse-map: attribute this recommendation to every detection in the matched category
         for (const d of asArray(detections)) {
-          const inCategory = asArray(d.categories).some((c) => c?.name === trigger.key);
+          const inCategory = asArray(d.categories).some(
+            (c) => c?.name === trigger.key,
+          );
           const cleanName = sanitizeName(d.name);
-          if (inCategory && cleanName) addToProductsIndex(index, cleanName, product, rank, rec, recIndex);
+          if (inCategory && cleanName)
+            addToProductsIndex(index, cleanName, product, rank, rec, recIndex);
         }
       }
     }
@@ -187,7 +205,8 @@ function buildTechnologyProductsIndex(recommendations, detections) {
   for (const [tech, productMap] of index.entries()) {
     const arr = Array.from(productMap.values())
       .sort((a, b) => {
-        if (a.bestPriorityRank !== b.bestPriorityRank) return a.bestPriorityRank - b.bestPriorityRank;
+        if (a.bestPriorityRank !== b.bestPriorityRank)
+          return a.bestPriorityRank - b.bestPriorityRank;
         return a.firstSeen - b.firstSeen;
       })
       .map((x) => ({
@@ -212,7 +231,9 @@ function computeCounts(technologies, recommendations) {
   }
 
   // Coverage: techs that have at least one ordered product recommendation
-  const techsWithProducts = technologies.filter((t) => asArray(t.hubspot?.products).length > 0).length;
+  const techsWithProducts = technologies.filter(
+    (t) => asArray(t.hubspot?.products).length > 0,
+  ).length;
 
   return {
     technologiesDetected: technologies.length,
@@ -233,7 +254,9 @@ function buildTopRecommendations(recommendations, max = 5) {
       const pa = prioRank(a.priority);
       const pb = prioRank(b.priority);
       if (pa !== pb) return pa - pb;
-      return String(a.hubspotProduct || "").localeCompare(String(b.hubspotProduct || ""));
+      return String(a.hubspotProduct || "").localeCompare(
+        String(b.hubspotProduct || ""),
+      );
     })
     .slice(0, max)
     .map((r) => ({
@@ -259,7 +282,10 @@ function buildSimpleReport(report, options = {}) {
 
   const cleanedRecs = cleanRecommendations(report?.recommendations);
 
-  const productsIndex = buildTechnologyProductsIndex(cleanedRecs, report?.detections);
+  const productsIndex = buildTechnologyProductsIndex(
+    cleanedRecs,
+    report?.detections,
+  );
 
   const technologies = asArray(report?.detections).map((d) => {
     const cleanName = sanitizeName(d.name);

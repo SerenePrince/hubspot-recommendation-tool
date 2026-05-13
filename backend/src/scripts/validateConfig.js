@@ -10,16 +10,24 @@ async function main() {
   const warnings = [];
 
   // Basic env sanity
-  if (!Number.isFinite(config.port) || config.port <= 0 || config.port > 65535) {
+  if (
+    !Number.isFinite(config.port) ||
+    config.port <= 0 ||
+    config.port > 65535
+  ) {
     errors.push(`PORT must be a valid TCP port (got: ${config.port})`);
   }
 
   if (!Number.isFinite(config.fetch.timeoutMs) || config.fetch.timeoutMs <= 0) {
-    errors.push(`FETCH_TIMEOUT_MS must be a positive integer (got: ${config.fetch.timeoutMs})`);
+    errors.push(
+      `FETCH_TIMEOUT_MS must be a positive integer (got: ${config.fetch.timeoutMs})`,
+    );
   }
 
   if (!Number.isFinite(config.fetch.maxBytes) || config.fetch.maxBytes <= 0) {
-    errors.push(`MAX_FETCH_BYTES must be a positive integer (got: ${config.fetch.maxBytes})`);
+    errors.push(
+      `MAX_FETCH_BYTES must be a positive integer (got: ${config.fetch.maxBytes})`,
+    );
   }
 
   if (
@@ -27,25 +35,34 @@ async function main() {
     config.api.maxConcurrentAnalyses <= 0
   ) {
     errors.push(
-      `MAX_CONCURRENT_ANALYSES must be a positive integer (got: ${config.api.maxConcurrentAnalyses})`
+      `MAX_CONCURRENT_ANALYSES must be a positive integer (got: ${config.api.maxConcurrentAnalyses})`,
     );
   }
 
-  if (!Number.isFinite(config.api.maxQueuedAnalyses) || config.api.maxQueuedAnalyses < 0) {
+  if (
+    !Number.isFinite(config.api.maxQueuedAnalyses) ||
+    config.api.maxQueuedAnalyses < 0
+  ) {
     errors.push(
-      `MAX_QUEUED_ANALYSES must be zero or a positive integer (got: ${config.api.maxQueuedAnalyses})`
+      `MAX_QUEUED_ANALYSES must be zero or a positive integer (got: ${config.api.maxQueuedAnalyses})`,
     );
   }
 
-  if (!Number.isFinite(config.http.requestTimeoutMs) || config.http.requestTimeoutMs <= 0) {
+  if (
+    !Number.isFinite(config.http.requestTimeoutMs) ||
+    config.http.requestTimeoutMs <= 0
+  ) {
     errors.push(
-      `HTTP_REQUEST_TIMEOUT_MS must be a positive integer (got: ${config.http.requestTimeoutMs})`
+      `HTTP_REQUEST_TIMEOUT_MS must be a positive integer (got: ${config.http.requestTimeoutMs})`,
     );
   }
 
-  if (!Number.isFinite(config.http.headersTimeoutMs) || config.http.headersTimeoutMs <= 0) {
+  if (
+    !Number.isFinite(config.http.headersTimeoutMs) ||
+    config.http.headersTimeoutMs <= 0
+  ) {
     errors.push(
-      `HTTP_HEADERS_TIMEOUT_MS must be a positive integer (got: ${config.http.headersTimeoutMs})`
+      `HTTP_HEADERS_TIMEOUT_MS must be a positive integer (got: ${config.http.headersTimeoutMs})`,
     );
   }
 
@@ -55,13 +72,16 @@ async function main() {
     config.http.headersTimeoutMs < config.http.requestTimeoutMs
   ) {
     errors.push(
-      `HTTP_HEADERS_TIMEOUT_MS must be greater than or equal to HTTP_REQUEST_TIMEOUT_MS`
+      `HTTP_HEADERS_TIMEOUT_MS must be greater than or equal to HTTP_REQUEST_TIMEOUT_MS`,
     );
   }
 
-  if (!Number.isFinite(config.http.keepAliveTimeoutMs) || config.http.keepAliveTimeoutMs < 0) {
+  if (
+    !Number.isFinite(config.http.keepAliveTimeoutMs) ||
+    config.http.keepAliveTimeoutMs < 0
+  ) {
     errors.push(
-      `HTTP_KEEP_ALIVE_TIMEOUT_MS must be zero or a positive integer (got: ${config.http.keepAliveTimeoutMs})`
+      `HTTP_KEEP_ALIVE_TIMEOUT_MS must be zero or a positive integer (got: ${config.http.keepAliveTimeoutMs})`,
     );
   }
 
@@ -70,7 +90,7 @@ async function main() {
     config.http.maxRequestsPerSocket <= 0
   ) {
     errors.push(
-      `HTTP_MAX_REQUESTS_PER_SOCKET must be a positive integer (got: ${config.http.maxRequestsPerSocket})`
+      `HTTP_MAX_REQUESTS_PER_SOCKET must be a positive integer (got: ${config.http.maxRequestsPerSocket})`,
     );
   }
 
@@ -101,13 +121,13 @@ async function main() {
   if (config.env === "production") {
     if (config.cors.allowOrigin === "*") {
       warnings.push(
-        "CORS_ALLOW_ORIGIN=* in production is only appropriate for very limited public API scenarios."
+        "CORS_ALLOW_ORIGIN=* in production is only appropriate for very limited public API scenarios.",
       );
     }
 
     if (!config.auth.enabled) {
       warnings.push(
-        "AUTH_ENABLED=0 in production. This is only acceptable if access is restricted by another trusted layer."
+        "AUTH_ENABLED=0 in production. This is only acceptable if access is restricted by another trusted layer.",
       );
     }
   }
@@ -139,8 +159,10 @@ async function validateDataRoot(root, errors, warnings) {
   // Required taxonomy files
   const categoriesPath = path.join(root, "categories.json");
   const groupsPath = path.join(root, "groups.json");
-  if (!(await pathExists(categoriesPath))) errors.push(`Missing file: ${categoriesPath}`);
-  if (!(await pathExists(groupsPath))) errors.push(`Missing file: ${groupsPath}`);
+  if (!(await pathExists(categoriesPath)))
+    errors.push(`Missing file: ${categoriesPath}`);
+  if (!(await pathExists(groupsPath)))
+    errors.push(`Missing file: ${groupsPath}`);
 
   // Technologies directory + expected files
   const techDir = path.join(root, "technologies");
@@ -156,7 +178,9 @@ async function validateDataRoot(root, errors, warnings) {
     if (!(await pathExists(p))) missing.push(f);
   }
   if (missing.length) {
-    errors.push(`Missing technology JSON files in ${techDir}: ${missing.join(", ")}`);
+    errors.push(
+      `Missing technology JSON files in ${techDir}: ${missing.join(", ")}`,
+    );
   }
 
   // Quick parse sanity (not exhaustive): ensure categories/groups are JSON
@@ -194,14 +218,15 @@ async function validateStaticDist(distDir, errors, warnings) {
   const assetsDir = path.join(distDir, "assets");
   if (!(await pathExists(assetsDir))) {
     warnings.push(
-      `No assets directory found at ${assetsDir}. This may be OK for some builds, but verify frontend output.`
+      `No assets directory found at ${assetsDir}. This may be OK for some builds, but verify frontend output.`,
     );
   }
 }
 
 function technologyFiles() {
   const out = ["_.json"];
-  for (let i = 0; i < 26; i++) out.push(String.fromCharCode("a".charCodeAt(0) + i) + ".json");
+  for (let i = 0; i < 26; i++)
+    out.push(String.fromCharCode("a".charCodeAt(0) + i) + ".json");
   return out;
 }
 

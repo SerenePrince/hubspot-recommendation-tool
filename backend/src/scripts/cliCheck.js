@@ -24,14 +24,18 @@ async function run(label, cmd, { expectJson = false, expectText = null } = {}) {
         JSON.parse(out);
         process.stdout.write(`  (valid JSON, ${out.length} chars)\n`);
       } catch {
-        process.stdout.write(`  ✗ Expected valid JSON but got: ${out.slice(0, 200)}\n`);
+        process.stdout.write(
+          `  ✗ Expected valid JSON but got: ${out.slice(0, 200)}\n`,
+        );
         process.exitCode = 1;
       }
     } else if (expectText) {
       if (out.includes(expectText)) {
         process.stdout.write(`  (contains expected: "${expectText}")\n`);
       } else {
-        process.stdout.write(`  ✗ Expected to contain "${expectText}" but output was:\n${out.slice(0, 400)}\n`);
+        process.stdout.write(
+          `  ✗ Expected to contain "${expectText}" but output was:\n${out.slice(0, 400)}\n`,
+        );
         process.exitCode = 1;
       }
     } else {
@@ -52,15 +56,23 @@ async function main() {
   // 1. --help should exit 0 and print usage
   process.stdout.write("\n-- Help output --\n");
   try {
-    const helpOut = execSync(`node ${CLI} --help`, { cwd: path.resolve(__dirname, "../.."), encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] });
+    const helpOut = execSync(`node ${CLI} --help`, {
+      cwd: path.resolve(__dirname, "../.."),
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
     if (helpOut.includes("Usage:") && helpOut.includes("--format")) {
       process.stdout.write(`✓ --help prints usage (exit 0)\n`);
     } else {
-      process.stdout.write(`✗ --help output unexpected: ${helpOut.slice(0, 200)}\n`);
+      process.stdout.write(
+        `✗ --help output unexpected: ${helpOut.slice(0, 200)}\n`,
+      );
       process.exitCode = 1;
     }
   } catch (e) {
-    process.stdout.write(`✗ --help failed (exit ${e.status}): ${(e.stderr || "").slice(0, 200)}\n`);
+    process.stdout.write(
+      `✗ --help failed (exit ${e.status}): ${(e.stderr || "").slice(0, 200)}\n`,
+    );
     process.exitCode = 1;
   }
 
@@ -74,23 +86,51 @@ async function main() {
   }
 
   if (!canReach) {
-    process.stdout.write("\n⚠ DNS not available in this environment — skipping network CLI tests.\n");
-    process.stdout.write("  Run manually: node src/cli/index.js https://example.com --format human\n");
+    process.stdout.write(
+      "\n⚠ DNS not available in this environment — skipping network CLI tests.\n",
+    );
+    process.stdout.write(
+      "  Run manually: node src/cli/index.js https://example.com --format human\n",
+    );
   } else {
     const TEST_URL = "https://example.com";
     process.stdout.write(`\n-- Fetching ${TEST_URL} --\n`);
 
-    await run("json (default)", `${CLI} ${TEST_URL} --format json`, { expectJson: true });
-    await run("json-pretty", `${CLI} ${TEST_URL} --format json-pretty`, { expectJson: true });
-    await run("--pretty alias", `${CLI} ${TEST_URL} --pretty`, { expectJson: true });
-    await run("human", `${CLI} ${TEST_URL} --format human`, { expectText: "HubSpot Recommendation Tool" });
-    await run("human --wide", `${CLI} ${TEST_URL} --format human --wide`, { expectText: "Technologies" });
-    await run("human --wrap", `${CLI} ${TEST_URL} --format human --wrap`, { expectText: "Technologies" });
-    await run("human --human alias", `${CLI} ${TEST_URL} --human`, { expectText: "Technologies" });
-    await run("--raw flag", `${CLI} ${TEST_URL} --raw --format json`, { expectJson: true });
-    await run("--meta flag (no-op)", `${CLI} ${TEST_URL} --meta --format json`, { expectJson: true });
-    await run("--format=json= style", `${CLI} ${TEST_URL} --format=json`, { expectJson: true });
-    await run("flag before URL", `${CLI} --format json ${TEST_URL}`, { expectJson: true });
+    await run("json (default)", `${CLI} ${TEST_URL} --format json`, {
+      expectJson: true,
+    });
+    await run("json-pretty", `${CLI} ${TEST_URL} --format json-pretty`, {
+      expectJson: true,
+    });
+    await run("--pretty alias", `${CLI} ${TEST_URL} --pretty`, {
+      expectJson: true,
+    });
+    await run("human", `${CLI} ${TEST_URL} --format human`, {
+      expectText: "HubSpot Recommendation Tool",
+    });
+    await run("human --wide", `${CLI} ${TEST_URL} --format human --wide`, {
+      expectText: "Technologies",
+    });
+    await run("human --wrap", `${CLI} ${TEST_URL} --format human --wrap`, {
+      expectText: "Technologies",
+    });
+    await run("human --human alias", `${CLI} ${TEST_URL} --human`, {
+      expectText: "Technologies",
+    });
+    await run("--raw flag", `${CLI} ${TEST_URL} --raw --format json`, {
+      expectJson: true,
+    });
+    await run(
+      "--meta flag (no-op)",
+      `${CLI} ${TEST_URL} --meta --format json`,
+      { expectJson: true },
+    );
+    await run("--format=json= style", `${CLI} ${TEST_URL} --format=json`, {
+      expectJson: true,
+    });
+    await run("flag before URL", `${CLI} --format json ${TEST_URL}`, {
+      expectJson: true,
+    });
   }
 
   // 3. Taxonomy CLI (no network needed)
@@ -100,7 +140,9 @@ async function main() {
 
   process.stdout.write(
     `\n=== Done (exit code: ${process.exitCode || 0}) ===\n` +
-    (canReach ? "" : "\nNOTE: Network tests were skipped. DNS not available from this shell.\n")
+      (canReach
+        ? ""
+        : "\nNOTE: Network tests were skipped. DNS not available from this shell.\n"),
   );
 }
 

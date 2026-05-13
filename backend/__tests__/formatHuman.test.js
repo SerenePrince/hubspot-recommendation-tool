@@ -88,7 +88,7 @@ describe("cli/formatHuman - technologies table", () => {
 
   test("renders version when present", () => {
     const out = formatHuman(
-      mkReport({ technologies: [mkTech("WordPress", { version: "6.4" })] })
+      mkReport({ technologies: [mkTech("WordPress", { version: "6.4" })] }),
     );
     expect(out).toContain("6.4");
   });
@@ -97,7 +97,7 @@ describe("cli/formatHuman - technologies table", () => {
     const out = formatHuman(
       mkReport({
         technologies: [mkTech("WordPress", { categories: [{ name: "CMS" }] })],
-      })
+      }),
     );
     expect(out).toContain("CMS");
   });
@@ -115,7 +115,7 @@ describe("cli/formatHuman - technologies table", () => {
 
   test("renders blank HubSpot Recommendation cell for unmapped technology", () => {
     const out = formatHuman(
-      mkReport({ technologies: [mkTech("ObscureTool")] })
+      mkReport({ technologies: [mkTech("ObscureTool")] }),
     );
     // The replacement cell should be empty — row present but no product text
     expect(out).toContain("ObscureTool");
@@ -150,7 +150,7 @@ describe("cli/formatHuman - coverage summary", () => {
 
   test("lists unmapped technology names in the summary", () => {
     const out = formatHuman(
-      mkReport({ technologies: [mkTech("ObscureTool")] })
+      mkReport({ technologies: [mkTech("ObscureTool")] }),
     );
     expect(out).toContain("ObscureTool");
     expect(out).toMatch(/No replacement mapped for:/);
@@ -174,7 +174,12 @@ describe("cli/formatHuman - recommendations table", () => {
   });
 
   test("renders description when present", () => {
-    const rec = { hubspotProduct: "Sales Hub", priority: "high", description: "Automate your pipeline.", triggeredBy: [] };
+    const rec = {
+      hubspotProduct: "Sales Hub",
+      priority: "high",
+      description: "Automate your pipeline.",
+      triggeredBy: [],
+    };
     const out = formatHuman(mkReport({ recommendations: [rec] }));
     expect(out).toContain("Automate your pipeline.");
   });
@@ -225,9 +230,12 @@ describe("cli/formatHuman - inspect mode", () => {
         triggeredBy: [{ triggerType: "technology", key: "WordPress" }],
       },
     ];
-    const out = formatHuman(mkReport({ technologies: [tech], recommendations: recs }), {
-      inspect: "WordPress",
-    });
+    const out = formatHuman(
+      mkReport({ technologies: [tech], recommendations: recs }),
+      {
+        inspect: "WordPress",
+      },
+    );
 
     expect(out).toContain("Inspect: WordPress");
     expect(out).toContain("Technology: WordPress");
@@ -252,10 +260,13 @@ describe("cli/formatHuman - inspect mode", () => {
         triggeredBy: [{ triggerType: "technology", key: "Zendesk" }],
       },
     ];
-    const out = formatHuman(mkReport({ technologies: [tech], recommendations: recs }), {
-      inspect: "Zendesk",
-      mode: "wide",
-    });
+    const out = formatHuman(
+      mkReport({ technologies: [tech], recommendations: recs }),
+      {
+        inspect: "Zendesk",
+        mode: "wide",
+      },
+    );
 
     expect(out).toContain("Service Hub");
     expect(out).toContain("Use HubSpot Service Hub.");
@@ -266,22 +277,22 @@ describe("cli/formatHuman - display modes", () => {
   test("wide mode does not truncate long cell content", () => {
     const longName = "A".repeat(80);
     const tech = mkTech(longName);
-    const out = formatHuman(mkReport({ technologies: [tech] }), { mode: "wide" });
+    const out = formatHuman(mkReport({ technologies: [tech] }), {
+      mode: "wide",
+    });
     expect(out).toContain(longName);
   });
 
   test("wrap mode runs without error", () => {
     const tech = mkTech("WordPress");
     expect(() =>
-      formatHuman(mkReport({ technologies: [tech] }), { mode: "wrap" })
+      formatHuman(mkReport({ technologies: [tech] }), { mode: "wrap" }),
     ).not.toThrow();
   });
 
   test("truncate mode (default) runs without error", () => {
     const tech = mkTech("WordPress");
-    expect(() =>
-      formatHuman(mkReport({ technologies: [tech] }))
-    ).not.toThrow();
+    expect(() => formatHuman(mkReport({ technologies: [tech] }))).not.toThrow();
   });
 
   test("includes footer tip lines", () => {

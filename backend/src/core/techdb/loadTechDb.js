@@ -119,13 +119,15 @@ async function mapLimit(items, limit, fn) {
   const out = new Array(items.length);
   let nextIndex = 0;
 
-  const workers = new Array(Math.min(limit, items.length)).fill(null).map(async () => {
-    for (;;) {
-      const i = nextIndex++;
-      if (i >= items.length) return;
-      out[i] = await fn(items[i], i);
-    }
-  });
+  const workers = new Array(Math.min(limit, items.length))
+    .fill(null)
+    .map(async () => {
+      for (;;) {
+        const i = nextIndex++;
+        if (i >= items.length) return;
+        out[i] = await fn(items[i], i);
+      }
+    });
 
   await Promise.all(workers);
   return out;

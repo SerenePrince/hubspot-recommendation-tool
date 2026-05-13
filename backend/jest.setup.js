@@ -17,19 +17,27 @@ let httpsGetSpy;
 
 beforeAll(() => {
   httpRequestSpy = jest.spyOn(http, "request").mockImplementation(() => {
-    throw new Error("Unit tests must not make real HTTP requests. Mock the network layer.");
+    throw new Error(
+      "Unit tests must not make real HTTP requests. Mock the network layer.",
+    );
   });
 
   httpGetSpy = jest.spyOn(http, "get").mockImplementation(() => {
-    throw new Error("Unit tests must not make real HTTP requests. Mock the network layer.");
+    throw new Error(
+      "Unit tests must not make real HTTP requests. Mock the network layer.",
+    );
   });
 
   httpsRequestSpy = jest.spyOn(https, "request").mockImplementation(() => {
-    throw new Error("Unit tests must not make real HTTPS requests. Mock the network layer.");
+    throw new Error(
+      "Unit tests must not make real HTTPS requests. Mock the network layer.",
+    );
   });
 
   httpsGetSpy = jest.spyOn(https, "get").mockImplementation(() => {
-    throw new Error("Unit tests must not make real HTTPS requests. Mock the network layer.");
+    throw new Error(
+      "Unit tests must not make real HTTPS requests. Mock the network layer.",
+    );
   });
 });
 

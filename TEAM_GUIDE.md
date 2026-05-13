@@ -95,11 +95,11 @@ Use this when you want to recommend a HubSpot product whenever a specific techno
 
 **Fields:**
 
-| Field | What it does | Values |
-|---|---|---|
-| `hubspotProduct` | The HubSpot product being recommended | `Content Hub`, `Marketing Hub`, `Sales Hub`, `Service Hub`, `Data Hub`, `Commerce Hub` |
-| `priority` | How prominently this surfaces in the report | `high`, `medium`, `low` |
-| `description` | Supporting notes shown in the Recommendations table | Any text |
+| Field            | What it does                                        | Values                                                                                 |
+| ---------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `hubspotProduct` | The HubSpot product being recommended               | `Content Hub`, `Marketing Hub`, `Sales Hub`, `Service Hub`, `Data Hub`, `Commerce Hub` |
+| `priority`       | How prominently this surfaces in the report         | `high`, `medium`, `low`                                                                |
+| `description`    | Supporting notes shown in the Recommendations table | Any text                                                                               |
 
 **To add a new technology mapping:**
 

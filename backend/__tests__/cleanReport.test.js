@@ -33,7 +33,9 @@ describe("core/report/cleanReport", () => {
     const { buildSimpleReport } = load();
     const report = {
       ok: true,
-      detections: [{ name: "[WordPress.com](http://WordPress.com)", confidence: 80 }],
+      detections: [
+        { name: "[WordPress.com](http://WordPress.com)", confidence: 80 },
+      ],
       recommendations: [],
     };
 
@@ -77,13 +79,19 @@ describe("core/report/cleanReport", () => {
 
   test("does not include meta by default", () => {
     const { buildSimpleReport } = load();
-    const result = buildSimpleReport({ ok: true, detections: [], recommendations: [] });
+    const result = buildSimpleReport({
+      ok: true,
+      detections: [],
+      recommendations: [],
+    });
     expect(result.meta).toBeUndefined();
   });
 
   test("ok is false when report.ok is not strictly true", () => {
     const { buildSimpleReport } = load();
-    expect(buildSimpleReport({ ok: false, detections: [], recommendations: [] }).ok).toBe(false);
+    expect(
+      buildSimpleReport({ ok: false, detections: [], recommendations: [] }).ok,
+    ).toBe(false);
     expect(buildSimpleReport(null).ok).toBe(false);
   });
 
@@ -280,12 +288,12 @@ describe("core/report/cleanReport", () => {
       ok: true,
       detections: [],
       recommendations: [
-        { hubspotProduct: "A Hub", priority: "low",    triggeredBy: [] },
+        { hubspotProduct: "A Hub", priority: "low", triggeredBy: [] },
         { hubspotProduct: "B Hub", priority: "medium", triggeredBy: [] },
-        { hubspotProduct: "C Hub", priority: "high",   triggeredBy: [] },
-        { hubspotProduct: "D Hub", priority: "high",   triggeredBy: [] },
+        { hubspotProduct: "C Hub", priority: "high", triggeredBy: [] },
+        { hubspotProduct: "D Hub", priority: "high", triggeredBy: [] },
         { hubspotProduct: "E Hub", priority: "medium", triggeredBy: [] },
-        { hubspotProduct: "F Hub", priority: "low",    triggeredBy: [] },
+        { hubspotProduct: "F Hub", priority: "low", triggeredBy: [] },
       ],
     });
 
@@ -317,7 +325,11 @@ describe("core/report/cleanReport", () => {
 
   test("buildCleanReport passes null for missing fetch/timings fields", () => {
     const { buildCleanReport } = load();
-    const result = buildCleanReport({ ok: true, detections: [], recommendations: [] });
+    const result = buildCleanReport({
+      ok: true,
+      detections: [],
+      recommendations: [],
+    });
 
     expect(result.meta.fetch).toBeNull();
     expect(result.meta.timings).toBeNull();

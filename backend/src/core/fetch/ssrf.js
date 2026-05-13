@@ -25,7 +25,10 @@ function isBlockedIp(ip) {
 
 function isBlockedIpv4(ip) {
   const parts = ip.split(".").map((p) => Number(p));
-  if (parts.length !== 4 || parts.some((n) => Number.isNaN(n) || n < 0 || n > 255)) {
+  if (
+    parts.length !== 4 ||
+    parts.some((n) => Number.isNaN(n) || n < 0 || n > 255)
+  ) {
     return true;
   }
 
@@ -105,7 +108,9 @@ function isBlockedIpv6(ip) {
  * @throws {Error} AppError(400) when host is missing, internal, or DNS resolution fails
  */
 async function assertPublicHost(hostname) {
-  const h = String(hostname || "").trim().toLowerCase();
+  const h = String(hostname || "")
+    .trim()
+    .toLowerCase();
   if (!h) throw badRequest("SSRF_BLOCKED_HOST", "Blocked host");
 
   // Blocks direct localhost hostnames even if DNS would resolve.

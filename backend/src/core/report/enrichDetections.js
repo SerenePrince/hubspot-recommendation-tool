@@ -18,7 +18,8 @@ function enrichDetections(db, detections) {
 
   return (detections || []).map((d) => {
     // Prefer slug lookup, fallback to name lookup for backwards compatibility.
-    const techDef = (d?.slug && techBySlug[d.slug]) || (d?.name && techByName[d.name]) || {};
+    const techDef =
+      (d?.slug && techBySlug[d.slug]) || (d?.name && techByName[d.name]) || {};
 
     const catIds = Array.isArray(techDef.cats) ? techDef.cats : [];
 

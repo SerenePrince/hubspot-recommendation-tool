@@ -42,9 +42,11 @@ export default function UrlInput({ onAnalysisComplete }) {
 
   const validationError = validateUrl(urlInput);
   // Gate errors behind blur or a submit attempt so users aren't punished mid-type.
-  const showValidationError = (hasBlurred || submitAttempted) && validationError;
+  const showValidationError =
+    (hasBlurred || submitAttempted) && validationError;
   // Prevent duplicate submissions once a URL has already been analyzed.
-  const isDuplicate = Boolean(urlInput.trim()) && urlInput.trim() === lastSubmittedUrl;
+  const isDuplicate =
+    Boolean(urlInput.trim()) && urlInput.trim() === lastSubmittedUrl;
   const isSubmitDisabled =
     loading || !urlInput.trim() || Boolean(validationError) || isDuplicate;
 

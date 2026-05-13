@@ -76,7 +76,8 @@ function detectTechnologies(db, signals, options = {}) {
 
   // Stable order (confidence desc, slug asc)
   found.sort((a, b) => {
-    if ((b.confidence || 0) !== (a.confidence || 0)) return (b.confidence || 0) - (a.confidence || 0);
+    if ((b.confidence || 0) !== (a.confidence || 0))
+      return (b.confidence || 0) - (a.confidence || 0);
     return (a.slug || "").localeCompare(b.slug || "");
   });
 
@@ -107,7 +108,10 @@ function runMatcher(detections, matcherFn, db, signals) {
       };
 
       // Probabilistic OR keeps confidence bounded while rewarding multiple independent signals.
-      existing.confidence = aggregateConfidence(existing.confidence, incomingConf);
+      existing.confidence = aggregateConfidence(
+        existing.confidence,
+        incomingConf,
+      );
 
       // Prefer version from the single strongest evidence match
       if (m.version && typeof m.version === "string") {

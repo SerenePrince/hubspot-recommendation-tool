@@ -28,7 +28,11 @@ function setCors(req, res) {
   // If the frontend is served from the same origin in production, CORS is usually unnecessary.
   // Allow opt-in tightening (or disabling) via config.
   if (String(config.cors.allowOrigin).toLowerCase() === "off") return;
-  if (config.env === "production" && config.static.enabled && config.cors.allowOrigin === "*") {
+  if (
+    config.env === "production" &&
+    config.static.enabled &&
+    config.cors.allowOrigin === "*"
+  ) {
     return;
   }
 
@@ -46,13 +50,15 @@ function setCors(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Accept, X-Request-Id, Authorization"
+    "Content-Type, Accept, X-Request-Id, Authorization",
   );
   res.setHeader("Access-Control-Max-Age", "86400");
 }
 
 function sendJson(res, status, payload, pretty) {
-  const body = pretty ? JSON.stringify(payload, null, 2) : JSON.stringify(payload);
+  const body = pretty
+    ? JSON.stringify(payload, null, 2)
+    : JSON.stringify(payload);
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
@@ -60,7 +66,9 @@ function sendJson(res, status, payload, pretty) {
 }
 
 function sendRateLimited(res, retryAfterSeconds, pretty) {
-  const seconds = Number.isFinite(Number(retryAfterSeconds)) ? Number(retryAfterSeconds) : 60;
+  const seconds = Number.isFinite(Number(retryAfterSeconds))
+    ? Number(retryAfterSeconds)
+    : 60;
 
   res.statusCode = 429;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -112,7 +120,7 @@ function logRequest(req, res, requestUrl, requestId, startMs) {
 // Best-effort in-memory limiter for failed auth attempts.
 // This protects a single process; distributed deployments should add edge-level limits too.
 const authRateLimiter = createRateLimiter(
-  config.auth && config.auth.rateLimit ? config.auth.rateLimit : undefined
+  config.auth && config.auth.rateLimit ? config.auth.rateLimit : undefined,
 );
 
 // Fail fast if auth is enabled but credentials are missing.
@@ -120,7 +128,7 @@ const authRateLimiter = createRateLimiter(
 if (config.auth && config.auth.enabled) {
   if (!config.auth.username || !config.auth.password) {
     console.error(
-      "FATAL: AUTH_ENABLED=1 but AUTH_USERNAME/AUTH_PASSWORD are missing. Refusing to start."
+      "FATAL: AUTH_ENABLED=1 but AUTH_USERNAME/AUTH_PASSWORD are missing. Refusing to start.",
     );
     process.exit(1);
   }
@@ -132,7 +140,8 @@ const server = http.createServer(async (req, res) => {
 
   // Generate or propagate a request id for easier tracing across logs/proxies.
   const requestId =
-    (req.headers["x-request-id"] && String(req.headers["x-request-id"])) || randomUUID();
+    (req.headers["x-request-id"] && String(req.headers["x-request-id"])) ||
+    randomUUID();
   res.setHeader("X-Request-Id", requestId);
 
   let requestUrl;
@@ -161,8 +170,12 @@ const server = http.createServer(async (req, res) => {
         return sendJson(
           res,
           503,
-          { ok: false, shuttingDown: true, service: "HubSpot Recommendation Tool API" },
-          pretty
+          {
+            ok: false,
+            shuttingDown: true,
+            service: "HubSpot Recommendation Tool API",
+          },
+          pretty,
         );
       }
 
@@ -170,7 +183,7 @@ const server = http.createServer(async (req, res) => {
         res,
         503,
         { ok: false, error: "Server is shutting down. Please retry shortly." },
-        pretty
+        pretty,
       );
     }
 
@@ -229,7 +242,7 @@ const server = http.createServer(async (req, res) => {
           service: "HubSpot Recommendation Tool API",
           shuttingDown: false,
         },
-        pretty
+        pretty,
       );
       return;
     }
@@ -255,7 +268,11 @@ const server = http.createServer(async (req, res) => {
       const accept = String(req.headers.accept || "");
       const looksLikeApi = requestUrl.pathname.startsWith("/api/");
 
-      if (!looksLikeApi && req.method === "GET" && accept.includes("text/html")) {
+      if (
+        !looksLikeApi &&
+        req.method === "GET" &&
+        accept.includes("text/html")
+      ) {
         const fellBack = await tryServeSpaFallback(req, res, {
           distDir: config.static.distDir,
         });
@@ -304,7 +321,7 @@ server.on("clientError", (err, socket) => {
         level: "warn",
         msg: "client_error",
         error: err?.message || String(err),
-      })
+      }),
     );
   }
 });

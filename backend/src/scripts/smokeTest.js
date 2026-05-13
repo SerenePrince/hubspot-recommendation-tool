@@ -72,7 +72,10 @@ async function smokeDirectWithFallback(url) {
     // If DNS is unavailable, retry with a public IP over HTTP.
     if (msg.includes("ENOTFOUND")) {
       const fallback = "http://93.184.216.34/"; // example.com IPv4 (public)
-      console.warn("⚠️  DNS lookup failed. Retrying with fallback URL:", fallback);
+      console.warn(
+        "⚠️  DNS lookup failed. Retrying with fallback URL:",
+        fallback,
+      );
       await smokeDirect(fallback);
       return;
     }
@@ -86,10 +89,19 @@ async function smokeDirect(url) {
 
   // Minimal assertions — keep it stable and not overly strict.
   assert(report && report.ok === true, "report.ok must be true");
-  assert(typeof report.url === "string" && report.url.length > 0, "report.url must be present");
-  assert(Array.isArray(report.detections), "report.detections must be an array");
+  assert(
+    typeof report.url === "string" && report.url.length > 0,
+    "report.url must be present",
+  );
+  assert(
+    Array.isArray(report.detections),
+    "report.detections must be an array",
+  );
   assert(report.summary != null, "report.summary must be present");
-  assert(Array.isArray(report.recommendations), "report.recommendations must be an array");
+  assert(
+    Array.isArray(report.recommendations),
+    "report.recommendations must be an array",
+  );
 
   console.log(
     JSON.stringify(
@@ -124,9 +136,15 @@ async function smokeApi(baseUrl, url) {
 
   const res = await httpGetJson(analyze.toString());
   assert(res && res.ok === true, "/analyze must return ok:true");
-  assert(Array.isArray(res.technologies), "response.technologies must be an array");
+  assert(
+    Array.isArray(res.technologies),
+    "response.technologies must be an array",
+  );
   assert(res.summary != null, "response.summary must be present");
-  assert(Array.isArray(res.recommendations), "response.recommendations must be an array");
+  assert(
+    Array.isArray(res.recommendations),
+    "response.recommendations must be an array",
+  );
 
   console.log(
     JSON.stringify(
@@ -162,12 +180,16 @@ function httpGetJson(url) {
         res.on("end", () => {
           const body = Buffer.concat(chunks).toString("utf8");
           if (res.statusCode < 200 || res.statusCode >= 300) {
-            return reject(new Error(`HTTP ${res.statusCode}: ${body.slice(0, 500)}`));
+            return reject(
+              new Error(`HTTP ${res.statusCode}: ${body.slice(0, 500)}`),
+            );
           }
           try {
             resolve(JSON.parse(body));
           } catch (e) {
-            reject(new Error(`Invalid JSON response: ${e?.message || String(e)}`));
+            reject(
+              new Error(`Invalid JSON response: ${e?.message || String(e)}`),
+            );
           }
         });
       },
