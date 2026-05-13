@@ -169,8 +169,17 @@ function addToProductsIndex(index, techName, product, rank, rec, recIndex) {
 
 /**
  * Build: techName -> ordered products array (primary-first).
- * Handles both technology-triggered and category-triggered recommendations so that
- * technologies matched only via a category mapping still receive HubSpot products.
+ *
+ * Handles all four trigger types so that technologies matched via any mapping
+ * shape (technology, category, categoryId, group, groupId) receive HubSpot
+ * products in the per-technology `hubspot.products` array returned to the
+ * frontend. Without this, only `byTechnology` and `byCategory` triggers would
+ * populate `hubspot.primaryProduct`; the other three would silently produce
+ * `null` even when recommendations were correctly generated.
+ *
+ * @param {Array<object>} recommendations - Cleaned recommendations list
+ * @param {Array<object>} detections - Enriched detections (used for reverse-mapping)
+ * @returns {Map<string, Array<object>>} Map of tech name → ordered products
  */
 function buildTechnologyProductsIndex(recommendations, detections) {
   const index = new Map();
@@ -183,17 +192,48 @@ function buildTechnologyProductsIndex(recommendations, detections) {
 
     for (const trigger of asArray(rec?.triggeredBy)) {
       if (trigger?.triggerType === "technology") {
+        // Direct match: attribute to the named technology only
         const techName = sanitizeName(trigger.key);
         if (techName)
           addToProductsIndex(index, techName, product, rank, rec, recIndex);
       } else if (trigger?.triggerType === "category") {
-        // Reverse-map: attribute this recommendation to every detection in the matched category
+        // Reverse-map: attribute to every detection in the matched category (by name)
         for (const d of asArray(detections)) {
           const inCategory = asArray(d.categories).some(
             (c) => c?.name === trigger.key,
           );
           const cleanName = sanitizeName(d.name);
           if (inCategory && cleanName)
+            addToProductsIndex(index, cleanName, product, rank, rec, recIndex);
+        }
+      } else if (trigger?.triggerType === "categoryId") {
+        // Reverse-map: attribute to every detection in the matched category (by numeric id)
+        for (const d of asArray(detections)) {
+          const inCategory = asArray(d.categories).some(
+            (c) => c?.id === trigger.key,
+          );
+          const cleanName = sanitizeName(d.name);
+          if (inCategory && cleanName)
+            addToProductsIndex(index, cleanName, product, rank, rec, recIndex);
+        }
+      } else if (trigger?.triggerType === "group") {
+        // Reverse-map: attribute to every detection in the matched group (by name)
+        for (const d of asArray(detections)) {
+          const inGroup = asArray(d.groups).some(
+            (g) => g?.name === trigger.key,
+          );
+          const cleanName = sanitizeName(d.name);
+          if (inGroup && cleanName)
+            addToProductsIndex(index, cleanName, product, rank, rec, recIndex);
+        }
+      } else if (trigger?.triggerType === "groupId") {
+        // Reverse-map: attribute to every detection in the matched group (by numeric id)
+        for (const d of asArray(detections)) {
+          const inGroup = asArray(d.groups).some(
+            (g) => g?.id === trigger.key,
+          );
+          const cleanName = sanitizeName(d.name);
+          if (inGroup && cleanName)
             addToProductsIndex(index, cleanName, product, rank, rec, recIndex);
         }
       }

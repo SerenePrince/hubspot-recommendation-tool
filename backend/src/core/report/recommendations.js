@@ -58,6 +58,13 @@ function ensureMappingLoaded(mappingPath) {
   return cachedMapping;
 }
 
+/**
+ * Maps a priority string to a numeric weight for score computation.
+ * Higher weight = higher sort precedence.
+ *
+ * @param {string} p - Priority string ("high" | "medium" | "low")
+ * @returns {number} Numeric weight (3 = high, 2 = medium, 1 = low/unknown)
+ */
 function priorityWeight(p) {
   if (p === "high") return 3;
   if (p === "medium") return 2;
@@ -65,6 +72,19 @@ function priorityWeight(p) {
   return 1;
 }
 
+/**
+ * Computes a sort score for a merged recommendation.
+ *
+ * Score components (additive):
+ *   - Base priority weight (1–3): ensures high-priority recs always outrank low ones
+ *   - Trigger breadth bonus (0–3): more triggering detections = stronger signal, capped to avoid
+ *     noisy broad-match rules from drowning out specific high-confidence detections
+ *   - Trigger specificity bonus: technology (+2) > category/categoryId (+1) > group/groupId (+0.5)
+ *     so a precise tech-level match ranks above a broad group-level match at the same priority
+ *
+ * @param {object} rec - Merged recommendation object with `priority`, `triggeredBy`, `triggerType`
+ * @returns {number} Numeric sort score (higher = surfaces first)
+ */
 function computeScore(rec) {
   let score = priorityWeight(rec.priority);
   const n = Array.isArray(rec.triggeredBy) ? rec.triggeredBy.length : 0;

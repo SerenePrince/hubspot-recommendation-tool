@@ -43,7 +43,12 @@ async function initTechDb() {
       // Allow retry on failure:
       // - on a transient filesystem issue, the next request can attempt re-init
       // - on success, cachedDb is set and dbInitPromise becomes irrelevant
-      if (!cachedDb) dbInitPromise = null;
+      if (!cachedDb) {
+        console.error(
+          "[analyzer] Tech DB failed to load; will retry on next request.",
+        );
+        dbInitPromise = null;
+      }
     });
   }
   return dbInitPromise;
