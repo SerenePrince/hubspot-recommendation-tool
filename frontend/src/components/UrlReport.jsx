@@ -57,8 +57,9 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
 
   const allRows = mapApiToTableData(urlAnalysisData);
   const mappedRows = allRows.filter((row) => row.products.length > 0);
-  const visibleRows = showUnmapped ? allRows : mappedRows;
-  const hiddenCount = allRows.length - mappedRows.length;
+  const unmappedRows = allRows.filter((row) => row.products.length === 0);
+  const visibleRows = showUnmapped ? [...mappedRows, ...unmappedRows] : mappedRows;
+  const hiddenCount = unmappedRows.length;
 
   const urlDisplay = urlAnalysisData.finalUrl || urlAnalysisData.url || "";
   const urlHref = urlAnalysisData.finalUrl || urlAnalysisData.url || "#";
@@ -75,10 +76,14 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
       </div>
 
       {visibleRows.length === 0 ? (
-        <p className="report__filter-note report__filter-note--empty">
+        <p
+          className="report__filter-note report__filter-note--empty"
+          aria-live="polite"
+        >
           No mapped recommendations for this site&apos;s tech stack —{" "}
           <button
             className="report__toggle"
+            aria-expanded={false}
             onClick={() => setShowUnmapped(true)}
           >
             reveal {hiddenCount} unmapped{" "}
@@ -99,7 +104,7 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
           </thead>
           <tbody>
             {visibleRows.map((row, idx) => (
-              <tr key={row.name || idx}>
+              <tr key={`${row.name ?? ""}_${idx}`}>
                 <td data-label="Technology">
                   <span className="tech-name">{row.name}</span>
                   {row.category && (
@@ -116,7 +121,7 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
                   {row.products?.length > 0 ? (
                     row.products.map((product, i) => (
                       <div
-                        key={product.name}
+                        key={`${product.name}_${i}`}
                         className={
                           i === 0
                             ? "replacement-block replacement-block--primary"
@@ -153,6 +158,7 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
               {allRows.length === 1 ? "technology" : "technologies"} —{" "}
               <button
                 className="report__toggle"
+                aria-expanded={true}
                 onClick={() => setShowUnmapped(false)}
               >
                 hide {hiddenCount} unmapped
@@ -164,6 +170,7 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
               {allRows.length === 1 ? "technology" : "technologies"} —{" "}
               <button
                 className="report__toggle"
+                aria-expanded={false}
                 onClick={() => setShowUnmapped(true)}
               >
                 reveal {hiddenCount} unmapped
