@@ -80,13 +80,11 @@ Use this when you want to recommend a HubSpot product whenever a specific techno
 "byTechnology": {
   "WordPress": [
     {
-      "title": "Migrate from WordPress to HubSpot Content Hub",
       "hubspotProduct": "Content Hub",
       "priority": "high",
       "description": "Move your website onto HubSpot for CRM-connected content, SEO tooling, lead capture, and unified reporting across the customer journey."
     },
     {
-      "title": "Power growth with HubSpot Marketing Hub alongside WordPress",
       "hubspotProduct": "Marketing Hub",
       "priority": "high",
       "description": "Automate lead capture and attribution from site traffic."
@@ -99,8 +97,7 @@ Use this when you want to recommend a HubSpot product whenever a specific techno
 
 | Field | What it does | Values |
 |---|---|---|
-| `title` | Short recommendation headline shown in the report | Any text |
-| `hubspotProduct` | The HubSpot product being recommended | `Content Hub`, `Marketing Hub`, `Sales Hub`, `Service Hub`, `Operations Hub`, `Commerce Hub` |
+| `hubspotProduct` | The HubSpot product being recommended | `Content Hub`, `Marketing Hub`, `Sales Hub`, `Service Hub`, `Data Hub`, `Commerce Hub` |
 | `priority` | How prominently this surfaces in the report | `high`, `medium`, `low` |
 | `description` | Supporting notes shown in the Recommendations table | Any text |
 
@@ -116,13 +113,11 @@ Use this when you want to recommend a HubSpot product whenever a specific techno
 ```json
 "Shopify": [
   {
-    "title": "Extend Shopify with HubSpot Commerce Hub",
     "hubspotProduct": "Commerce Hub",
     "priority": "high",
     "description": "Connect your Shopify store to HubSpot CRM for unified revenue attribution and post-purchase automation."
   },
   {
-    "title": "Drive repeat purchases with HubSpot Marketing Hub",
     "hubspotProduct": "Marketing Hub",
     "priority": "medium",
     "description": "Automate abandoned cart flows, post-purchase sequences, and loyalty campaigns."
@@ -140,7 +135,6 @@ Use this when you want to recommend a HubSpot product for any technology that fa
 "byCategory": {
   "CRM": [
     {
-      "title": "Consolidate your CRM into HubSpot",
       "hubspotProduct": "Sales Hub",
       "priority": "high",
       "description": "Replace fragmented CRM tools with HubSpot's unified CRM — contacts, deals, tasks, and reporting in one place."

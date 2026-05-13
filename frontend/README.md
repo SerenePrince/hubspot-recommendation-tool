@@ -62,8 +62,7 @@ The table uses three columns. `mapApiToTableData` extracts only what is needed:
         "products": [
           {
             "hubspotProduct": "HubSpot CMS Hub",
-            "priority": "high",
-            "title": "Migrate to HubSpot CMS"
+            "priority": "high"
           }
         ]
       }
@@ -77,12 +76,12 @@ Mapped to table rows:
 | ------------------ | ----------------------------------------- | ------------------------- |
 | Technology         | `tech.name` + `tech.categories[0].name`   | `"Unknown"`               |
 | Description        | `tech.description`                        | `"No description available"` |
-| HubSpot Replacement| `tech.hubspot.primaryProduct` + `products[0].title` | `"No direct replacement"` |
+| HubSpot Replacement| `tech.hubspot.primaryProduct`                       | `"No direct replacement"` |
 
 ## Constraints
 
 - Table always has exactly **3 columns**: Technology, Description, HubSpot Replacement.
-- Only the **primary HubSpot product** and its recommendation title are shown per row.
+- Only the **primary HubSpot product** is shown per row.
 - Input only accepts **https://** URLs.
 - Raw API data is never passed directly into components — always goes through `mapApiToTableData`.
 

@@ -42,7 +42,7 @@ Frontend-facing report builder (`buildSimpleReport` / `buildCleanReport`).
 - Technology with no matching trigger has `primaryProduct: null`
 - `primaryProduct` is the highest-priority product when a tech maps to multiple
 - `triggeredBySummary`: formats `Tech: / Category: / Group:` entries, appends `+N` overflow, is `null` for empty `triggeredBy`
-- `topRecommendations`: capped at 5, priority-first then alphabetical
+- `topRecommendations`: capped at 5, priority-first then `hubspotProduct` alphabetical
 
 ### `detectTechnologies.test.js`
 Phase 4: technology detection across all matcher signals.
@@ -67,14 +67,14 @@ Validates the `hubspot-mapping.json` schema before it is used at runtime.
 - Accepts an empty mapping object (all sections are optional)
 - Validates `byTechnology`, `byCategory`, and `byGroup` section types (must be `{key: RecommendationItem[]}`)
 - Rejects `null` and non-object items inside recommendation arrays
-- Required fields: `title`, `hubspotProduct`, `priority` (must be `"high" | "medium" | "low"`)
+- Required fields: `hubspotProduct`, `priority` (must be `"high" | "medium" | "low"`)
 - Optional string fields: `description`, `url`, `reason`, `inboxOffer` — rejected if present but wrong type
 - `tags`: must be an array of strings if present
 
 ### `recommendations.test.js`
 Phase 5: recommendation building from enriched detections.
 - Invalid mapping degrades gracefully to an empty list (no crash)
-- Duplicates are merged by `(title, hubspotProduct)`: `triggeredBy` is unioned, highest priority wins, tags are merged
+- Duplicates are merged by `hubspotProduct`: `triggeredBy` is unioned, highest priority wins, tags are merged
 - Detections below `minConfidence` (default 50) are excluded
 - `byCategoryId` trigger matches on numeric category `id`
 - `capGroupNoise`: when multiple group-triggered recs target the same `hubspotProduct`, only the highest-scored one is kept
