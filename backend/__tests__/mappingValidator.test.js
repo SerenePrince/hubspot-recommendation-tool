@@ -26,7 +26,6 @@ describe("core/report/mappingValidator - validateMapping", () => {
       byTechnology: {
         React: [
           {
-            title: "Replace forms",
             hubspotProduct: "Marketing Hub",
             priority: "high",
             description: "desc",
@@ -52,7 +51,7 @@ describe("core/report/mappingValidator - validateMapping", () => {
   test("rejects invalid priorities and missing required fields", () => {
     const mapping = {
       byTechnology: {
-        React: [{ title: "", hubspotProduct: "", priority: "urgent" }],
+        React: [{ hubspotProduct: "", priority: "urgent" }],
       },
     };
 
@@ -60,7 +59,6 @@ describe("core/report/mappingValidator - validateMapping", () => {
     expect(r.ok).toBe(false);
     expect(r.errors).toEqual(
       expect.arrayContaining([
-        expect.stringContaining(".title is required"),
         expect.stringContaining(".hubspotProduct is required"),
         expect.stringContaining(".priority must be one of"),
       ]),
@@ -72,7 +70,6 @@ describe("core/report/mappingValidator - validateMapping", () => {
       byTechnology: {
         React: [
           {
-            title: "t",
             hubspotProduct: "p",
             priority: "low",
             tags: [1, 2],
@@ -97,7 +94,7 @@ describe("core/report/mappingValidator - validateMapping", () => {
   test("validates byGroup section the same as byTechnology", () => {
     const mapping = {
       byGroup: {
-        Analytics: [{ title: "t", hubspotProduct: "p", priority: "high" }],
+        Analytics: [{ hubspotProduct: "p", priority: "high" }],
         BadGroup: "not an array",
       },
     };
@@ -125,7 +122,6 @@ describe("core/report/mappingValidator - validateMapping", () => {
       byCategory: {
         Ecommerce: [
           {
-            title: "t",
             hubspotProduct: "p",
             priority: "medium",
             url: 123,

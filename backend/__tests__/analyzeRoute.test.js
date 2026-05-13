@@ -73,7 +73,7 @@ describe("api/routes/analyze - handleAnalyze", () => {
         url: "https://example.com/",
         finalUrl: "https://example.com/",
         detections: [{ slug: "React", name: "React", confidence: 90 }],
-        recommendations: [{ title: "t" }],
+        recommendations: [{ hubspotProduct: "Marketing Hub", priority: "high" }],
         summary: { total: 1 },
         groups: {},
         fetch: { status: 200 },

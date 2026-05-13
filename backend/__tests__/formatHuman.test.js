@@ -43,8 +43,8 @@ function mkTech(name, overrides = {}) {
   };
 }
 
-function mkRec(title, hubspotProduct, priority, triggeredBy = []) {
-  return { title, hubspotProduct, priority, triggeredBy };
+function mkRec(hubspotProduct, priority, triggeredBy = []) {
+  return { hubspotProduct, priority, triggeredBy };
 }
 
 describe("cli/formatHuman - output structure", () => {
@@ -106,7 +106,7 @@ describe("cli/formatHuman - technologies table", () => {
     const tech = mkTech("WordPress", {
       hubspot: {
         primaryProduct: "Content Hub",
-        products: [{ hubspotProduct: "Content Hub", title: "Migrate CMS" }],
+        products: [{ hubspotProduct: "Content Hub" }],
       },
     });
     const out = formatHuman(mkReport({ technologies: [tech] }));
@@ -129,7 +129,7 @@ describe("cli/formatHuman - coverage summary", () => {
     const tech = mkTech("Mailchimp", {
       hubspot: {
         primaryProduct: "Marketing Hub",
-        products: [{ hubspotProduct: "Marketing Hub", title: "Automate email" }],
+        products: [{ hubspotProduct: "Marketing Hub" }],
       },
     });
     const out = formatHuman(mkReport({ technologies: [tech] }));
@@ -140,7 +140,7 @@ describe("cli/formatHuman - coverage summary", () => {
     const mapped = mkTech("WordPress", {
       hubspot: {
         primaryProduct: "Content Hub",
-        products: [{ hubspotProduct: "Content Hub", title: "Migrate CMS" }],
+        products: [{ hubspotProduct: "Content Hub" }],
       },
     });
     const unmapped = mkTech("ObscureTool");
@@ -159,20 +159,24 @@ describe("cli/formatHuman - coverage summary", () => {
 
 describe("cli/formatHuman - recommendations table", () => {
   test("renders correct column headers", () => {
-    const rec = mkRec("Replace your CRM", "Sales Hub", "high");
+    const rec = mkRec("Sales Hub", "high");
     const out = formatHuman(mkReport({ recommendations: [rec] }));
     expect(out).toContain("Product");
     expect(out).toContain("Priority");
-    expect(out).toContain("Recommendation");
-    expect(out).toContain("Notes");
+    expect(out).toContain("Description");
   });
 
-  test("renders recommendation title and product in table", () => {
-    const rec = mkRec("Replace your CRM", "Sales Hub", "high");
+  test("renders product and priority in recommendation table", () => {
+    const rec = mkRec("Sales Hub", "high");
     const out = formatHuman(mkReport({ recommendations: [rec] }));
-    expect(out).toContain("Replace your CRM");
     expect(out).toContain("Sales Hub");
     expect(out).toContain("high");
+  });
+
+  test("renders description when present", () => {
+    const rec = { hubspotProduct: "Sales Hub", priority: "high", description: "Automate your pipeline.", triggeredBy: [] };
+    const out = formatHuman(mkReport({ recommendations: [rec] }));
+    expect(out).toContain("Automate your pipeline.");
   });
 
   test("renders 'No HubSpot recommendations were triggered.' when list is empty", () => {
@@ -184,9 +188,9 @@ describe("cli/formatHuman - recommendations table", () => {
 describe("cli/formatHuman - top recommendations", () => {
   test("lists top recommendations sorted by priority", () => {
     const recs = [
-      mkRec("Low rec", "Service Hub", "low"),
-      mkRec("High rec", "Sales Hub", "high"),
-      mkRec("Medium rec", "Marketing Hub", "medium"),
+      mkRec("Service Hub", "low"),
+      mkRec("Sales Hub", "high"),
+      mkRec("Marketing Hub", "medium"),
     ];
     const out = formatHuman(mkReport({ recommendations: recs }));
     // High rec should appear before low rec in the Top Recommendations section
@@ -210,12 +214,11 @@ describe("cli/formatHuman - inspect mode", () => {
       categories: [{ name: "CMS" }],
       hubspot: {
         primaryProduct: "Content Hub",
-        products: [{ hubspotProduct: "Content Hub", title: "Migrate CMS" }],
+        products: [{ hubspotProduct: "Content Hub" }],
       },
     });
     const recs = [
       {
-        title: "Migrate CMS",
         hubspotProduct: "Content Hub",
         priority: "high",
         description: "Move your site to HubSpot.",
@@ -243,7 +246,6 @@ describe("cli/formatHuman - inspect mode", () => {
     const tech = mkTech("Zendesk", { categories: [{ name: "Helpdesk" }] });
     const recs = [
       {
-        title: "Replace Zendesk",
         hubspotProduct: "Service Hub",
         priority: "high",
         description: "Use HubSpot Service Hub.",
@@ -255,8 +257,8 @@ describe("cli/formatHuman - inspect mode", () => {
       mode: "wide",
     });
 
-    expect(out).toContain("Replace Zendesk");
     expect(out).toContain("Service Hub");
+    expect(out).toContain("Use HubSpot Service Hub.");
   });
 });
 

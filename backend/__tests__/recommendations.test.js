@@ -4,7 +4,7 @@
  * We validate:
  * - mapping loading + validation fallback behavior
  * - triggers from technology/category/group and their merge rules
- * - dedupe by (title, hubspotProduct) and union of triggeredBy
+ * - dedupe by hubspotProduct and union of triggeredBy
  * - minConfidence filter
  * - scoring + sorting behavior is deterministic
  */
@@ -40,21 +40,21 @@ describe("core/report/recommendations - buildRecommendations", () => {
     }
   });
 
-  test("merges duplicates by (title, hubspotProduct) and unions triggeredBy", () => {
+  test("merges duplicates by hubspotProduct and unions triggeredBy", () => {
     const mappingPath = writeTmpMapping({
       byTechnology: {
         React: [
-          { title: "Use HubSpot CMS", hubspotProduct: "CMS Hub", priority: "high", tags: ["cms"], reason: "tech" },
+          { hubspotProduct: "CMS Hub", priority: "high", tags: ["cms"], reason: "tech" },
         ],
       },
       byCategory: {
         Ecommerce: [
-          { title: "Use HubSpot CMS", hubspotProduct: "CMS Hub", priority: "medium", tags: ["web"], reason: "cat" },
+          { hubspotProduct: "CMS Hub", priority: "medium", tags: ["web"], reason: "cat" },
         ],
       },
       byGroup: {
         Analytics: [
-          { title: "Use HubSpot CMS", hubspotProduct: "CMS Hub", priority: "low", tags: ["analytics"], reason: "group" },
+          { hubspotProduct: "CMS Hub", priority: "low", tags: ["analytics"], reason: "group" },
         ],
       },
     });
@@ -74,7 +74,6 @@ describe("core/report/recommendations - buildRecommendations", () => {
     expect(out).toHaveLength(1);
 
     const rec = out[0];
-    expect(rec.title).toBe("Use HubSpot CMS");
     expect(rec.hubspotProduct).toBe("CMS Hub");
 
     // Highest priority wins on merge
@@ -101,7 +100,7 @@ describe("core/report/recommendations - buildRecommendations", () => {
 
   test("filters out detections below minConfidence (report-aligned default)", () => {
     const mappingPath = writeTmpMapping({
-      byTechnology: { React: [{ title: "t", hubspotProduct: "p", priority: "high" }] },
+      byTechnology: { React: [{ hubspotProduct: "p", priority: "high" }] },
     });
 
     const { buildRecommendations } = require("../src/core/report/recommendations");
@@ -116,7 +115,7 @@ describe("core/report/recommendations - buildRecommendations", () => {
   test("byCategoryId trigger matches on numeric category id", () => {
     const mappingPath = writeTmpMapping({
       byCategoryId: {
-        42: [{ title: "Sync CRM data", hubspotProduct: "Operations Hub", priority: "medium" }],
+        42: [{ hubspotProduct: "Data Hub", priority: "medium" }],
       },
     });
 
@@ -133,15 +132,15 @@ describe("core/report/recommendations - buildRecommendations", () => {
 
     const out = buildRecommendations(detections, { mappingPath });
     expect(out).toHaveLength(1);
-    expect(out[0].hubspotProduct).toBe("Operations Hub");
+    expect(out[0].hubspotProduct).toBe("Data Hub");
     expect(out[0].triggeredBy[0]).toMatchObject({ triggerType: "categoryId", key: 42 });
   });
 
   test("caps group-noise: only best group-triggered rec per hubspotProduct is kept", () => {
     const mappingPath = writeTmpMapping({
       byGroup: {
-        GroupA: [{ title: "Rec A", hubspotProduct: "Sales Hub", priority: "low" }],
-        GroupB: [{ title: "Rec B", hubspotProduct: "Sales Hub", priority: "high" }],
+        GroupA: [{ hubspotProduct: "Sales Hub", priority: "low" }],
+        GroupB: [{ hubspotProduct: "Sales Hub", priority: "high" }],
       },
     });
 
@@ -152,6 +151,6 @@ describe("core/report/recommendations - buildRecommendations", () => {
 
     // Both are group-triggered and same product; only the best-scoring should remain
     expect(out).toHaveLength(1);
-    expect(out[0].title).toBe("Rec B");
+    expect(out[0].priority).toBe("high");
   });
 });

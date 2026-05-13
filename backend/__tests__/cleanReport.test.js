@@ -6,7 +6,7 @@
  * - buildSimpleReport: stable output shape, field defaults, and apiVersion marker
  * - buildTechnologyProductsIndex: technology-triggered AND category-triggered product assignment
  * - summarizeTriggeredBy: summary string format, overflow notation, null on empty
- * - buildTopRecommendations: top-5 cap with priority-first, then alpha ordering
+ * - buildTopRecommendations: top-5 cap with priority-first, then hubspotProduct alpha ordering
  * - buildCleanReport: includes meta.fetch and meta.timings
  *
  * buildSimpleReport internally calls ensureMappingLoaded (a side-effect ensuring the
@@ -96,7 +96,6 @@ describe("core/report/cleanReport", () => {
       detections: [{ name: "Mailchimp", confidence: 90 }],
       recommendations: [
         {
-          title: "Replace email",
           hubspotProduct: "Marketing Hub",
           priority: "high",
           triggeredBy: [{ triggerType: "technology", key: "Mailchimp" }],
@@ -124,7 +123,6 @@ describe("core/report/cleanReport", () => {
       ],
       recommendations: [
         {
-          title: "Replace analytics",
           hubspotProduct: "Marketing Hub",
           priority: "medium",
           triggeredBy: [{ triggerType: "category", key: "Analytics" }],
@@ -150,7 +148,6 @@ describe("core/report/cleanReport", () => {
       ],
       recommendations: [
         {
-          title: "Use CMS Hub",
           hubspotProduct: "CMS Hub",
           priority: "high",
           triggeredBy: [{ triggerType: "category", key: "CMS" }],
@@ -170,7 +167,6 @@ describe("core/report/cleanReport", () => {
       detections: [{ name: "UnknownLib", confidence: 70 }],
       recommendations: [
         {
-          title: "Some rec",
           hubspotProduct: "Marketing Hub",
           priority: "low",
           triggeredBy: [{ triggerType: "technology", key: "OtherTech" }],
@@ -190,13 +186,11 @@ describe("core/report/cleanReport", () => {
       detections: [{ name: "Zendesk", confidence: 90 }],
       recommendations: [
         {
-          title: "Low rec",
-          hubspotProduct: "Operations Hub",
+          hubspotProduct: "Data Hub",
           priority: "low",
           triggeredBy: [{ triggerType: "technology", key: "Zendesk" }],
         },
         {
-          title: "High rec",
           hubspotProduct: "Service Hub",
           priority: "high",
           triggeredBy: [{ triggerType: "technology", key: "Zendesk" }],
@@ -218,7 +212,6 @@ describe("core/report/cleanReport", () => {
       detections: [],
       recommendations: [
         {
-          title: "Rec",
           hubspotProduct: "Marketing Hub",
           priority: "high",
           triggeredBy: [
@@ -243,7 +236,6 @@ describe("core/report/cleanReport", () => {
       detections: [],
       recommendations: [
         {
-          title: "Rec",
           hubspotProduct: "Marketing Hub",
           priority: "high",
           triggeredBy: [
@@ -266,7 +258,6 @@ describe("core/report/cleanReport", () => {
       detections: [],
       recommendations: [
         {
-          title: "Rec",
           hubspotProduct: "Marketing Hub",
           priority: "high",
           triggeredBy: [],
@@ -279,25 +270,22 @@ describe("core/report/cleanReport", () => {
 
   // ── buildTopRecommendations ─────────────────────────────────────────────────
 
-  test("topRecommendations is capped at 5 and ordered by priority then alpha", () => {
+  test("topRecommendations is capped at 5 and ordered by priority then hubspotProduct alpha", () => {
     const { buildSimpleReport } = load();
-    const mkRec = (title, priority) => ({
-      title,
-      hubspotProduct: "Marketing Hub",
-      priority,
-      triggeredBy: [],
-    });
 
+    // Six distinct products so no merging occurs; two at each priority level.
+    // Expected order: C Hub (high) → D Hub (high) → B Hub (medium) → E Hub (medium) → A Hub (low)
+    // F Hub (low) is cut by the cap of 5.
     const result = buildSimpleReport({
       ok: true,
       detections: [],
       recommendations: [
-        mkRec("Aaa", "low"),
-        mkRec("Bbb", "medium"),
-        mkRec("Ccc", "high"),
-        mkRec("Ddd", "high"),
-        mkRec("Eee", "medium"),
-        mkRec("Fff", "low"),
+        { hubspotProduct: "A Hub", priority: "low",    triggeredBy: [] },
+        { hubspotProduct: "B Hub", priority: "medium", triggeredBy: [] },
+        { hubspotProduct: "C Hub", priority: "high",   triggeredBy: [] },
+        { hubspotProduct: "D Hub", priority: "high",   triggeredBy: [] },
+        { hubspotProduct: "E Hub", priority: "medium", triggeredBy: [] },
+        { hubspotProduct: "F Hub", priority: "low",    triggeredBy: [] },
       ],
     });
 
@@ -305,9 +293,9 @@ describe("core/report/cleanReport", () => {
     expect(top).toHaveLength(5);
     expect(top[0].priority).toBe("high");
     expect(top[1].priority).toBe("high");
-    // Within same priority, alphabetical order
-    expect(top[0].title).toBe("Ccc");
-    expect(top[1].title).toBe("Ddd");
+    // Within same priority, alphabetical by hubspotProduct
+    expect(top[0].hubspotProduct).toBe("C Hub");
+    expect(top[1].hubspotProduct).toBe("D Hub");
   });
 
   // ── buildCleanReport ────────────────────────────────────────────────────────

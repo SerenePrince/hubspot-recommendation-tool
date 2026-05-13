@@ -80,7 +80,7 @@ describe("core/analyzer - initTechDb / analyzeUrl", () => {
 
     jest.doMock("../src/core/report/summarize", () => ({ buildSummary: jest.fn(() => ({ totalDetections: 2 })) }));
     jest.doMock("../src/core/report/groupDetections", () => ({ groupDetections: jest.fn(() => ({ byCategory: {} })) }));
-    jest.doMock("../src/core/report/recommendations", () => ({ buildRecommendations: jest.fn(() => [{ title: "x" }]) }));
+    jest.doMock("../src/core/report/recommendations", () => ({ buildRecommendations: jest.fn(() => [{ hubspotProduct: "x" }]) }));
 
     // Ensure debugSignals off for this test
     jest.doMock("../src/core/config", () => ({ config: { debugSignals: false } }));
@@ -94,7 +94,7 @@ describe("core/analyzer - initTechDb / analyzeUrl", () => {
 
     expect(report.detections.map((d) => d.name)).toEqual(["React", "Vue"]);
     expect(report.summary.totalDetections).toBe(2);
-    expect(report.recommendations).toEqual([{ title: "x" }]);
+    expect(report.recommendations).toEqual([{ hubspotProduct: "x" }]);
     expect(report._debugSignals).toBeUndefined();
   });
 
