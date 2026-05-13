@@ -527,8 +527,12 @@ body {
   color: var(--acc3);
 }
 .replacement-block--secondary .replacement-product {
-  font-weight: 500;
-  color: var(--sub);
+  /* Lighter weight (vs. 600 on primary) signals secondary status without
+     reducing colour contrast. Opacity-based dimming on teal (#006f5f) fails
+     WCAG AA (~2.4:1 on white at 0.55 opacity), so hierarchy is expressed
+     through weight alone here. */
+  font-weight: 400;
+  color: var(--acc3);
 }
 
 .replacement-description {
