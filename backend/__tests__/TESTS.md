@@ -133,7 +133,7 @@ SSRF protection layer in Phase 2 (page fetching).
 
 | Module                                                             | Reason                                                                                                                               |
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `cli/formatHuman.js`, `cli/formatPretty.js`                        | Presentation-only string formatting with no branching logic                                                                          |
+| `cli/formatPretty.js`                                              | Thin JSON pretty-printer with no branching logic; `formatHuman.js` is covered by `formatHuman.test.js` |
 | `enrichDetections.js`, `groupDetections.js`                        | Pure data transforms; behavior exercised implicitly via `analyzer.test.js`                                                           |
 | `api/static.js`                                                    | Static file serving is platform behavior, not business logic                                                                         |
 | `api/auth.js`, `api/rateLimit.js`                                  | Middleware; integration-level concern                                                                                                |

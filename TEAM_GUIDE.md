@@ -151,6 +151,34 @@ npm run cli:tax -- --human
 
 This prints a clean, readable list of every category grouped by type. Copy the name exactly as shown.
 
+### `byGroup` — recommendations for technology groups
+
+Use this when you want to target a broad technology group — a higher-level taxonomy bucket that groups related categories together (e.g. "Marketing" groups all marketing-related technologies). `byGroup` rules fire for any detected technology that belongs to the named group, regardless of its specific category.
+
+This is the broadest trigger type. Use it for very general HubSpot positioning when a prospect has any marketing, sales, or e-commerce technology present.
+
+**Schema** (same fields as `byTechnology`):
+
+```json
+"byGroup": {
+  "Marketing": [
+    {
+      "hubspotProduct": "Marketing Hub",
+      "priority": "medium",
+      "description": "Consolidate your marketing stack into HubSpot for unified lead tracking, email automation, and attribution reporting."
+    }
+  ]
+}
+```
+
+**To find the exact group names:** run the taxonomy command:
+
+```bash
+npm run cli:tax -- --human
+```
+
+Group names appear alongside category listings in the output.
+
 ---
 
 ## Keeping the technology database current
@@ -188,6 +216,38 @@ The human output groups all categories by type (e.g. Marketing, Analytics, CMS) 
 
 ---
 
+## Using the web UI
+
+The web app provides the same analysis the CLI does, in a browser. Enter a URL in the input field and click **Analyze** — the report table appears below, showing every detected technology alongside its HubSpot replacement.
+
+**Unmapped technologies**
+
+By default the table only shows technologies that have a HubSpot recommendation. Technologies that are detected but not yet mapped are hidden to keep the report focused on actionable insights.
+
+A note at the bottom of the table tells you how many are hidden — for example, "Showing 8 of 14 detected technologies." Click **reveal N unmapped** to expand the table and see all detected technologies, including unmapped ones. Unmapped technologies appear at the bottom of the table so the mapped recommendations stay visible first. Click **hide N unmapped** to collapse them again.
+
+---
+
+## Developer flags
+
+These settings are for developers running the tool locally and are not relevant to day-to-day sales use.
+
+### `SHOW_UNMAPPED_TECHNOLOGIES` (frontend)
+
+File: `frontend/src/config.js`
+
+Controls the default state of the "reveal unmapped" toggle in the web UI.
+
+```js
+// false = production default: toggle starts collapsed (only mapped techs shown)
+// true  = developer convenience: toggle starts expanded (all techs shown)
+export const SHOW_UNMAPPED_TECHNOLOGIES = false;
+```
+
+Set this to `true` when you are auditing mapping coverage — it means every run immediately shows all detected technologies without needing to click "reveal" each time. Set it back to `false` before deploying so the UI opens in the focused, client-ready state.
+
+---
+
 ## Tips
 
 - Technology names in the mapping file are **case-sensitive**. `"wordpress"` will not match a detected `"WordPress"`. Use `--inspect` on the CLI to see the exact name as detected: `npm run cli -- https://example.com --human --inspect WordPress`
@@ -195,3 +255,4 @@ The human output groups all categories by type (e.g. Marketing, Analytics, CMS) 
 - `priority: "high"` surfaces recommendations at the top of the **Top Recommendations** section of the report and in the web app.
 - Changes to `hubspot-mapping.json` take effect immediately — no restart or redeployment needed.
 - If a technology shows a blank HubSpot Replacement in the report, it simply hasn't been mapped yet. Check the CLI output for the exact technology name, then add it to `byTechnology`.
+- Trigger precedence (most to least specific): `byTechnology` > `byCategory` > `byGroup`. A recommendation from a more specific trigger will outrank one from a broader trigger when both fire for the same technology.
