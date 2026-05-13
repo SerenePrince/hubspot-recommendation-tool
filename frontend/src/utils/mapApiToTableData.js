@@ -2,6 +2,10 @@
  * Extracts only the fields the table UI needs from the API response.
  * Keeps components decoupled from the raw backend shape.
  *
+ * Always returns all detected technologies — filtering (e.g. hiding unmapped
+ * rows) is the component's responsibility so it can respond to user interaction
+ * without re-invoking this function.
+ *
  * @param {object} apiResponse - Raw response from GET /api/analyze
  * @returns {{
  *   name: string,
@@ -26,8 +30,6 @@ export function mapApiToTableData(apiResponse) {
         .filter((p) => p?.hubspotProduct)
         .map((p) => ({
           name: p.hubspotProduct,
-          // Plain-English pitch for why this product fits — more useful in a
-          // sales context than the action-oriented title field.
           description: p.description ?? null,
         })),
     };
