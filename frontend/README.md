@@ -52,17 +52,18 @@ The table uses three columns. `mapApiToTableData` extracts only what is needed:
   "ok": true,
   "url": "https://example.com",
   "finalUrl": "https://example.com/",
+  "htmlTruncated": false,
   "technologies": [
     {
       "name": "React",
+      "version": null,
       "description": "A JavaScript library for building user interfaces.",
-      "categories": [{ "id": 12, "name": "JavaScript frameworks" }],
+      "categories": [{ "name": "JavaScript frameworks" }],
       "hubspot": {
-        "primaryProduct": "HubSpot CMS Hub",
         "products": [
           {
-            "hubspotProduct": "HubSpot CMS Hub",
-            "priority": "high",
+            "hubspotProduct": "Content Hub",
+            "description": "Build and manage your website on HubSpot.",
           },
         ],
       },
@@ -71,17 +72,20 @@ The table uses three columns. `mapApiToTableData` extracts only what is needed:
 }
 ```
 
+`buildFrontendReport` strips internal fields before the response leaves the backend:
+`confidence`, `website`, `icon`, `groups`, `categories[].id`, `hubspot.primaryProduct`, `hubspot.products[].priority`.
+
 Mapped to table rows:
 | Column | Source field | Fallback |
-| ------------------ | ----------------------------------------- | ------------------------- |
+| ------------------ | -------------------------------------------- | ---------------------------- |
 | Technology | `tech.name` + `tech.categories[0].name` | `"Unknown"` |
 | Description | `tech.description` | `"No description available"` |
-| HubSpot Replacement| `tech.hubspot.primaryProduct` | `"No direct replacement"` |
+| HubSpot Replacement| `tech.hubspot.products[].hubspotProduct` | `"No recommendation mapped"` |
 
 ## Constraints
 
 - Table always has exactly **3 columns**: Technology, Description, HubSpot Replacement.
-- Only the **primary HubSpot product** is shown per row.
+- The primary product (index 0) gets full visual weight; secondary products are shown below it in a subdued style.
 - Input only accepts **https://** URLs.
 - Raw API data is never passed directly into components — always goes through `mapApiToTableData`.
 

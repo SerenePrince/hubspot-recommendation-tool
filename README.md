@@ -69,7 +69,7 @@ curl http://localhost:3001/health
 
 ```bash
 curl -u "$AUTH_USERNAME:$AUTH_PASSWORD" \
-  "http://localhost:3001/api/analyze?url=https://react.dev&pretty=1&includeMeta=1"
+  "http://localhost:3001/api/analyze?url=https://react.dev"
 ```
 
 ## Project Documentation
