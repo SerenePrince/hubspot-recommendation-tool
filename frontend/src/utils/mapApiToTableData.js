@@ -1,12 +1,20 @@
 /**
  * Extracts only the fields the table UI needs from the API response.
- * Keeps components decoupled from the raw backend shape.
+ * Keeps components decoupled from the backend shape.
  *
  * Always returns all detected technologies — filtering (e.g. hiding unmapped
  * rows) is the component's responsibility so it can respond to user interaction
  * without re-invoking this function.
  *
- * @param {object} apiResponse - Raw response from GET /api/analyze
+ * Expected API response shape (from buildFrontendReport in cleanReport.js):
+ *   technologies[].name             {string}
+ *   technologies[].version          {string|null}
+ *   technologies[].description      {string|null}
+ *   technologies[].categories[0].name {string|null}
+ *   technologies[].hubspot.products[].hubspotProduct {string}
+ *   technologies[].hubspot.products[].description    {string|null}
+ *
+ * @param {object} apiResponse - Slimmed response from GET /api/analyze
  * @returns {{
  *   name: string,
  *   version: string|null,

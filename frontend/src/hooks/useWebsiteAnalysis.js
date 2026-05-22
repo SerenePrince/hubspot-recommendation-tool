@@ -14,7 +14,22 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
  * - keep the latest successful result cached for consumers
  * - cancel in‑flight requests when a new one starts
  *
- * @returns {{analyzeUrl: (url: string) => Promise<object|null>, loading: boolean, errorMessage: string|null, result: object|null}} Hook API for analysis requests
+ * The API response uses the slimmed frontend shape from `buildFrontendReport`
+ * (backend: cleanReport.js). Fields available on a successful result:
+ *   ok           {boolean}   — always true on success
+ *   url          {string}    — originally requested URL
+ *   finalUrl     {string}    — URL after any redirects
+ *   technologies {Array}     — detected technologies with HubSpot products
+ *   htmlTruncated {boolean}  — true when the HTML body exceeded the byte cap;
+ *                              detection results may be incomplete for very
+ *                              large pages
+ *
+ * @returns {{
+ *   analyzeUrl: (url: string) => Promise<object|null>,
+ *   loading: boolean,
+ *   errorMessage: string|null,
+ *   result: object|null
+ * }} Hook API for analysis requests
  */
 export function useWebsiteAnalysis() {
   const [loading, setLoading] = useState(false);
@@ -34,10 +49,11 @@ export function useWebsiteAnalysis() {
     setErrorMessage(null);
 
     try {
-      const params = new URLSearchParams({
-        url,
-        pretty: "true",
-      });
+      // Only the `url` param is sent. The `pretty` param was removed: the
+      // backend previously JSON.stringify'd with 2-space indentation when
+      // pretty=true, adding significant whitespace to every response. The
+      // frontend never needed human-readable JSON from this endpoint.
+      const params = new URLSearchParams({ url });
 
       const response = await fetch(`${API_BASE_URL}/analyze?${params}`, {
         method: "GET",
