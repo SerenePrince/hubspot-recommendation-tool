@@ -22,11 +22,13 @@ Concurrency limiter that gates `/analyze` requests.
 HTTP handler for `GET /analyze`.
 
 - Input validation: missing URL, invalid format, bad protocol, URL > 2048 chars
-- Success path: limiter acquired, `analyzeUrl` called, `buildSimpleReport` applied
+- Success path: limiter acquired, `analyzeUrl` called, `buildFrontendReport` applied — returns the slimmed frontend shape
+- Response is always compact JSON (no whitespace indentation — `pretty` param removed)
+- `htmlTruncated: true` is forwarded through the response when the page HTML was cut at the byte cap
 - `AppError` with `expose=true` passes its message to the client
 - `AppError` with `expose=false` returns `"Request failed"` — internal message is hidden
 - Generic non-`AppError` returns 500
-- Limiter `release()` is always called on both success and error paths
+- Limiter `release()` is always called on both success and error paths, including when `buildFrontendReport` itself throws
 
 ### `analyzer.test.js`
 
@@ -34,11 +36,15 @@ Orchestrator that wires all analysis phases together.
 
 - `initTechDb` loads the DB exactly once even with concurrent calls
 - `analyzeUrl` produces a stable output shape with detections sorted by confidence desc, then name asc
+- `htmlTruncated: true` from `fetchPage` is propagated into the report object
+- `htmlTruncated` defaults to `false` when `fetchPage` does not set it
 - `_debugSignals` is included only when `config.debugSignals=true`
 
 ### `cleanReport.test.js`
 
-Frontend-facing report builder (`buildSimpleReport` / `buildCleanReport`).
+Report builders: `buildSimpleReport` (full shape), `buildCleanReport` (CLI with meta), `buildFrontendReport` (slimmed API response).
+
+**buildSimpleReport / buildCleanReport**
 
 - `sanitizeName` strips Wappalyzer markdown link syntax (`[text](url)` → `text`) from tech names
 - Output shape: `apiVersion: "2.0"`, `technologies`, `byGroup`, `recommendations`, `summary`
@@ -51,6 +57,28 @@ Frontend-facing report builder (`buildSimpleReport` / `buildCleanReport`).
 - `primaryProduct` is the highest-priority product when a tech maps to multiple
 - `triggeredBySummary`: formats `Tech: / Category: / Group:` entries, appends `+N` overflow, is `null` for empty `triggeredBy`
 - `topRecommendations`: capped at 5, priority-first then `hubspotProduct` alphabetical
+
+**buildFrontendReport**
+
+- Returns only fields consumed by the frontend: `ok`, `url`, `finalUrl`, `technologies`, `htmlTruncated`
+- Strips all internal fields: `apiVersion`, `byGroup`, `recommendations`, `summary`, `meta`
+- Each technology entry strips: `confidence`, `website`, `icon`, `groups`, `categories[].id`, `hubspot.primaryProduct`, `hubspot.products[].priority`
+- `hubspotProduct` field name is preserved (not renamed) — `mapApiToTableData.js` reads it directly
+- `htmlTruncated: true` is forwarded from the internal report; defaults to `false` when not set
+- `technologies: []` when there are no detections
+- Safe when called with `null` — delegates to `buildSimpleReport` which handles it gracefully
+
+### `readBodyWithLimit.test.js`
+
+Truncation logic inside `fetchPage` (tested via `fetchPage` with a mocked global `fetch`).
+
+- Normal response (under cap): body returned in full, `htmlTruncated: false`
+- Response exactly at cap: body returned in full, `htmlTruncated: false`
+- Response one byte over cap: body truncated at cap, `htmlTruncated: true`
+- Chunk straddles cap boundary: only the fitting portion is kept, remainder discarded
+- Multiple chunks, cap reached mid-stream: later chunks are not consumed
+- `htmlTruncated` is always present as a named field on the `fetchPage` return object
+- Unreadable body (`response.body` is `null`): throws `AppError` with code `FETCH_UNREADABLE_BODY`
 
 ### `detectTechnologies.test.js`
 
@@ -133,7 +161,7 @@ SSRF protection layer in Phase 2 (page fetching).
 
 | Module                                                             | Reason                                                                                                                               |
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `cli/formatPretty.js`                                              | Thin JSON pretty-printer with no branching logic; `formatHuman.js` is covered by `formatHuman.test.js` |
+| `cli/formatPretty.js`                                              | Thin JSON pretty-printer with no branching logic; `formatHuman.js` is covered by `formatHuman.test.js`                               |
 | `enrichDetections.js`, `groupDetections.js`                        | Pure data transforms; behavior exercised implicitly via `analyzer.test.js`                                                           |
 | `api/static.js`                                                    | Static file serving is platform behavior, not business logic                                                                         |
 | `api/auth.js`, `api/rateLimit.js`                                  | Middleware; integration-level concern                                                                                                |

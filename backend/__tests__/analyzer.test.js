@@ -5,6 +5,7 @@
  * - initTechDb caches the loaded DB and de-dupes concurrent initialization
  * - analyzeUrl wires together fetchPage -> buildSignals -> detectTechnologies -> enrich -> summarize -> group -> recommendations
  * - outputs are stably sorted (confidence desc then name asc)
+ * - htmlTruncated from fetchPage is propagated to the returned report object
  * - debugSignals are included only when config.debugSignals is enabled
  */
 describe("core/analyzer - initTechDb / analyzeUrl", () => {
@@ -128,6 +129,108 @@ describe("core/analyzer - initTechDb / analyzeUrl", () => {
     expect(report.summary.totalDetections).toBe(2);
     expect(report.recommendations).toEqual([{ hubspotProduct: "x" }]);
     expect(report._debugSignals).toBeUndefined();
+  });
+
+  // ── htmlTruncated propagation ───────────────────────────────────────────────
+
+  test("propagates htmlTruncated: true from fetchPage into the report", async () => {
+    const db = { technologies: {} };
+
+    jest.doMock("../src/core/techdb/loadTechDb", () => ({
+      loadTechDb: jest.fn(async () => db),
+    }));
+
+    // Simulate fetchPage returning htmlTruncated: true (page exceeded byte cap)
+    jest.doMock("../src/core/fetch/fetchPage", () => ({
+      fetchPage: jest.fn(async () => ({
+        timingMs: 3,
+        finalUrl: "https://big-site.com/",
+        status: 200,
+        contentType: "text/html",
+        bytes: 2_000_000,
+        headers: {},
+        html: "<html>…partial…</html>",
+        external: { scripts: [], stylesheets: [] },
+        htmlTruncated: true,
+      })),
+    }));
+
+    jest.doMock("../src/core/normalize/signals", () => ({
+      buildSignals: jest.fn(() => ({})),
+    }));
+    jest.doMock("../src/core/detect/detectTechnologies", () => ({
+      detectTechnologies: jest.fn(() => []),
+    }));
+    jest.doMock("../src/core/report/enrichDetections", () => ({
+      enrichDetections: jest.fn(() => []),
+    }));
+    jest.doMock("../src/core/report/summarize", () => ({
+      buildSummary: jest.fn(() => ({})),
+    }));
+    jest.doMock("../src/core/report/groupDetections", () => ({
+      groupDetections: jest.fn(() => ({})),
+    }));
+    jest.doMock("../src/core/report/recommendations", () => ({
+      buildRecommendations: jest.fn(() => []),
+    }));
+    jest.doMock("../src/core/config", () => ({
+      config: { debugSignals: false },
+    }));
+
+    const { analyzeUrl } = require("../src/core/analyzer");
+    const report = await analyzeUrl("https://big-site.com/");
+
+    expect(report.htmlTruncated).toBe(true);
+  });
+
+  test("sets htmlTruncated: false when fetchPage does not signal truncation", async () => {
+    const db = { technologies: {} };
+
+    jest.doMock("../src/core/techdb/loadTechDb", () => ({
+      loadTechDb: jest.fn(async () => db),
+    }));
+
+    // fetchPage returns no htmlTruncated field — should default to false in report
+    jest.doMock("../src/core/fetch/fetchPage", () => ({
+      fetchPage: jest.fn(async () => ({
+        timingMs: 3,
+        finalUrl: "https://example.com/",
+        status: 200,
+        contentType: "text/html",
+        bytes: 50_000,
+        headers: {},
+        html: "<html></html>",
+        external: { scripts: [], stylesheets: [] },
+        // htmlTruncated intentionally absent
+      })),
+    }));
+
+    jest.doMock("../src/core/normalize/signals", () => ({
+      buildSignals: jest.fn(() => ({})),
+    }));
+    jest.doMock("../src/core/detect/detectTechnologies", () => ({
+      detectTechnologies: jest.fn(() => []),
+    }));
+    jest.doMock("../src/core/report/enrichDetections", () => ({
+      enrichDetections: jest.fn(() => []),
+    }));
+    jest.doMock("../src/core/report/summarize", () => ({
+      buildSummary: jest.fn(() => ({})),
+    }));
+    jest.doMock("../src/core/report/groupDetections", () => ({
+      groupDetections: jest.fn(() => ({})),
+    }));
+    jest.doMock("../src/core/report/recommendations", () => ({
+      buildRecommendations: jest.fn(() => []),
+    }));
+    jest.doMock("../src/core/config", () => ({
+      config: { debugSignals: false },
+    }));
+
+    const { analyzeUrl } = require("../src/core/analyzer");
+    const report = await analyzeUrl("https://example.com/");
+
+    expect(report.htmlTruncated).toBe(false);
   });
 
   test("includes _debugSignals only when enabled via config", async () => {

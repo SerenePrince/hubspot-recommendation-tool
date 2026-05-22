@@ -8,6 +8,8 @@
  * - summarizeTriggeredBy: summary string format, overflow notation, null on empty
  * - buildTopRecommendations: top-5 cap with priority-first, then hubspotProduct alpha ordering
  * - buildCleanReport: includes meta.fetch and meta.timings
+ * - buildFrontendReport: slimmed shape, stripped fields, hubspotProduct preserved,
+ *     htmlTruncated forwarded, and defaults to false when not set
  *
  * buildSimpleReport internally calls ensureMappingLoaded (a side-effect ensuring the
  * recommendation mapping is warm for CLI callers). That is mocked here — recommendations
@@ -333,5 +335,142 @@ describe("core/report/cleanReport", () => {
 
     expect(result.meta.fetch).toBeNull();
     expect(result.meta.timings).toBeNull();
+  });
+
+  // ── buildFrontendReport: slimmed shape ─────────────────────────────────────
+
+  test("buildFrontendReport returns only the fields consumed by the frontend", () => {
+    const { buildFrontendReport } = load();
+    const result = buildFrontendReport({
+      ok: true,
+      url: "https://example.com/",
+      finalUrl: "https://example.com/",
+      htmlTruncated: false,
+      detections: [],
+      recommendations: [],
+    });
+
+    // Fields that must be present
+    expect(result.ok).toBe(true);
+    expect(result.url).toBe("https://example.com/");
+    expect(result.finalUrl).toBe("https://example.com/");
+    expect(Array.isArray(result.technologies)).toBe(true);
+    expect(result.htmlTruncated).toBe(false);
+
+    // Fields that must NOT be present (stripped for payload size)
+    expect(result.apiVersion).toBeUndefined();
+    expect(result.byGroup).toBeUndefined();
+    expect(result.recommendations).toBeUndefined();
+    expect(result.summary).toBeUndefined();
+    expect(result.meta).toBeUndefined();
+  });
+
+  test("buildFrontendReport strips internal fields from each technology", () => {
+    const { buildFrontendReport } = load();
+    const result = buildFrontendReport({
+      ok: true,
+      detections: [
+        {
+          name: "React",
+          confidence: 95,
+          version: "18.0",
+          description: "A JS library",
+          website: "https://react.dev",
+          icon: "react.png",
+          categories: [{ id: 12, name: "JavaScript frameworks" }],
+          groups: [{ id: 3, name: "UI" }],
+        },
+      ],
+      recommendations: [],
+    });
+
+    const tech = result.technologies[0];
+
+    // Fields that must be kept
+    expect(tech.name).toBe("React");
+    expect(tech.version).toBe("18.0");
+    expect(tech.description).toBe("A JS library");
+    expect(tech.categories).toEqual([{ name: "JavaScript frameworks" }]);
+
+    // Fields that must be stripped
+    expect(tech.confidence).toBeUndefined();
+    expect(tech.website).toBeUndefined();
+    expect(tech.icon).toBeUndefined();
+    expect(tech.groups).toBeUndefined();
+    // categories[].id should be stripped; only name survives
+    expect(tech.categories[0].id).toBeUndefined();
+    // hubspot.primaryProduct is stripped
+    expect(tech.hubspot.primaryProduct).toBeUndefined();
+  });
+
+  test("buildFrontendReport preserves hubspotProduct field name in products (not renamed)", () => {
+    // mapApiToTableData.js reads p.hubspotProduct directly — renaming it would
+    // silently break the replacement column without a runtime error.
+    const { buildFrontendReport } = load();
+    const result = buildFrontendReport({
+      ok: true,
+      detections: [{ name: "Mailchimp", confidence: 90 }],
+      recommendations: [
+        {
+          hubspotProduct: "Marketing Hub",
+          priority: "high",
+          description: "Email & automation",
+          triggeredBy: [{ triggerType: "technology", key: "Mailchimp" }],
+        },
+      ],
+    });
+
+    const products = result.technologies[0].hubspot.products;
+    expect(products).toHaveLength(1);
+    // Must remain hubspotProduct (not 'name')
+    expect(products[0].hubspotProduct).toBe("Marketing Hub");
+    expect(products[0].description).toBe("Email & automation");
+    // priority is an internal sort field and must not appear in the response
+    expect(products[0].priority).toBeUndefined();
+  });
+
+  test("buildFrontendReport forwards htmlTruncated: true from the report", () => {
+    const { buildFrontendReport } = load();
+    const result = buildFrontendReport({
+      ok: true,
+      htmlTruncated: true,
+      detections: [],
+      recommendations: [],
+    });
+
+    expect(result.htmlTruncated).toBe(true);
+  });
+
+  test("buildFrontendReport defaults htmlTruncated to false when not set", () => {
+    const { buildFrontendReport } = load();
+    const result = buildFrontendReport({
+      ok: true,
+      // htmlTruncated intentionally omitted
+      detections: [],
+      recommendations: [],
+    });
+
+    expect(result.htmlTruncated).toBe(false);
+  });
+
+  test("buildFrontendReport returns technologies: [] when detections is empty", () => {
+    const { buildFrontendReport } = load();
+    const result = buildFrontendReport({
+      ok: true,
+      detections: [],
+      recommendations: [],
+    });
+
+    expect(result.technologies).toEqual([]);
+  });
+
+  test("buildFrontendReport is safe when called with null report", () => {
+    const { buildFrontendReport } = load();
+    // buildSimpleReport handles null gracefully (ok: false); buildFrontendReport
+    // must not throw when the full report is falsy.
+    const result = buildFrontendReport(null);
+    expect(result.ok).toBe(false);
+    expect(Array.isArray(result.technologies)).toBe(true);
+    expect(result.htmlTruncated).toBe(false);
   });
 });
