@@ -26,6 +26,12 @@ import { SHOW_UNMAPPED_TECHNOLOGIES } from "../config";
  *   table is replaced with a prompt to reveal — so the user is never left
  *   staring at an empty table with no explanation.
  *
+ * Truncation notice:
+ *   When the backend set htmlTruncated: true on the API response (meaning the
+ *   page's HTML body exceeded the configured byte cap and was cut short), a
+ *   small notice is shown below the report heading. This helps users understand
+ *   why some technologies may be missing for unusually large pages.
+ *
  * The table switches to a stacked card layout on mobile via CSS; each cell
  * carries a data-label attribute so the label can be surfaced via ::before.
  *
@@ -33,7 +39,8 @@ import { SHOW_UNMAPPED_TECHNOLOGIES } from "../config";
  *   urlAnalysisData: object|null,
  *   hasAttemptedAnalysis: boolean
  * }} props
- *   urlAnalysisData      — raw response from GET /api/analyze, or null.
+ *   urlAnalysisData      — slimmed response from GET /api/analyze, or null.
+ *                          Shape: { ok, url, finalUrl, technologies, htmlTruncated }
  *   hasAttemptedAnalysis — true only after a successful analysis; prevents
  *                          the report area from rendering on first load.
  */
@@ -66,6 +73,10 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
   const urlDisplay = urlAnalysisData.finalUrl || urlAnalysisData.url || "";
   const urlHref = urlAnalysisData.finalUrl || urlAnalysisData.url || "#";
 
+  // True when the backend cut the HTML body at the byte cap. Detection ran on
+  // a partial document so some technologies may be missing from these results.
+  const isHtmlTruncated = urlAnalysisData.htmlTruncated === true;
+
   return (
     <div className="report">
       <div className="report__heading">
@@ -76,6 +87,13 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
           </a>
         </p>
       </div>
+
+      {isHtmlTruncated && (
+        <p className="report__truncation-notice" role="note">
+          This page&apos;s HTML exceeded the analysis size limit and was
+          partially scanned — some technologies may not appear in these results.
+        </p>
+      )}
 
       {visibleRows.length === 0 ? (
         <p
