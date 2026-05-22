@@ -224,12 +224,12 @@ body {
     border-color 0.15s ease,
     box-shadow 0.15s ease;
 }
-/* The whole bar highlights on focus — cleaner than a per-element inset shadow. */
+/* The whole bar highlights on focus — cleaner than a per-element inset shadow.
+   The border carries the color signal; the shadow adds depth with a neutral
+   dark tone rather than a tinted glow, so the two layers don't compete. */
 .url-form__row:focus-within {
   border-color: var(--acc3);
-  box-shadow:
-    0 2px 20px rgba(0, 0, 0, 0.09),
-    0 0 0 3px rgba(0, 111, 95, 0.12);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.13);
 }
 
 .url-form__input {
@@ -312,7 +312,9 @@ body {
   }
   .url-form__input:focus {
     border-color: var(--acc3);
-    box-shadow: 0 0 0 3px rgba(0, 111, 95, 0.12);
+    /* Neutral shadow — matches the desktop focus treatment: color from the
+       border, depth from a dark shadow rather than a tinted glow. */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.11);
   }
   .url-form__button {
     width: 100%;
@@ -698,6 +700,18 @@ body {
 }
 .footer__logo-hubspot {
   max-width: 80px;
+}
+
+/* Disclaimer — sits below the three-column content row, separated by a hairline
+   so it reads as a footnote rather than part of the primary footer layout. */
+.footer__disclaimer {
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+  line-height: 1.5;
 }
 
 .footer a {
