@@ -59,7 +59,9 @@ async function initTechDb() {
  * Runs the full analysis pipeline for a single URL and returns the API report payload.
  *
  * @param {string} url - Absolute http/https URL to analyze
- * @returns {Promise<object>} Full analysis report with fetch metadata, detections, and recommendations
+ * @returns {Promise<object>} Full analysis report with fetch metadata, detections, and recommendations.
+ *   Includes `htmlTruncated: boolean` when the HTML body was cut at the configured byte cap
+ *   (see fetchPage). Report consumers (e.g. buildFrontendReport) forward this flag to callers.
  * @throws {Error} Propagates operational errors from fetch, normalization, detection, or report stages
  */
 async function analyzeUrl(url) {
@@ -117,6 +119,12 @@ async function analyzeUrl(url) {
     ok: true,
     url,
     finalUrl: fetched.finalUrl,
+
+    // Propagated from fetchPage: true when the HTML body was cut at the byte
+    // cap. buildFrontendReport forwards this to the API response so the
+    // frontend can optionally surface a "results may be incomplete" notice.
+    htmlTruncated: fetched.htmlTruncated === true,
+
     fetch: {
       status: fetched.status,
       contentType: fetched.contentType,
