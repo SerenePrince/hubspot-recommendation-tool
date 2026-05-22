@@ -392,4 +392,94 @@ function buildCleanReport(report) {
   return buildSimpleReport(report, { includeMeta: true });
 }
 
-module.exports = { buildSimpleReport, buildCleanReport };
+// ---------------------------------------------------------------------------
+// Frontend-optimised response shape
+// ---------------------------------------------------------------------------
+
+/**
+ * Strips a full technology entry down to the fields the frontend actually
+ * consumes, reducing payload size.
+ *
+ * Fields kept:
+ *   name        — displayed in the Technology column
+ *   version     — displayed as a badge in the Technology column
+ *   description — shown in the Description column
+ *   categories  — only the first entry's `name` is used (mapApiToTableData)
+ *   hubspot.products — each product's `hubspotProduct` and `description`
+ *                      are accessed by mapApiToTableData.js to build the
+ *                      HubSpot Replacement column
+ *
+ * IMPORTANT — field name preservation:
+ *   mapApiToTableData.js reads `p.hubspotProduct` to both filter and display
+ *   each product. The field name must remain `hubspotProduct` (not renamed to
+ *   `name`) so the existing frontend utility continues to work without changes.
+ *
+ * Fields removed (never accessed by the frontend):
+ *   confidence, website, icon, groups, categories[].id,
+ *   hubspot.primaryProduct, hubspot.products[].priority
+ *
+ * @param {object} tech - A technology entry from buildSimpleReport's `technologies` array
+ * @returns {object} Slimmed technology object
+ */
+function slimTechnologyForFrontend(tech) {
+  return {
+    name: tech.name,
+    version: tech.version,
+    description: tech.description,
+    // Only the category name is used by the frontend (mapApiToTableData reads
+    // categories[0].name). The `id` field is dropped to keep the payload small.
+    categories: asArray(tech.categories).map((c) => ({ name: c.name })),
+    hubspot: {
+      // `hubspotProduct` must be kept verbatim — mapApiToTableData.js filters
+      // on `p?.hubspotProduct` and reads it directly. `priority` is for
+      // internal sorting only and is not rendered by the frontend.
+      products: asArray(tech.hubspot?.products).map((p) => ({
+        hubspotProduct: p.hubspotProduct,
+        description: p.description ?? null,
+      })),
+    },
+  };
+}
+
+/**
+ * Builds a slimmed, frontend-optimised API response from the internal analyzer
+ * report. Wraps `buildSimpleReport` and strips all fields that are not consumed
+ * by the React frontend, reducing payload size and serialisation overhead.
+ *
+ * This is the function used by `routes/analyze.js` (the public API endpoint).
+ * `buildSimpleReport` and `buildCleanReport` remain intact for CLI and any other
+ * consumers that rely on the full response shape.
+ *
+ * Fields included in the returned payload:
+ *   ok           — read by useWebsiteAnalysis.js to detect request success
+ *   url          — read by UrlReport.jsx (fallback for display/link)
+ *   finalUrl     — read by UrlReport.jsx (preferred display/link URL)
+ *   technologies — slimmed array (see slimTechnologyForFrontend)
+ *   htmlTruncated — true when the HTML body was cut at the byte cap; the
+ *                   frontend may optionally surface a "results may be
+ *                   incomplete" notice for unusually large pages
+ *
+ * Fields intentionally excluded (not referenced anywhere in the frontend):
+ *   apiVersion, byGroup, recommendations, summary,
+ *   technologies[].confidence, technologies[].website, technologies[].icon,
+ *   technologies[].groups, technologies[].categories[].id,
+ *   technologies[].hubspot.primaryProduct, technologies[].hubspot.products[].priority
+ *
+ * @param {object} report - Internal report from `analyzeUrl()`
+ * @returns {object} Slimmed API payload for frontend consumption
+ */
+function buildFrontendReport(report) {
+  const full = buildSimpleReport(report, { includeMeta: false });
+
+  return {
+    ok: full.ok,
+    url: full.url,
+    finalUrl: full.finalUrl,
+    technologies: asArray(full.technologies).map(slimTechnologyForFrontend),
+    // Forward the truncation flag so the frontend can optionally surface a
+    // notice when detection results may be incomplete due to the byte cap.
+    htmlTruncated: report?.htmlTruncated === true,
+  };
+}
+
+module.exports = { buildSimpleReport, buildCleanReport, buildFrontendReport };
