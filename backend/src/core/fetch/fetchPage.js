@@ -5,8 +5,25 @@ const { config } = require("../config");
 const { AppError } = require("../errors");
 
 /**
- * Read a response body with a hard cap.
- * Uses Web Streams reader (Node's fetch/undici) to abort early.
+ * Read a response body with a soft cap: truncate at `maxBytes` rather than
+ * throwing. The caller receives the partial content along with a `truncated`
+ * flag so it can surface the limitation without failing the entire request.
+ *
+ * Why truncate instead of error?
+ * - Large sites (e.g. Wix, Squarespace) may return responses exceeding 2 MB.
+ *   A hard failure gives users a confusing error instead of a partial result.
+ * - Technology detection is pattern-based and works well on the first portion
+ *   of an HTML document (where `<head>` meta tags, inline scripts, and
+ *   external resource references live).
+ * - The frontend can optionally surface a "truncated" notice so users know
+ *   results may be incomplete for unusually large pages.
+ *
+ * Uses Web Streams reader (Node's fetch/undici) to abort the connection
+ * immediately once the cap is reached, avoiding unnecessary data transfer.
+ *
+ * @param {Response} res - Fetch API Response object
+ * @param {{ maxBytes: number, controller: AbortController }} opts
+ * @returns {Promise<{ buffer: Buffer, truncated: boolean }>}
  */
 async function readBodyWithLimit(res, { maxBytes, controller }) {
   const reader = res.body?.getReader?.();
@@ -21,30 +38,43 @@ async function readBodyWithLimit(res, { maxBytes, controller }) {
 
   let received = 0;
   const chunks = [];
+  let truncated = false;
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
 
-    received += value.length;
-    if (received > maxBytes) {
+    const remaining = maxBytes - received;
+
+    if (remaining <= 0) {
+      // Cap already reached from a previous chunk — stop reading.
+      truncated = true;
+      try {
+        controller.abort();
+      } catch {
+        // ignore — the connection may already be closed
+      }
+      break;
+    }
+
+    if (value.length > remaining) {
+      // This chunk would push us over the limit — keep only what fits.
+      chunks.push(value.subarray(0, remaining));
+      received += remaining;
+      truncated = true;
       try {
         controller.abort();
       } catch {
         // ignore
       }
-      throw new AppError({
-        code: "FETCH_TOO_LARGE",
-        message: `Response exceeded max size of ${maxBytes} bytes`,
-        statusCode: 413,
-        expose: true,
-      });
+      break;
     }
 
+    received += value.length;
     chunks.push(value);
   }
 
-  return Buffer.concat(chunks);
+  return { buffer: Buffer.concat(chunks), truncated };
 }
 
 function uniq(arr) {
@@ -234,7 +264,14 @@ async function fetchResource(
       headers["set-cookie"] = res.headers.getSetCookie();
     }
 
-    const buf = await readBodyWithLimit(res, { maxBytes, controller });
+    // readBodyWithLimit now returns { buffer, truncated } instead of a plain
+    // Buffer. The `truncated` flag is true when the response body was cut off
+    // at maxBytes. We propagate it to callers so they can decide how to
+    // surface the partial result (e.g. add a notice in the API response).
+    const { buffer, truncated } = await readBodyWithLimit(res, {
+      maxBytes,
+      controller,
+    });
 
     return {
       finalUrl: currentUrl,
@@ -242,8 +279,10 @@ async function fetchResource(
       statusText: res.statusText,
       headers,
       contentType: headers["content-type"] || "",
-      bytes: buf.length,
-      body: buf.toString("utf8"),
+      bytes: buffer.length,
+      body: buffer.toString("utf8"),
+      // true when the response exceeded maxBytes and was cut at the cap
+      truncated,
     };
   }
 
@@ -260,7 +299,7 @@ async function fetchResource(
  * - http/https only
  * - SSRF: blocks private/loopback/link-local targets
  * - deadline-based timeout
- * - max response size cap
+ * - max response size cap (soft: truncates instead of failing)
  * - redirect limit (enforces SSRF checks per hop)
  * - opportunistically fetches a bounded subset of external JS/CSS resources
  *
@@ -268,13 +307,25 @@ async function fetchResource(
  * - Wappalyzer datasets often match technologies using inline code and static asset URLs.
  * - Pulling a *small* bounded subset improves detection coverage without becoming a crawler.
  *
+ * Truncation behaviour (primary HTML document only):
+ * - When the HTML response exceeds `maxBytes`, the body is cut at the cap rather
+ *   than failing with an error. Technology detection is front-loaded in a page's
+ *   <head> section (meta tags, inline scripts, external resource URLs), so a
+ *   partial read usually yields accurate results.
+ * - The return object includes `htmlTruncated: true` when this occurs so callers
+ *   can surface a notice to the user (e.g. "results may be incomplete for this
+ *   large page"). External scripts/stylesheets are fetched on a best-effort basis
+ *   regardless — their individual caps remain hard (failures are swallowed).
+ *
  * Boundaries here are intentionally strict (timeouts, redirect caps, byte caps, and
  * best-effort failures) so this endpoint remains safe to expose behind auth.
  *
  * @param {string} inputUrl - Target URL submitted by the user
  * @param {object} [options] - Optional runtime overrides for timeout and resource bounds
- * @returns {Promise<object>} Normalized fetch artifacts used by Phase 3 signal building
- * @throws {Error} AppError variants for invalid URL, blocked host, timeout, oversize response, or fetch failure
+ * @returns {Promise<object>} Normalized fetch artifacts used by Phase 3 signal building.
+ *   Includes `htmlTruncated: boolean` indicating whether the HTML body was cut at maxBytes.
+ * @throws {Error} AppError variants for invalid URL, blocked host, timeout, or fetch failure.
+ *   Note: an oversized HTML response is no longer an error — it is truncated and returned.
  */
 async function fetchPage(inputUrl, options = {}) {
   const {
@@ -318,6 +369,9 @@ async function fetchPage(inputUrl, options = {}) {
   const headers = page.headers || {};
   const html = page.body || "";
   const baseUrl = page.finalUrl;
+  // Propagate truncation flag: true when the HTML body was cut at maxBytes.
+  // External resources are fetched independently and swallow their own errors.
+  const htmlTruncated = page.truncated === true;
 
   // Pulling some external assets improves detection coverage, but we keep strict
   // byte/count/concurrency limits so this never behaves like a crawler.
@@ -420,6 +474,11 @@ async function fetchPage(inputUrl, options = {}) {
 
     // Primary document
     html,
+
+    // true when the HTML body was cut at maxBytes (soft cap).
+    // Callers should surface this to the user when present so they know
+    // detection results may be incomplete for unusually large pages.
+    htmlTruncated,
 
     // Additional artifacts used by buildSignals (Phase 3)
     external,
