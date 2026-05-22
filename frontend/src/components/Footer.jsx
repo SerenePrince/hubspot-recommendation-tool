@@ -1,12 +1,16 @@
 /**
  * Site footer.
  *
- * Three-column layout (collapses to a stacked column below 1024 px):
- *   Left   — Inbox logo (linking to inboxcommunications.com) + social media
- *             links (Facebook, X/Twitter, LinkedIn) wrapped in a <nav> for
- *             screen-reader landmark navigation.
- *   Centre — dynamic copyright year.
- *   Right  — HubSpot Platinum Solutions Partner badge.
+ * Two sections:
+ *   1. Three-column content row (collapses to a stacked column below 1024 px):
+ *        Left   — Inbox logo (linking to inboxcommunications.com) + social
+ *                 links (Facebook, X/Twitter, LinkedIn) in a <nav> landmark.
+ *        Centre — dynamic copyright year.
+ *        Right  — HubSpot Platinum Solutions Partner badge.
+ *   2. Disclaimer row — a single full-width line setting honest expectations
+ *      about detection accuracy. Sits below the content row, separated by a
+ *      hairline, so it reads as a legal/informational footnote rather than
+ *      primary footer content.
  *
  * Purely presentational — no props, no state.
  */
@@ -74,6 +78,15 @@ export default function Footer() {
           />
         </div>
       </div>
+
+      {/* Disclaimer — sets honest expectations about detection accuracy.
+          Technology detection is based on publicly observable signals and
+          cannot identify every tool a site uses. */}
+      <p className="footer__disclaimer">
+        Detection results are best-effort and intended as a guide only. Some
+        technologies may not be identified due to security restrictions, content
+        delivery methods, or limited publicly observable signals.
+      </p>
     </footer>
   );
 }
