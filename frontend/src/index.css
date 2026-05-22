@@ -563,6 +563,19 @@ body {
   text-align: center;
 }
 
+/* Informational notice shown when the backend truncated the HTML body at the
+   byte cap. Styled as a subdued, non-alarming callout — it's a limitation
+   notice, not an error. Appears between the heading and the table. */
+.report__truncation-notice {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  font-size: var(--text-xs);
+  color: var(--sub);
+  background: color-mix(in srgb, var(--acc3) 8%, transparent);
+  border-left: 3px solid var(--acc3);
+  border-radius: 0 4px 4px 0;
+}
+
 .report__filter-note {
   margin-top: 16px;
   font-size: var(--text-xs);
