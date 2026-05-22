@@ -229,9 +229,7 @@ function buildTechnologyProductsIndex(recommendations, detections) {
       } else if (trigger?.triggerType === "groupId") {
         // Reverse-map: attribute to every detection in the matched group (by numeric id)
         for (const d of asArray(detections)) {
-          const inGroup = asArray(d.groups).some(
-            (g) => g?.id === trigger.key,
-          );
+          const inGroup = asArray(d.groups).some((g) => g?.id === trigger.key);
           const cleanName = sanitizeName(d.name);
           if (inGroup && cleanName)
             addToProductsIndex(index, cleanName, product, rank, rec, recIndex);
