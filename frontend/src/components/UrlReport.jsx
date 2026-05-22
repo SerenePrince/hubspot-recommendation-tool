@@ -58,7 +58,9 @@ export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
   const allRows = mapApiToTableData(urlAnalysisData);
   const mappedRows = allRows.filter((row) => row.products.length > 0);
   const unmappedRows = allRows.filter((row) => row.products.length === 0);
-  const visibleRows = showUnmapped ? [...mappedRows, ...unmappedRows] : mappedRows;
+  const visibleRows = showUnmapped
+    ? [...mappedRows, ...unmappedRows]
+    : mappedRows;
   const hiddenCount = unmappedRows.length;
 
   const urlDisplay = urlAnalysisData.finalUrl || urlAnalysisData.url || "";

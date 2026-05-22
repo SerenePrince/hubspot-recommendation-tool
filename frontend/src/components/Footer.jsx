@@ -2,11 +2,11 @@
  * Site footer.
  *
  * Three-column layout (collapses to a stacked column below 1024 px):
- *   Left   — HubSpot Platinum Solutions Partner badge + social media links
- *             (Facebook, X/Twitter, LinkedIn) wrapped in a <nav> for
+ *   Left   — Inbox logo (linking to inboxcommunications.com) + social media
+ *             links (Facebook, X/Twitter, LinkedIn) wrapped in a <nav> for
  *             screen-reader landmark navigation.
  *   Centre — dynamic copyright year.
- *   Right  — Inbox logo linking to inboxcommunications.com.
+ *   Right  — HubSpot Platinum Solutions Partner badge.
  *
  * Purely presentational — no props, no state.
  */
@@ -15,11 +15,18 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer__content">
         <div className="footer__left">
-          <img
-            className="footer__logo-left"
-            src="/images/HubSpot_Platinum_Solutions_Partner_Large.png"
-            alt="HubSpot Platinum Solutions Partner"
-          />
+          <a
+            href="https://www.inboxcommunications.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Inbox Communications website"
+          >
+            <img
+              className="footer__logo-inbox"
+              src="/images/logo.svg"
+              alt="Inbox Communications"
+            />
+          </a>
           <nav className="footer__links-left" aria-label="Inbox social media">
             <ul className="footer__social-list">
               <li>
@@ -60,18 +67,11 @@ export default function Footer() {
         </div>
 
         <div className="footer__right">
-          <a
-            href="https://www.inboxcommunications.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Inbox Communications website"
-          >
-            <img
-              className="footer__logo-right"
-              src="/images/logo.svg"
-              alt="Inbox Communications"
-            />
-          </a>
+          <img
+            className="footer__logo-hubspot"
+            src="/images/HubSpot_Platinum_Solutions_Partner_Large.png"
+            alt="HubSpot Platinum Solutions Partner"
+          />
         </div>
       </div>
     </footer>

@@ -88,15 +88,13 @@ export default function UrlInput({ onAnalysisComplete }) {
 
   return (
     <form onSubmit={handleSubmit} className="url-form">
-      <label htmlFor="url-input" className="url-form__label">
-        Website URL
-      </label>
       <div className="url-form__row">
         <input
           id="url-input"
           type="url"
           className="url-form__input"
           placeholder="https://example.com"
+          aria-label="Website URL"
           value={urlInput}
           onChange={(event) => setUrlInput(event.target.value)}
           onBlur={() => setHasBlurred(true)}

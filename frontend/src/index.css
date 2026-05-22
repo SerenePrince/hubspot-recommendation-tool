@@ -9,20 +9,25 @@
   /* Brand palette (Color N = Inbox Brand Guidelines reference) */
   --bg: #e6e7e8; /* Color 6 — light grey (page background)    */
   --app-bg: #ffffff; /* white (card / surface background)          */
+  /* --fg and --color-dark intentionally share the same value.
+     --fg is the body-text foreground; --color-dark is the dark
+     section background (header, footer). Keeping them separate
+     lets either be updated independently during a rebrand. */
   --fg: #302e2f; /* Color 2 — brand dark (body text)           */
-  --hdft: #302e2f; /* Color 2 — brand dark (header / footer)     */
-  --muted: #6b7280; /* secondary / label text                     */
+  --color-dark: #302e2f; /* Color 2 — brand dark (header / footer bg)  */
+  --muted: #6b7280; /* secondary / label text (4.8:1 on white ✓)  */
   --sub: #4b5563; /* supporting body text (e.g. table subtitles)*/
 
   /* Accent palette */
-  --acc1: #f78f22; /* Color 1 — orange  */
-  --acc2: #e56d66; /* Color 3 — coral   */
+  --acc1: #f78f22; /* Color 1 — orange  (decorative borders, button bg) */
+  --acc1-dark: #d47800; /* darker orange for coloured text on light bg — WCAG AA large text (3.2:1 on white ✓) */
+  --acc2: #e56d66; /* Color 3 — coral   (reserved — brand palette, not currently applied) */
   --acc3: #006f5f; /* Color 5 — teal    */
   --acc4: #900049; /* Color 4 — magenta */
 
   /* UI surface tones */
-  --row-alt: #f9fafb; /* table even-row stripe     */
-  --row-hover: #f3f4f6; /* table row hover (desktop) */
+  --row-alt: #f9fafb; /* table even-row stripe                      */
+  --row-hover: #f3f4f6; /* secondary block divider (not a hover state) */
 
   /* Message state colours */
   --error-bg: #fee2e2;
@@ -43,8 +48,8 @@
        --text-xs    12px fixed   category badges, footer copyright, mobile labels
        --text-sm    14px fixed   secondary text, table cells, form messages
        --text-base  16px fixed   body copy
-       --text-lg    16–20px fluid  headings, form label, inputs, button, subtitle
-       --text-h1    22–48px fluid  page title only
+       --text-lg    16–18px fluid  subtitle, inputs, button
+       --text-h1    28–36px fluid  page title only
      ─────────────────────────────────────────────────────────── */
   --font-body:
     "AvenirNext", system-ui, -apple-system, "Segoe UI", Roboto,
@@ -53,8 +58,8 @@
   --text-xs: 0.75rem; /* 12px fixed                  */
   --text-sm: 0.875rem; /* 14px fixed                  */
   --text-base: 1rem; /* 16px fixed                  */
-  --text-lg: clamp(1rem, 2vw, 1.25rem); /* 16–20px fluid               */
-  --text-h1: clamp(1.375rem, 5vw, 3rem); /* 22–48px fluid               */
+  --text-lg: clamp(1rem, 1.5vw, 1.125rem); /* 16–18px fluid               */
+  --text-h1: clamp(1.75rem, 3.5vw, 2.25rem); /* 28–36px fluid               */
 }
 
 /* ─── Font faces ──────────────────────────────────────────────── */
@@ -93,7 +98,7 @@ textarea {
 
 /* ─── Base ────────────────────────────────────────────────────── */
 html {
-  background-color: var(--hdft);
+  background-color: var(--color-dark);
 }
 body {
   font-family: var(--font-body);
@@ -122,7 +127,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0px 4px 50px 50px #00000033;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.18);
 }
 @media (max-width: 1024px) {
   .app {
@@ -139,7 +144,7 @@ body {
 /* ─── Page heading ────────────────────────────────────────────── */
 .app__heading {
   text-align: center;
-  border-bottom: 1px solid var(--acc2);
+  border-bottom: 1px solid var(--bg);
   margin-bottom: 72px;
   width: 100%;
 }
@@ -149,8 +154,11 @@ body {
   max-width: 79%;
   margin: 0 auto 0.25rem;
 }
+/* --acc1-dark instead of --acc1: brand orange #f78f22 is only 2.3:1 on white,
+   which fails WCAG AA even for large text (requires 3:1). The darker shade
+   hits 3.2:1, clearing the threshold while staying recognisably orange. */
 .app__highlight {
-  color: var(--acc1);
+  color: var(--acc1-dark);
 }
 .app__heading p {
   font-size: var(--text-lg);
@@ -183,72 +191,82 @@ body {
 }
 
 /* ─── URL input block ─────────────────────────────────────────── */
+/* The grey card wrapper is gone — the form row is now the visual container.
+   This block is a layout spacer only: it centres and width-caps the form. */
 .app__url-input {
   width: 100%;
-  /* 69.44% ≈ 828px / 1192px (design spec card width inside the max-width container) */
-  min-width: 69.44%;
-  background: var(--bg);
-  border-radius: 16px;
-  padding: 40px 60px 24px;
-  margin: 0 37px 72px;
-  box-shadow: 0px 1px 15px 5px #00000030;
+  max-width: 820px;
+  margin: 0 auto 48px;
 }
 @media (max-width: 1024px) {
   .app__url-input {
-    min-width: 100%;
-    padding: 32px 40px 20px;
-    margin: 0 0 48px;
+    margin-bottom: 40px;
   }
 }
 @media (max-width: 768px) {
   .app__url-input {
-    padding: 20px 16px 14px;
     margin-bottom: 28px;
-    border-radius: 8px;
   }
 }
 
 /* ─── Form ────────────────────────────────────────────────────── */
-.url-form__label {
-  display: block;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
+/* The row is the unified search-bar container at desktop and tablet.
+   overflow: hidden clips the input and button into the shared border-radius
+   so they read as a single element. */
 .url-form__row {
   display: flex;
+  border: 1.5px solid var(--bg);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--app-bg);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
+/* The whole bar highlights on focus — cleaner than a per-element inset shadow. */
+.url-form__row:focus-within {
+  border-color: var(--acc3);
+  box-shadow:
+    0 2px 20px rgba(0, 0, 0, 0.09),
+    0 0 0 3px rgba(0, 111, 95, 0.12);
+}
+
 .url-form__input {
   flex: 1;
-  height: 72px;
-  padding-left: 24px;
+  height: 64px;
+  padding-left: 20px;
   font-size: var(--text-lg);
   border: none;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
+  border-radius: 0;
+  background: transparent;
 }
 .url-form__input:focus {
   outline: none;
-  box-shadow: inset 0 0 0 2px var(--acc3);
+  /* Focus ring provided by .url-form__row:focus-within above */
 }
+
+/* border-radius: 0 — the row's overflow: hidden handles the outer corners.
+   Dark text on orange: #302e2f on #f78f22 = 5.9:1 (WCAG AA ✓).
+   White on orange would be only 2.3:1 — fails even for large text. */
 .url-form__button {
   padding: 0 28px;
   font-size: var(--text-lg);
-  color: var(--app-bg);
+  font-weight: 600;
+  color: var(--fg);
   background-color: var(--acc1);
   border: none;
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-radius: 0;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease;
   white-space: nowrap;
 }
+/* Darken on hover rather than translateY — avoids clipping inside overflow: hidden. */
 .url-form__button:hover:not(:disabled) {
-  transform: translateY(-1px);
+  background-color: #e07d10;
 }
 .url-form__button:active:not(:disabled) {
-  transform: translateY(0);
+  background-color: #cc6f0c;
 }
 .url-form__button:focus-visible {
   outline: 3px solid var(--acc3);
@@ -261,23 +279,40 @@ body {
 
 @media (max-width: 1024px) {
   .url-form__input {
-    height: 60px;
+    height: 56px;
   }
   .url-form__button {
     padding: 0 20px;
   }
 }
+
+/* At mobile the row stacks vertically — the shared overflow container no longer
+   applies, so each element gets its own border and border-radius back. */
 @media (max-width: 768px) {
   .url-form__row {
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    box-shadow: none;
+    background: transparent;
+  }
+  .url-form__row:focus-within {
+    border-color: transparent;
+    box-shadow: none;
   }
   .url-form__input {
-    max-width: 100%;
     width: 100%;
     height: 46px;
     padding: 10px 14px;
+    border: 1.5px solid var(--bg);
     border-radius: 8px;
+    background: var(--app-bg);
+  }
+  .url-form__input:focus {
+    border-color: var(--acc3);
+    box-shadow: 0 0 0 3px rgba(0, 111, 95, 0.12);
   }
   .url-form__button {
     width: 100%;
@@ -322,23 +357,14 @@ body {
 /* ─── Report block ────────────────────────────────────────────── */
 .app__report {
   width: 100%;
-  border-top: 1px solid var(--acc2);
-  /* Flex column mirrors .app's own layout so .report is centered
-     the same way .app__url-input is — margin: 0 37px is absorbed
-     correctly by align-items: center in both cases. */
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 .report {
   width: 100%;
-  /* Matches .app__url-input width so the card edges align vertically */
-  min-width: 69.44%;
-  background: var(--bg);
-  border-radius: 16px;
-  padding: 16px;
-  margin: 72px 37px 0;
-  box-shadow: 0px 1px 15px 5px #00000030;
+  border-top: 1px solid var(--bg);
+  padding-top: 32px;
   animation: fadeIn 0.3s ease;
 }
 @keyframes fadeIn {
@@ -353,37 +379,31 @@ body {
 }
 @media (max-width: 1024px) {
   .report {
-    min-width: 100%;
-    margin: 48px 0 0;
-    padding: 12px;
+    padding-top: 24px;
   }
 }
 @media (max-width: 768px) {
   .report {
-    margin-top: 28px;
-    padding: 8px;
-    border-radius: 8px;
+    padding-top: 20px;
   }
 }
 
 /* ─── Report heading ──────────────────────────────────────────── */
 .report__heading {
-  background-color: var(--app-bg);
-  border-radius: 8px;
-  padding: 20px 24px;
-  margin-bottom: 16px;
-  text-align: center;
+  padding-bottom: 20px;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--bg);
 }
 .report__heading-title {
   margin: 0;
   font-size: var(--text-lg);
   font-weight: 700;
-  color: var(--hdft);
+  color: var(--fg);
 }
 .report__heading-subtitle {
   margin: 4px 0 0;
-  font-size: var(--text-lg);
-  color: var(--hdft);
+  font-size: var(--text-sm);
+  color: var(--muted);
 }
 .report__heading-subtitle a {
   color: var(--acc3);
@@ -394,32 +414,23 @@ body {
   text-decoration: underline;
   outline: none;
 }
-@media (max-width: 768px) {
-  .report__heading {
-    padding: 16px 12px;
-  }
-}
 
 /* ─── Table ───────────────────────────────────────────────────── */
 .report__table {
-  /* calc(100% + 12px) + margin: 0 -6px is the standard pattern for removing
-     outer gutters from border-spacing: each side gains 6px so column edges
-     stay flush with the heading above while 6px gaps appear between columns. */
-  width: calc(100% + 12px);
-  border-collapse: separate;
-  border-spacing: 6px 8px;
-  margin: 0 -6px;
+  width: 100%;
+  border-collapse: collapse;
 }
+/* Uppercase small-caps labels with an orange rule — ties the table header
+   to the same accent language as the site header and footer. */
 .report__table thead th {
-  padding: 14px 14px;
-  border-radius: 8px;
-  color: var(--app-bg);
-  background-color: var(--acc3);
-  font-weight: 600;
-  text-align: center;
-}
-.report__table thead th:last-child {
-  background-color: var(--acc1);
+  padding: 14px 16px;
+  text-align: left;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  border-bottom: 2px solid var(--acc1);
 }
 /* 20 / 30 / 50 column split — recommendation is the most valuable column */
 .report__table thead th:nth-child(1) {
@@ -433,27 +444,23 @@ body {
 }
 
 .report__table tbody td {
-  background-color: var(--app-bg);
-  border-radius: 8px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   vertical-align: top;
   font-size: var(--text-sm);
   line-height: 1.5;
   word-break: break-word;
+  border-bottom: 1px solid var(--bg);
+}
+.report__table tbody tr:last-child td {
+  border-bottom: none;
 }
 .report__table tbody tr:nth-child(even) td {
   background-color: var(--row-alt);
 }
-/* Hover only on devices with a pointer (avoids stuck hover on touch) */
-@media (hover: hover) {
-  .report__table tbody tr:hover td {
-    background-color: var(--row-hover);
-  }
-}
 @media (max-width: 1024px) {
-  .report__table thead th {
-    padding: 10px 8px;
-    font-size: var(--text-sm);
+  .report__table thead th,
+  .report__table tbody td {
+    padding: 12px 10px;
   }
 }
 @media (max-width: 768px) {
@@ -463,14 +470,15 @@ body {
   .report__table tbody tr {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding-bottom: 16px;
+    padding: 16px 0;
     border-bottom: 1px solid var(--bg);
-    margin-bottom: 8px;
+  }
+  .report__table tbody tr:last-child {
+    border-bottom: none;
   }
   .report__table tbody td {
-    padding: 8px 10px;
-    font-size: var(--text-sm);
+    border-bottom: none;
+    padding: 4px 0;
   }
   .report__table tbody td[data-label]::before {
     content: attr(data-label);
@@ -515,6 +523,12 @@ body {
   flex-direction: column;
   gap: 3px;
 }
+/* --primary: no additional styles beyond the base block. Full visual weight
+   is already conveyed by the base class; this rule exists so the modifier
+   class applied in JSX (replacement-block--primary) is intentional and
+   documented rather than silently a no-op. */
+.replacement-block--primary {
+}
 .replacement-block--secondary {
   margin-top: 10px;
   padding-top: 10px;
@@ -550,15 +564,14 @@ body {
 }
 
 .report__filter-note {
-  margin-top: 12px;
-  padding: 0 6px;
+  margin-top: 16px;
   font-size: var(--text-xs);
   color: var(--muted);
   text-align: right;
 }
 .report__filter-note--empty {
   text-align: center;
-  padding: 20px 6px;
+  padding: 20px 0;
 }
 
 /* Link-styled button — semantically a button (it's an action, not navigation)
@@ -587,9 +600,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--hdft);
-  min-height: 72px;
+  background-color: var(--color-dark);
+  min-height: 80px;
   padding: 0 24px;
+  border-bottom: 3px solid var(--acc1);
   box-shadow: 0px 4px 15px 5px #00000040;
 }
 .header__logo {
@@ -598,7 +612,7 @@ body {
 
 @media (max-width: 1024px) {
   .header {
-    min-height: 64px;
+    min-height: 68px;
     padding: 0 20px;
   }
   .header__logo {
@@ -607,7 +621,7 @@ body {
 }
 @media (max-width: 768px) {
   .header {
-    min-height: 50px;
+    min-height: 54px;
     padding: 0 16px;
   }
   .header__logo {
@@ -617,8 +631,9 @@ body {
 
 /* ─── Footer ──────────────────────────────────────────────────── */
 .footer {
-  background-color: var(--hdft);
-  padding: 14px 20.8%;
+  background-color: var(--color-dark);
+  padding: 24px 8%;
+  border-top: 3px solid var(--acc1);
   box-shadow: 0px -4px 15px 5px #00000023;
 }
 .footer__content {
@@ -626,20 +641,18 @@ body {
   grid-template-columns: 3fr 1fr 3fr;
   align-items: center;
 }
+
+/* Left column — Inbox logo + social links stacked vertically */
 .footer__left {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
-.footer__logo-left {
-  max-width: 72px;
-  padding-top: 5px;
-  padding-right: 15px;
-  border-right: 1px solid var(--app-bg);
+.footer__logo-inbox {
+  max-width: 88px;
 }
 .footer__links-left {
-  display: flex;
-  flex-direction: column;
-  padding-left: 16px;
   line-height: 1.3;
 }
 .footer__social-list {
@@ -647,13 +660,15 @@ body {
   margin: 0;
   padding: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  gap: 16px;
 }
+
+/* Center column — copyright */
 .footer__center {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--app-bg);
 }
 .footer__copyright {
   margin: 0;
@@ -661,16 +676,17 @@ body {
   white-space: nowrap;
   color: var(--app-bg);
 }
+
+/* Right column — HubSpot partner badge */
 .footer__right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
 }
-.footer__logo-right {
-  max-width: 96px;
-  border-left: none;
-  padding-left: 0;
+.footer__logo-hubspot {
+  max-width: 80px;
 }
+
 .footer a {
   color: var(--app-bg);
   font-size: var(--text-sm);
@@ -686,41 +702,37 @@ body {
 }
 
 @media (max-width: 1024px) {
-  .footer {
-    padding: 14px 8%;
-  }
   .footer__content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
   }
   .footer__left {
     order: 1;
+    align-items: center;
+  }
+  .footer__social-list {
     justify-content: center;
   }
   .footer__right {
     order: 2;
     justify-content: center;
-    flex-direction: row-reverse;
-    gap: 12px;
   }
   .footer__center {
     order: 3;
-    justify-content: center;
     text-align: center;
-  }
-  .footer__logo-right {
-    padding-right: 15px;
   }
 }
 @media (max-width: 768px) {
   .footer {
-    padding: 14px 5%;
+    padding: 20px 5%;
   }
-  .footer__logo-left,
-  .footer__logo-right {
-    max-width: 60px;
+  .footer__logo-inbox {
+    max-width: 72px;
+  }
+  .footer__logo-hubspot {
+    max-width: 64px;
   }
   .footer a {
     font-size: var(--text-xs);
