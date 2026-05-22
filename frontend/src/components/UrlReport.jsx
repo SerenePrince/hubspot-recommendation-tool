@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { mapApiToTableData } from "../utils/mapApiToTableData";
 import { SHOW_UNMAPPED_TECHNOLOGIES } from "../config";
 
@@ -21,6 +21,10 @@ import { SHOW_UNMAPPED_TECHNOLOGIES } from "../config";
  *   table lets the user expand to all detected technologies in-session.
  *   Setting SHOW_UNMAPPED_TECHNOLOGIES = true starts the toggle in the expanded
  *   state (useful when auditing mapping coverage during development).
+ *
+ *   The toggle resets to its default state whenever urlAnalysisData changes
+ *   (i.e. each time a new URL is submitted), so the expanded state from one
+ *   analysis does not carry over to the next.
  *
  *   If every detected technology is unmapped and the toggle is collapsed, the
  *   table is replaced with a prompt to reveal — so the user is never left
@@ -46,6 +50,14 @@ import { SHOW_UNMAPPED_TECHNOLOGIES } from "../config";
  */
 export default function UrlReport({ urlAnalysisData, hasAttemptedAnalysis }) {
   const [showUnmapped, setShowUnmapped] = useState(SHOW_UNMAPPED_TECHNOLOGIES);
+
+  // Reset the "reveal unmapped" toggle whenever a new analysis result arrives.
+  // The expanded state is contextual to a specific scan — keeping it open across
+  // different URL submissions would be surprising behaviour, so we always start
+  // the new result in the default collapsed state.
+  useEffect(() => {
+    setShowUnmapped(SHOW_UNMAPPED_TECHNOLOGIES);
+  }, [urlAnalysisData]);
 
   if (!hasAttemptedAnalysis) return null;
 
