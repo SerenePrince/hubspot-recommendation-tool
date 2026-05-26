@@ -1,7 +1,14 @@
 {
-  "name": "url-input-app",
+  "name": "hubspot-recommendation-tool-frontend",
   "version": "0.1.0",
-  "private": true,
+  "description": "React + Vite frontend for the HubSpot Recommendation Tool",
+  "author": "Team Debug",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noahparknguyen/hubspot-recommendation-tool"
+  },
+  "homepage": "https://hubspot-recommendation-tool.onrender.com/",
   "type": "module",
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",

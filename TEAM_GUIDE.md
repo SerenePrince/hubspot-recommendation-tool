@@ -183,7 +183,7 @@ Group names appear alongside category listings in the output.
 
 ## Keeping the technology database current
 
-The tool uses an open-source fingerprint database (WebAppAnalyzer) to detect technologies. This database is updated regularly by the open-source community. To pull the latest version:
+The tool uses an open-source fingerprint database ([WebAppAnalyzer](https://github.com/enthec/webappanalyzer) by enthec, licensed under GPL-3.0) to detect technologies. This database is updated regularly by the open-source community. To pull the latest version:
 
 ```bash
 cd backend

@@ -18,7 +18,7 @@ Main directories:
 - `frontend/`: React + Vite UI
 - `backend/src/api/`: HTTP server/auth/routing/static serving
 - `backend/src/core/`: analysis engine
-- `backend/data/vendor/webappanalyzer/src/`: technology dataset
+- `backend/data/vendor/webappanalyzer/src/`: technology dataset (WebAppAnalyzer/enthec, GPL-3.0 — see root `NOTICE`)
 
 ## Backend Layering
 
@@ -40,6 +40,8 @@ Pipeline entry point: `analyzeUrl()` in `src/core/analyzer.js`.
 ### Phase 1 - Database Loading (`loadTechDb`)
 
 File: `src/core/techdb/loadTechDb.js`
+
+Dataset source: [WebAppAnalyzer](https://github.com/enthec/webappanalyzer) by enthec (GPL-3.0). Vendored at `backend/data/vendor/webappanalyzer/src/`. See root `NOTICE` for full attribution.
 
 - Loads:
   - `categories.json`

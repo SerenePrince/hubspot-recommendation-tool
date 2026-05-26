@@ -22,7 +22,7 @@ This document lists every backend environment variable defined in `src/core/conf
 
 - Type: path string
 - Default: `./data/vendor/webappanalyzer/src` (resolved from process cwd)
-- Purpose: location of Wappalyzer-style dataset
+- Purpose: location of the WebAppAnalyzer fingerprint dataset (enthec, GPL-3.0 — see root `NOTICE`)
 - Misconfigured impact:
   - DB load fails
   - analysis fails when DB cannot initialize
