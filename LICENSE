@@ -1,13 +1,27 @@
-Copyright (c) 2025–present Inbox. All rights reserved.
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
 
-This software and its source code are the proprietary and confidential property
-of Inbox. Unauthorized copying, distribution, modification, public display, or
-public performance of this software, in whole or in part, is strictly prohibited.
+Copyright (C) 2025 Team Debug
 
-This software was developed by Team Debug (Algonquin College, Computer
-Engineering Technology) as a capstone project on behalf of Inbox. All
-intellectual property rights in and to this software are owned exclusively
-by Inbox.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-No license, express or implied, is granted to any party other than Inbox and
-its authorized employees and contractors for any purpose whatsoever.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+---
+
+This project bundles the WebAppAnalyzer fingerprint dataset
+(backend/data/vendor/webappanalyzer/) from the WebAppAnalyzer project
+by enthec, which is also licensed under GPL-3.0. See NOTICE for full
+third-party attribution.
+
+The complete text of the GNU General Public License v3 is available at:
+https://www.gnu.org/licenses/gpl-3.0.txt

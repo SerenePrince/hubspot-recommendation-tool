@@ -4,14 +4,12 @@ Paste in a prospect's website URL and instantly see what technologies they use �
 
 Built as a capstone project by Team Debug (Algonquin College) for Inbox, a HubSpot Platinum Solutions Partner in Ottawa.
 
+[![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)](https://react.dev)
-[![Vite](https://img.shields.io/badge/Vite-7-646cff?logo=vite&logoColor=white)](https://vite.dev)
 [![Node](https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ed?logo=docker&logoColor=white)](https://docker.com)
 
-## Demo
-
-**Live:** https://hubspot-recommendation-tool.onrender.com/
+🔗 **Live Demo:** [hubspot-recommendation-tool.onrender.com](https://hubspot-recommendation-tool.onrender.com/)
 
 ## What It Does
 
@@ -102,4 +100,4 @@ The technology fingerprint dataset in `backend/data/vendor/webappanalyzer/` is s
 
 ---
 
-Capstone project · Team Debug · Algonquin College Computer Engineering Technology · Built for Inbox
+[GPL-3.0](LICENSE) · Capstone project · Team Debug · Algonquin College Computer Engineering Technology · Built for Inbox
