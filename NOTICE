@@ -1,0 +1,35 @@
+# THIRD-PARTY NOTICES
+
+This project includes third-party components listed below. Each component
+is governed by its own license, which is separate from the license covering
+the application code.
+
+---
+
+## WebAppAnalyzer fingerprint dataset
+
+Name: WebAppAnalyzer
+Source: https://github.com/enthec/webappanalyzer
+Path: backend/data/vendor/webappanalyzer/
+License: GNU General Public License v3.0 (GPL-3.0)
+
+The technology fingerprint dataset bundled in this repository
+(backend/data/vendor/webappanalyzer/) is sourced from the WebAppAnalyzer
+project maintained by enthec. It is used here to identify technologies
+present on a target website during the detection phase of the analysis
+pipeline.
+
+This dataset is licensed under the GNU General Public License v3.0. The
+full license text is available at:
+
+https://www.gnu.org/licenses/gpl-3.0.html
+
+The upstream license file can also be found at:
+
+https://github.com/enthec/webappanalyzer/blob/main/LICENSE
+
+No modifications have been made to the dataset files. The dataset is
+vendored locally to support offline/containerized builds. To update the
+dataset to the latest upstream version, run:
+
+cd backend && npm run update:techdb
