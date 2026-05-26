@@ -1,43 +1,48 @@
 # HubSpot Recommendation Tool
 
-This project is the capstone handoff for Team Debug (Algonquin College, Computer Engineering Technology), built for Inbox, a HubSpot Platinum Solutions Partner in Ottawa. It is an internal tool that analyzes a public website URL, detects technologies in use, and returns HubSpot replacement recommendations.
+Paste in a prospect's website URL and instantly see what technologies they use — and which HubSpot products could replace them.
 
-Inbox previously did this work manually during client discovery. This tool reduces that process from hours to seconds by automating fetch, detection, and recommendation steps.
+Built as a capstone project by Team Debug (Algonquin College) for Inbox, a HubSpot Platinum Solutions Partner in Ottawa.
 
-**Live site:** https://hubspot-recommendation-tool.onrender.com/
+[![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-7-646cff?logo=vite&logoColor=white)](https://vite.dev)
+[![Node](https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ed?logo=docker&logoColor=white)](https://docker.com)
 
-## Start Here (30 seconds)
+## Demo
 
-1. Run with Docker:
-   - copy env: `cp .env.example .env`
-   - set `AUTH_USERNAME` and `AUTH_PASSWORD`
-   - start: `docker compose up --build`
-2. Open `http://localhost:3001`
-3. Read `backend/docs/DEVELOPER_GUIDE.md` for full dev setup
+**Live:** https://hubspot-recommendation-tool.onrender.com/
 
-## Who This Is For
+## What It Does
 
-- Inbox internal employees using the tool during prospect audits
-- Developers maintaining or extending the codebase after handoff
-- IT/admin staff deploying the integrated app with Docker
+Inbox previously identified replacement opportunities manually during client discovery calls. This tool automates the entire process: fetch the target site, fingerprint its technology stack using a Wappalyzer-style detection engine, and map each detected tool to the HubSpot product that could replace it — in seconds.
 
-## Tech Stack
+Key capabilities:
 
-- Frontend: React + Vite SPA (`frontend/`)
-- Backend: vanilla Node.js HTTP server, no Express (`backend/`)
-- Detection data: local WebAppAnalyzer/Wappalyzer-style dataset (`backend/data/vendor/webappanalyzer/src`)
-- Deployment: root `Dockerfile`, `docker-compose.yml`, and `render.yaml`
-- Local runtime requirement (non-Docker): Node.js `>=20.12` (for `--env-file-if-exists` in dev scripts)
+- Detects hundreds of technologies via a 10-matcher fingerprint pipeline (HTTP headers, script sources, DOM, cookies, meta tags, inline scripts, CSS, and more)
+- Maps detections to HubSpot products via a configurable JSON file — no code changes required to add or update recommendations
+- Optional HTTP Basic Auth with in-memory failed-auth rate limiting
+- CLI tool for running analyses directly from the terminal
+- Single-container Docker deployment; live instance hosted on Render
 
-## Run Locally With Docker (5 Steps)
+## Quick Start
 
-1. Copy the root environment template.
+### Docker (recommended)
 
 ```bash
+git clone https://github.com/noahparknguyen/hubspot-recommendation-tool.git
+cd hubspot-recommendation-tool
 cp .env.example .env
+docker compose up --build
 ```
 
-2. (Optional) Enable auth in `.env` if you want to password-protect the tool:
+Open http://localhost:3001 or verify the API:
+
+```bash
+curl http://localhost:3001/health
+```
+
+Optional: enable auth in `.env` before starting:
 
 ```dotenv
 AUTH_ENABLED=1
@@ -45,47 +50,56 @@ AUTH_USERNAME=your-user
 AUTH_PASSWORD=your-pass
 ```
 
-Auth is off by default (`AUTH_ENABLED=0`). Skip this step for open access.
-
-3. Build and start the integrated app.
+### Local development
 
 ```bash
-docker compose up --build
+# Backend (terminal 1)
+cd backend && npm install && npm run dev
+
+# Frontend (terminal 2)
+cd frontend && npm install && npm run dev
 ```
 
-4. Open the app UI.
+Frontend runs at http://localhost:5173 and proxies `/api` to the backend at http://localhost:3001.
 
-```text
-http://localhost:3001
-```
-
-5. Verify health.
+### Quick API call
 
 ```bash
-curl http://localhost:3001/health
+curl "http://localhost:3001/api/analyze?url=https://react.dev"
 ```
 
-## Quick API Example
+## Tech Stack
 
-```bash
-curl -u "$AUTH_USERNAME:$AUTH_PASSWORD" \
-  "http://localhost:3001/api/analyze?url=https://react.dev"
-```
+| Layer          | Technology                                                                               |
+| -------------- | ---------------------------------------------------------------------------------------- |
+| Frontend       | React 18, Vite 7                                                                         |
+| Backend        | Node.js 20 (vanilla `http` — no framework)                                               |
+| Detection data | [WebAppAnalyzer](https://github.com/enthec/webappanalyzer) fingerprint dataset (GPL-3.0) |
+| HTML parsing   | Cheerio                                                                                  |
+| Testing        | Jest                                                                                     |
+| Deployment     | Docker, Render                                                                           |
 
-## Project Documentation
+## Documentation
 
-- Root/client handoff:
-  - `CLIENT_GUIDE.md`
-- Frontend:
-  - `frontend/README.md`
-- Backend overview:
-  - `backend/README.md`
-- Backend deep docs:
-  - `backend/docs/ARCHITECTURE.md`
-  - `backend/docs/API.md`
-  - `backend/docs/DEVELOPER_GUIDE.md`
-  - `backend/docs/ENVIRONMENT.md`
-  - `backend/docs/SECURITY.md`
-  - `backend/docs/OPERATIONS_GUIDE.md`
-  - `backend/docs/RUNBOOK.md`
-  - `backend/docs/CLI.md`
+Full docs live in `backend/docs/`:
+
+| File                  | Contents                                      |
+| --------------------- | --------------------------------------------- |
+| `ARCHITECTURE.md`     | Five-phase analysis pipeline and request flow |
+| `API.md`              | Endpoint contracts and response shapes        |
+| `DEVELOPER_GUIDE.md`  | Local setup, extension guide, adding matchers |
+| `ENVIRONMENT.md`      | All environment variables and defaults        |
+| `SECURITY.md`         | SSRF protection, auth model, rate limiting    |
+| `OPERATIONS_GUIDE.md` | Deployment, monitoring, troubleshooting       |
+| `RUNBOOK.md`          | Quick operational checklist                   |
+| `CLI.md`              | CLI usage and flags                           |
+
+Client-facing guides: [`CLIENT_GUIDE.md`](CLIENT_GUIDE.md), [`TEAM_GUIDE.md`](TEAM_GUIDE.md)
+
+## Third-Party Licenses
+
+The technology fingerprint dataset in `backend/data/vendor/webappanalyzer/` is sourced from [WebAppAnalyzer](https://github.com/enthec/webappanalyzer) (enthec) and licensed under [GPL-3.0](https://github.com/enthec/webappanalyzer/blob/main/LICENSE). See [`NOTICE`](NOTICE) for full details.
+
+---
+
+Capstone project · Team Debug · Algonquin College Computer Engineering Technology · Built for Inbox
