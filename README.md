@@ -4,6 +4,7 @@ Paste in a prospect's website URL and instantly see what technologies they use â
 
 Built as a capstone project by Team Debug (Algonquin College) for Inbox, a HubSpot Platinum Solutions Partner in Ottawa.
 
+[![CI](https://img.shields.io/github/actions/workflow/status/noahparknguyen/hubspot-recommendation-tool/ci.yml?logo=githubactions&logoColor=white&label=CI)](https://github.com/noahparknguyen/hubspot-recommendation-tool/actions/workflows/ci.yml)
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)](https://react.dev)
 [![Node](https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white)](https://nodejs.org)
