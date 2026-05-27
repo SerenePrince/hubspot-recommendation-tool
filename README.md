@@ -24,6 +24,10 @@ Key capabilities:
 - CLI tool for running analyses directly from the terminal
 - Single-container Docker deployment; live instance hosted on Render
 
+## Deploying Your Own Instance
+
+Fork this repo, clone it, and follow the Docker setup below. All configuration is handled through environment variables — no code changes needed to stand up your own deployment.
+
 ## Quick Start
 
 ### Docker (recommended)
@@ -80,20 +84,9 @@ curl "http://localhost:3001/api/analyze?url=https://react.dev"
 
 ## Documentation
 
-Full docs live in `backend/docs/`:
+Full technical docs live in [`backend/docs/`](backend/docs/) — covering the API, architecture, environment variables, security model, and deployment guide.
 
-| File                  | Contents                                      |
-| --------------------- | --------------------------------------------- |
-| `ARCHITECTURE.md`     | Five-phase analysis pipeline and request flow |
-| `API.md`              | Endpoint contracts and response shapes        |
-| `DEVELOPER_GUIDE.md`  | Local setup, extension guide, adding matchers |
-| `ENVIRONMENT.md`      | All environment variables and defaults        |
-| `SECURITY.md`         | SSRF protection, auth model, rate limiting    |
-| `OPERATIONS_GUIDE.md` | Deployment, monitoring, troubleshooting       |
-| `RUNBOOK.md`          | Quick operational checklist                   |
-| `CLI.md`              | CLI usage and flags                           |
-
-Client-facing guides: [`CLIENT_GUIDE.md`](CLIENT_GUIDE.md), [`TEAM_GUIDE.md`](TEAM_GUIDE.md)
+Client-facing guides: [`CLIENT_GUIDE.md`](CLIENT_GUIDE.md) · [`TEAM_GUIDE.md`](TEAM_GUIDE.md)
 
 ## Third-Party Licenses
 
