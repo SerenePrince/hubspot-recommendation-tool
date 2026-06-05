@@ -8,6 +8,8 @@ Built as a capstone project by Team Debug (Algonquin College) for Inbox, a HubSp
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)](https://react.dev)
 [![Node](https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Vite](https://img.shields.io/badge/Vite-7-646cff?logo=vite&logoColor=white)](https://vite.dev)
+[![Jest](https://img.shields.io/badge/Jest-29-c21325?logo=jest&logoColor=white)](https://jestjs.io)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ed?logo=docker&logoColor=white)](https://docker.com)
 
 🔗 **Live Demo:** [hubspot-recommendation-tool.onrender.com](https://hubspot-recommendation-tool.onrender.com/)
@@ -23,6 +25,8 @@ Key capabilities:
 - Optional HTTP Basic Auth with in-memory failed-auth rate limiting
 - CLI tool for running analyses directly from the terminal
 - Single-container Docker deployment; live instance hosted on Render
+- Frontend theming via CSS custom properties — all colors and typography live in a single `:root` block so the whole app can be rebranded by editing one file; nothing is hardcoded outside that block
+- Accessible form: `aria-live` status announcements, `aria-invalid` and `aria-describedby` wired to the input's error state, validation deferred until blur or submit so users aren't interrupted mid-type
 
 ## Deploying Your Own Instance
 
