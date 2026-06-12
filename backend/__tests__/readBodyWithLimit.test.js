@@ -200,7 +200,6 @@ describe("readBodyWithLimit (via fetchPage)", () => {
     }));
 
     const { fetchPage } = load();
-    const { AppError } = require("../src/core/errors");
 
     await expect(
       fetchPage("https://example.com/", { maxBytes: 100 }),

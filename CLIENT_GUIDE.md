@@ -50,8 +50,31 @@ If your deployment has authentication enabled:
 - Re-check your username and password.
 - Close and reopen the browser, then try again.
 
+## Usage policies and expectations
+
+### What this tool is not
+
+- A public product or customer portal
+- A system of record or a secure data vault
+- A place to enter confidential, personal, or regulated data
+- A replacement for HubSpot or internal analytics systems
+
+### Shared login
+
+If your deployment has authentication enabled, the tool uses a **shared login** (one username/password for the whole team). Changing the password affects everyone, there is no per-user activity tracking, and if you believe credentials were shared externally you should request a password rotation immediately.
+
+### Data and privacy
+
+The tool analyzes publicly available website data using a local copy of a public dataset. It does not store personal data and does not write data to external systems. Do not input sensitive information into the tool.
+
+### Availability
+
+This is a lightweight internal utility: it may be restarted during updates, short downtime during deployment is expected, and no formal uptime SLA is provided unless agreed separately.
+
 ## Support contact
 
 - Primary support contact: Inbox to provide
 - Backup support contact: Inbox to provide
 - Escalation contact: Inbox to provide
+
+The internal technical owner is responsible for deployment and restarts, password rotation, and handling bug reports and feature requests.

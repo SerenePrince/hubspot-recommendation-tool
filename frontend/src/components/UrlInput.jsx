@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useWebsiteAnalysis } from "../hooks/useWebsiteAnalysis";
+import { validateUrl } from "../utils/validateUrl";
 
 /**
  * URL input form.
@@ -25,20 +26,6 @@ export default function UrlInput({ onAnalysisComplete }) {
   const [hasBlurred, setHasBlurred] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const { analyzeUrl, loading, errorMessage } = useWebsiteAnalysis();
-
-  function validateUrl(input) {
-    const trimmed = input.trim();
-    if (!trimmed) return null;
-    try {
-      const parsed = new URL(trimmed);
-      if (parsed.protocol !== "https:") {
-        return "Only https:// URLs are accepted.";
-      }
-      return null;
-    } catch {
-      return "Enter a valid URL (for example, https://example.com).";
-    }
-  }
 
   const validationError = validateUrl(urlInput);
   // Gate errors behind blur or a submit attempt so users aren't punished mid-type.
@@ -88,18 +75,21 @@ export default function UrlInput({ onAnalysisComplete }) {
 
   return (
     <form onSubmit={handleSubmit} className="url-form">
+      {/* Visible label (replaces the old aria-label): benefits sighted users
+          and screen readers alike, and enlarges the input's click target. */}
+      <label className="url-form__label" htmlFor="url-input">
+        Website URL
+      </label>
       <div className="url-form__row">
         <input
           id="url-input"
           type="url"
           className="url-form__input"
           placeholder="https://example.com"
-          aria-label="Website URL"
           value={urlInput}
           onChange={(event) => setUrlInput(event.target.value)}
           onBlur={() => setHasBlurred(true)}
           disabled={loading}
-          autoFocus
           autoComplete="url"
           aria-invalid={Boolean(showValidationError || errorMessage)}
           aria-describedby="url-form-message"

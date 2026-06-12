@@ -41,9 +41,11 @@ This document lists every backend environment variable defined in `src/core/conf
 
 - Type: number
 - Default: `2000000`
-- Purpose: max primary response body bytes
+- Purpose: max primary response body bytes (soft cap — the body is truncated
+  at this limit and the response carries `htmlTruncated: true`; it does not
+  return an error)
 - Misconfigured impact:
-  - too low: frequent `413`
+  - too low: frequent truncation, incomplete detection results
   - too high: higher memory pressure
 
 ### `NODE_ENV`

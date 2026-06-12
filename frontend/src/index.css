@@ -210,6 +210,17 @@ body {
 }
 
 /* ─── Form ────────────────────────────────────────────────────── */
+/* Visible label above the search bar — previously the input relied on
+   aria-label only, which screen readers announce but sighted users never see. */
+.url-form__label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--fg);
+  text-align: left;
+}
+
 /* The row is the unified search-bar container at desktop and tablet.
    overflow: hidden clips the input and button into the shared border-radius
    so they read as a single element. */
@@ -377,6 +388,17 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+/* Respect OS-level motion preferences: the report entrance animation (and any
+   hover/focus transitions) are decorative, so they are disabled entirely when
+   the user has asked for reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }
 @media (max-width: 1024px) {
@@ -709,7 +731,9 @@ body {
   padding-top: 14px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.45);
+  /* 0.6 alpha ≈ 5.4:1 on --color-dark — clears WCAG AA (4.5:1) for this
+     12px text; the previous 0.45 alpha was ~4.0:1 and failed. */
+  color: rgba(255, 255, 255, 0.6);
   text-align: center;
   line-height: 1.5;
 }

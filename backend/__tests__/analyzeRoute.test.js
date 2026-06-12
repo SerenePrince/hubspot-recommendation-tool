@@ -180,7 +180,7 @@ describe("api/routes/analyze - handleAnalyze", () => {
 
     // Compact JSON must not contain newlines or multi-space indentation
     expect(res.body).not.toMatch(/\n/);
-    expect(res.body).not.toMatch(/  /);
+    expect(res.body).not.toMatch(/ {2}/);
   });
 
   test("htmlTruncated: true is forwarded through the response when page was truncated", async () => {

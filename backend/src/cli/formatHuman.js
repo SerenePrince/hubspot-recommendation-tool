@@ -230,18 +230,7 @@ function formatHuman(report, options = {}) {
 
     const rows = technologies.slice(0, 200).map((t) => {
       const name = String(t?.name || t?.slug || "").trim() || "Unknown";
-      const confidence = t?.confidence != null ? String(t.confidence) : "n/a";
       const version = t?.version ? String(t.version) : "";
-      const cats = (Array.isArray(t?.categories) ? t.categories : [])
-        .map((c) => c && c.name)
-        .filter(Boolean)
-        .slice(0, 3)
-        .join(", ");
-      const groups = (Array.isArray(t?.groups) ? t.groups : [])
-        .map((g) => g && g.name)
-        .filter(Boolean)
-        .slice(0, 3)
-        .join(", ");
 
       // Prefer the pre-computed hubspot.products from the clean report (covers all trigger
       // types including category-triggered). Fall back to the recommendations-derived map

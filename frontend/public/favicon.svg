@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Favicon derived from the Inbox logo mark: brand-dark tile with the
+       orange square accent (Rectangle_120 in images/logo.svg). -->
+  <rect width="64" height="64" rx="12" fill="#302e2f"/>
+  <rect x="14" y="14" width="14" height="14" fill="#fc8f0d"/>
+  <rect x="14" y="34" width="14" height="16" fill="#ffffff"/>
+  <rect x="34" y="14" width="14" height="36" fill="#ffffff"/>
+</svg>

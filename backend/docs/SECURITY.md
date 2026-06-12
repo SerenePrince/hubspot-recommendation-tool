@@ -17,6 +17,13 @@ Files: `src/core/fetch/ssrf.js`, `src/core/fetch/fetchPage.js`
 Limitations:
 
 - Application-level SSRF checks are not a replacement for network egress controls
+- DNS TOCTOU window: `assertPublicHost` resolves and validates DNS, then the
+  subsequent `fetch` re-resolves the hostname independently. A hostile DNS
+  server could answer with a public IP during validation and a private IP for
+  the fetch (DNS rebinding). Closing this fully requires pinning the validated
+  IP into the connection (custom undici Agent `lookup`) or, preferably,
+  network-level egress policy. Accepted as a known limitation for this
+  deployment profile; per-hop re-validation narrows but does not remove it.
 
 ### Fetch limits
 

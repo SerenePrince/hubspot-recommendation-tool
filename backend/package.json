@@ -22,7 +22,10 @@
     "update:techdb": "bash src/scripts/update-webappanalyzer-db.sh",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "keywords": [
     "node",
@@ -45,6 +48,10 @@
     "cheerio": "^1.2.0"
   },
   "devDependencies": {
-    "jest": "^29.7.0"
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^16.0.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.0.0"
   }
 }

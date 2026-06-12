@@ -98,46 +98,45 @@ Purpose: analyze a public website URL and return frontend-friendly report.
 Query params:
 
 - `url` (required): absolute `http` or `https` URL
-- `pretty` (optional): `1` or `true` for formatted JSON
-- `includeMeta` (optional): `1` or `true` to include `meta.fetch` and `meta.timings`
+
+> The backend accepts both `http://` and `https://` target URLs; the React
+> frontend deliberately restricts input to `https://` for end users. Direct
+> API/CLI consumers may analyze `http://` targets.
+>
+> The `pretty` and `includeMeta` params accepted by earlier versions of this
+> route have been removed. The route always returns compact JSON in the
+> slimmed frontend shape below (`buildFrontendReport` in
+> `src/core/report/cleanReport.js`). The full report shape — including
+> `byGroup`, `recommendations`, `summary`, and optional `meta` — remains
+> available through the CLI (`buildSimpleReport` / `buildCleanReport`).
 
 Success (`200`) response shape:
 
 ```json
 {
   "ok": true,
-  "apiVersion": "2.0",
   "url": "https://example.com/",
   "finalUrl": "https://example.com/",
-  "technologies": [],
-  "byGroup": {},
-  "recommendations": [],
-  "summary": {
-    "totals": {
-      "technologiesDetected": 0,
-      "categories": 0,
-      "groups": 0,
-      "recommendations": 0,
-      "mappedReplacements": {
-        "technologiesWithReplacements": 0,
-        "totalTechnologies": 0
+  "technologies": [
+    {
+      "name": "React",
+      "version": "18.3.1",
+      "description": "React is an open source JavaScript library…",
+      "categories": [{ "name": "JavaScript frameworks" }],
+      "hubspot": {
+        "products": [
+          { "hubspotProduct": "CMS Hub", "description": "…" }
+        ]
       }
-    },
-    "topRecommendations": []
-  }
+    }
+  ],
+  "htmlTruncated": false
 }
 ```
 
-If `includeMeta=1`, adds:
-
-```json
-{
-  "meta": {
-    "fetch": {},
-    "timings": {}
-  }
-}
-```
+- `htmlTruncated` is `true` when the target page's HTML exceeded
+  `MAX_FETCH_BYTES` and was cut at the cap; detection ran on a partial
+  document, so results may be incomplete (this is not an error).
 
 ## Status Codes And Causes
 
@@ -150,7 +149,6 @@ If `includeMeta=1`, adds:
   - SSRF blocked host/IP/DNS failure
 - `401`: auth required and credentials missing/invalid
 - `404`: route not found
-- `413`: fetched response exceeded `MAX_FETCH_BYTES` (or external per-resource cap)
 - `429`: auth-failure rate limit block
 - `500`: uncaught server error
 - `502`: upstream fetch failures, unreadable body, redirect issues, too many redirects
@@ -191,17 +189,11 @@ Analyze:
 curl "http://localhost:3001/api/analyze?url=https://react.dev"
 ```
 
-Analyze with metadata:
-
-```bash
-curl "http://localhost:3001/api/analyze?url=https://react.dev&includeMeta=1&pretty=1"
-```
-
 Analyze with auth:
 
 ```bash
 curl -u "$AUTH_USERNAME:$AUTH_PASSWORD" \
-  "http://localhost:3001/api/analyze?url=https://react.dev&pretty=1"
+  "http://localhost:3001/api/analyze?url=https://react.dev"
 ```
 
 Analyze with explicit Authorization header:

@@ -135,7 +135,7 @@ async function assertPublicHost(hostname) {
   let records;
   try {
     records = await dns.lookup(h, { all: true, verbatim: true });
-  } catch (err) {
+  } catch {
     throw badRequest("SSRF_DNS_FAIL", "Could not resolve hostname");
   }
 

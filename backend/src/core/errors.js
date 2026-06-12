@@ -53,17 +53,6 @@ function badRequest(code, message) {
 }
 
 /**
- * Builds a 429 operational error.
- *
- * @param {string} code - Stable machine-readable error code
- * @param {string} message - Client-safe error message
- * @returns {AppError} 429 AppError marked safe to expose
- */
-function tooManyRequests(code, message) {
-  return new AppError({ code, message, statusCode: 429, expose: true });
-}
-
-/**
  * Builds a 503 operational error.
  *
  * @param {string} code - Stable machine-readable error code
@@ -78,6 +67,5 @@ module.exports = {
   AppError,
   isAppError,
   badRequest,
-  tooManyRequests,
   serviceUnavailable,
 };
