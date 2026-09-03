@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>HubSpot Recommendation Tool — social image generator</title>
+    <style>
+      /* Fonts and colours are the app's own, pulled from frontend/src/index.css
+         so the card can't drift from the product it advertises. */
+      @font-face {
+        font-family: "AvenirNext";
+        src: url("../frontend/public/fonts/avenirnextltpro-regular-webfont.woff")
+          format("woff");
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "AvenirNext";
+        src: url("../frontend/public/fonts/avenirnextltpro-bold-webfont.woff")
+          format("woff");
+        font-weight: 700;
+        font-style: normal;
+      }
+
+      :root {
+        --dark: #302e2f; /* Color 2 — brand dark    */
+        --acc1: #f78f22; /* Color 1 — orange        */
+        --on-dark: #ffffff;
+        --muted: #b7b3b4;
+        --font:
+          "AvenirNext", system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #1b1a1a;
+        font-family: var(--font);
+        color: var(--on-dark);
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+        align-items: flex-start;
+      }
+      .note {
+        max-width: 1280px;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #d8d5d6;
+        background: #262424;
+        border: 1px solid #443f40;
+        border-radius: 10px;
+        padding: 14px 18px;
+      }
+      .note code {
+        font-family: ui-monospace, monospace;
+        color: var(--acc1);
+      }
+      .cap {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--acc1);
+        margin-bottom: 10px;
+      }
+
+      /* Screenshot targets — capture these exact nodes. */
+      .frame {
+        position: relative;
+        overflow: hidden;
+        background: var(--dark);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        /* The app's header sits above an orange rule; the card echoes it. */
+        border-top: 10px solid var(--acc1);
+      }
+      .frame.og {
+        width: 1200px;
+        height: 630px;
+      }
+      .frame.gh {
+        width: 1280px;
+        height: 640px;
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 0 96px;
+      }
+      .brand img.mark {
+        width: 88px;
+        height: 88px;
+        margin-bottom: 34px;
+      }
+      /* Both lines are sized to fit on ONE line in the narrower of the two
+         frames — the OG card, which has 1008px of usable width against the
+         GitHub card's 1088px. Measured natural widths for this exact font:
+         the title runs 14.99px of width per px of font-size, the subtitle
+         11.98px. At 64px the title is 959px (49px of slack) and at 26px the
+         subtitle is 934px (74px). Re-measure before changing either string. */
+      .word {
+        font-weight: 700;
+        font-size: 64px;
+        line-height: 1.12;
+        letter-spacing: -0.015em;
+        color: var(--on-dark);
+      }
+      /* Safety net: if the title is ever lengthened past the frame, this forces
+         the break to fall after "HubSpot" rather than orphaning "Tool". */
+      .word .keep {
+        white-space: nowrap;
+      }
+      .word .hl {
+        color: var(--acc1);
+      }
+      .sub {
+        font-size: 26px;
+        line-height: 1.45;
+        color: var(--muted);
+        margin-top: 26px;
+      }
+      /* Keeps the card from reading as an official Inbox product: this repo and
+         the demo deployment are the author's, not the client's instance. */
+      .foot {
+        position: absolute;
+        bottom: 40px;
+        font-size: 19px;
+        letter-spacing: 0.05em;
+        color: #8d8889;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="note">
+      <strong>How to export:</strong> open this file in Chrome, wait a second
+      for the fonts to load, then right-click a frame → <em>Inspect</em> → in
+      the Elements panel right-click the highlighted
+      <code>&lt;div class="frame …"&gt;</code> →
+      <code>Capture node screenshot</code>. That saves the frame at its exact
+      pixel size — no cropping. Save the 1200×630 frame as
+      <code>frontend/public/og-image.png</code> (referenced by the meta tags in
+      <code>frontend/index.html</code>). Save the 1280×640 frame as
+      <code>docs/preview.png</code> — that file is the checked-in copy of the
+      GitHub social preview, which has to be uploaded by hand under repo
+      Settings → Social preview because GitHub stores it outside the repo.
+    </div>
+
+    <!-- OG image — 1200×630 (Open Graph / Twitter / Slack / Discord) -->
+    <div>
+      <div class="cap">og-image · 1200 × 630</div>
+      <div class="frame og">
+        <div class="brand">
+          <img class="mark" src="../frontend/public/favicon.svg" alt="" />
+          <div class="word">
+            HubSpot
+            <span class="keep"
+              ><span class="hl">Recommendation</span> Tool</span
+            >
+          </div>
+          <div class="sub">
+            See what a prospect's site runs — and which HubSpot products could
+            replace it.
+          </div>
+        </div>
+        <div class="foot">Capstone project · Built for Inbox</div>
+      </div>
+    </div>
+
+    <!-- GitHub social preview — 1280×640 (2:1) -->
+    <div>
+      <div class="cap">github social · 1280 × 640</div>
+      <div class="frame gh">
+        <div class="brand">
+          <img class="mark" src="../frontend/public/favicon.svg" alt="" />
+          <div class="word">
+            HubSpot
+            <span class="keep"
+              ><span class="hl">Recommendation</span> Tool</span
+            >
+          </div>
+          <div class="sub">
+            See what a prospect's site runs — and which HubSpot products could
+            replace it.
+          </div>
+        </div>
+        <div class="foot">Capstone project · Built for Inbox</div>
+      </div>
+    </div>
+  </body>
+</html>

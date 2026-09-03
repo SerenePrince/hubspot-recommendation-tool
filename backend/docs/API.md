@@ -124,9 +124,7 @@ Success (`200`) response shape:
       "description": "React is an open source JavaScript library…",
       "categories": [{ "name": "JavaScript frameworks" }],
       "hubspot": {
-        "products": [
-          { "hubspotProduct": "CMS Hub", "description": "…" }
-        ]
+        "products": [{ "hubspotProduct": "CMS Hub", "description": "…" }]
       }
     }
   ],

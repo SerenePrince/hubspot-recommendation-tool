@@ -10,7 +10,10 @@ const apiResponse = {
       name: "React",
       version: "18.3.1",
       description: "A JavaScript library",
-      categories: [{ name: "JavaScript frameworks" }, { name: "Web frameworks" }],
+      categories: [
+        { name: "JavaScript frameworks" },
+        { name: "Web frameworks" },
+      ],
       hubspot: {
         products: [
           { hubspotProduct: "CMS Hub", description: "Primary" },
@@ -61,12 +64,17 @@ describe("mapApiToTableData", () => {
         {
           name: "X",
           hubspot: {
-            products: [{ description: "orphan" }, { hubspotProduct: "Sales Hub" }],
+            products: [
+              { description: "orphan" },
+              { hubspotProduct: "Sales Hub" },
+            ],
           },
         },
       ],
     });
-    expect(rows[0].products).toEqual([{ name: "Sales Hub", description: null }]);
+    expect(rows[0].products).toEqual([
+      { name: "Sales Hub", description: null },
+    ]);
   });
 
   it("defaults name to 'Unknown' and tolerates missing fields", () => {

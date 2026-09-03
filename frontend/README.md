@@ -76,11 +76,12 @@ The table uses three columns. `mapApiToTableData` extracts only what is needed:
 `confidence`, `website`, `icon`, `groups`, `categories[].id`, `hubspot.primaryProduct`, `hubspot.products[].priority`.
 
 Mapped to table rows:
-| Column | Source field | Fallback |
-| ------------------ | -------------------------------------------- | ---------------------------- |
-| Technology | `tech.name` + `tech.categories[0].name` | `"Unknown"` |
-| Description | `tech.description` | `"No description available"` |
-| HubSpot Replacement| `tech.hubspot.products[].hubspotProduct` | `"No recommendation mapped"` |
+
+| Column              | Source field                             | Fallback                     |
+| ------------------- | ---------------------------------------- | ---------------------------- |
+| Technology          | `tech.name` + `tech.categories[0].name`  | `"Unknown"`                  |
+| Description         | `tech.description`                       | `"No description available"` |
+| HubSpot Replacement | `tech.hubspot.products[].hubspotProduct` | `"No recommendation mapped"` |
 
 ## Constraints
 
