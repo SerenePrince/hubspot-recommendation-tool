@@ -5,7 +5,7 @@ services:
   - type: web
     name: hubspot-recommendation-tool
     runtime: docker
-    repo: https://github.com/SerenePrince/hubspot-recommendation-tool
+    repo: https://github.com/noahparknguyen/hubspot-recommendation-tool
     plan: free
     healthCheckPath: /health
     envVars:

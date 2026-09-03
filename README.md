@@ -4,7 +4,7 @@ Paste in a prospect's website URL and instantly see what technologies they use �
 
 Built as a capstone project by Team Debug (Algonquin College) for Inbox, a HubSpot Platinum Solutions Partner in Ottawa.
 
-[![CI](https://img.shields.io/github/actions/workflow/status/SerenePrince/hubspot-recommendation-tool/ci.yml?logo=githubactions&logoColor=white&label=CI)](https://github.com/SerenePrince/hubspot-recommendation-tool/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/noahparknguyen/hubspot-recommendation-tool/ci.yml?logo=githubactions&logoColor=white&label=CI)](https://github.com/noahparknguyen/hubspot-recommendation-tool/actions/workflows/ci.yml)
 [![GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-61dafb?logo=react&logoColor=white)](https://react.dev)
 [![Node](https://img.shields.io/badge/Node-20-339933?logo=node.js&logoColor=white)](https://nodejs.org)
@@ -12,11 +12,15 @@ Built as a capstone project by Team Debug (Algonquin College) for Inbox, a HubSp
 [![Jest](https://img.shields.io/badge/Jest-29-c21325?logo=jest&logoColor=white)](https://jestjs.io)
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ed?logo=docker&logoColor=white)](https://docker.com)
 
-🔗 **Live Demo:** [hubspot-recommendation-tool.onrender.com](https://hubspot-recommendation-tool.onrender.com/)
+🔗 **Live Demo:** [hubspot-recommendation-tool.onrender.com](https://hubspot-recommendation-tool.onrender.com/) — hosted on a free tier, so give it a few seconds to wake up.
+
+![The HubSpot Recommendation Tool — paste a website URL and press Analyze](docs/home.png)
 
 ## What It Does
 
 Inbox previously identified replacement opportunities manually during client discovery calls. This tool automates the entire process: fetch the target site, fingerprint its technology stack using a Wappalyzer-style detection engine, and map each detected tool to the HubSpot product that could replace it — in seconds.
+
+![A finished report: each detected technology with its category, description, and the HubSpot product that could replace it](docs/report.png)
 
 Key capabilities:
 
@@ -37,7 +41,7 @@ Fork this repo, clone it, and follow the Docker setup below. All configuration i
 ### Docker (recommended)
 
 ```bash
-git clone https://github.com/SerenePrince/hubspot-recommendation-tool.git
+git clone https://github.com/noahparknguyen/hubspot-recommendation-tool.git
 cd hubspot-recommendation-tool
 cp .env.example .env
 docker compose up --build
