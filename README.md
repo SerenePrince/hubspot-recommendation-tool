@@ -18,7 +18,9 @@ Built as a capstone project by Team Debug (Algonquin College) for Inbox, a HubSp
 
 ## What It Does
 
-Inbox previously identified replacement opportunities manually during client discovery calls. This tool automates the entire process: fetch the target site, fingerprint its technology stack using a Wappalyzer-style detection engine, and map each detected tool to the HubSpot product that could replace it — in seconds.
+A client comes to Inbox with an existing site, and Inbox works out what it's running and what could be consolidated into HubSpot instead. That research was manual. This tool is a shortcut for it: fetch the target site, fingerprint its technology stack using a Wappalyzer-style detection engine, and map each detected tool to the HubSpot product that could replace it — in seconds.
+
+It's meant to speed up discovery, not replace it. The output is a starting point for the conversation, not the conclusion.
 
 ![A finished report: each detected technology with its category, description, and the HubSpot product that could replace it](docs/report.png)
 
